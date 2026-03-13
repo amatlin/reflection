@@ -217,3 +217,40 @@ This is a capstone milestone (M6), dependent on the full stack being in place. B
 ### Next session
 - Brainstorm the architecture diagram in detail — which nodes, what connections, what the animation looks like
 - Build M2: analytics layer with the diagram + dashboards on existing PostHog/Supabase data
+
+## 2026-03-13 — M2 redesigned: pipeline first, not presentation
+
+Brainstormed what M2 should actually be. Original plan was an animated architecture diagram + dashboards on live data. Realized:
+1. Dashboards on a live operational DB is just Datadog — not interesting or unique
+2. The animated SVG diagram requires a big frontend investment the developer isn't ready for
+3. The pipeline (warehouse + ETL + dbt) is the real substance — and it's in the developer's wheelhouse
+
+Revised M2: build the analytical backbone. The architecture diagram moves to M4 when there's a full pipeline to visualize and the frontend investment pays off more.
+
+## 2026-03-13 — Stack decisions for M2
+
+- **Warehouse:** BigQuery (free tier, industry standard, new GCP project `reflection-data`)
+- **ETL:** PostHog's built-in batch export to BigQuery (hourly) — discovered the Events API is deprecated and PostHog recommends batch exports instead. This eliminates the need for a custom extract/load script entirely.
+- **Transform:** dbt Core (CLI, run locally)
+- **Orchestration:** Simple cron or Python script that runs `dbt run` hourly after PostHog's export lands
+- **Source:** PostHog only — it has richer metadata (sessions, device info, geo) than the Supabase events table. Supabase stays as the live stream source.
+
+Key simplification: PostHog batch export handles extract + load automatically. Our pipeline script just needs to run dbt.
+
+## 2026-03-13 — GCP and PostHog batch export set up
+
+Completed infrastructure setup:
+1. Installed gcloud CLI via Homebrew
+2. Created GCP project `reflection-data`
+3. Enabled BigQuery API, created `reflection` dataset
+4. Created service account `reflection-pipeline` with BigQuery Data Editor + Job User roles
+5. Downloaded service account key to `~/reflection-bq-key.json`
+6. Configured PostHog batch export: events → BigQuery, hourly interval, structured fields enabled
+
+Updated config: added `bigquery_project`, `bigquery_dataset`, `bigquery_key_path` to app Settings. Added `dbt-core`, `dbt-bigquery`, `google-cloud-bigquery`, `requests` to requirements.
+
+### Next steps
+- Build dbt project (staging + mart models)
+- Create pipeline runner script (`dbt run` on schedule)
+- Build minimal `/analytics` page showing data from dbt models
+- Wait for first PostHog batch export to land and verify data in BigQuery

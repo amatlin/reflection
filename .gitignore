@@ -7,3 +7,7 @@ venv/
 dist/
 build/
 .playwright-mcp/
+.superpowers/
+pipeline/logs/
+pipeline/state/
+*-bq-key.json

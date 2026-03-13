@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     supabase_url: str = ""
     supabase_anon_key: str = ""
     supabase_service_role_key: str = ""
+    bigquery_project: str = ""
+    bigquery_dataset: str = "reflection"
+    bigquery_key_path: str = ""
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

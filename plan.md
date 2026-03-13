@@ -16,18 +16,19 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 
 1. ~~Landing page with live event stream~~ (done)
 
-2. Analytics layer on existing data
-- Live architecture diagram: an animated SVG showing events flowing through the actual infrastructure (browser → API → Supabase → PostHog → warehouse → dashboard) in real time, triggered by visitor actions
-- Dashboards showing aggregate patterns from M1 events (traffic, sessions, devices, geo)
-- The diagram grows as new infrastructure is added in later milestones
+2. Analytical backbone (pipeline + basic analytics page)
+- PostHog batch export → BigQuery warehouse (hourly)
+- dbt Core models: staging, facts, dimensions, daily metrics
+- Minimal analytics page on the site showing numbers from dbt models
+- Simple dashboards proving the pipeline works end-to-end
 
 3. Meaningful data model
 - Add flows (sign-up, checkout, review) that generate richer data types: funnels, natural language, pricing
 - Each new flow immediately enriches the analytics layer from M2
 - Solid, extensible event schema
 
-4. Offline data + deeper analytics
-- ETL from operational layer to warehouse (dbt)
+4. Deeper analytics + visualization
+- Live architecture diagram showing data flowing through the real infrastructure
 - SQL playground with suggested queries
 - Expose the pipeline itself as content (last snapshot, rows loaded, transformation logic)
 
