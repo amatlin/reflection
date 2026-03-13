@@ -1,0 +1,12 @@
+reflection:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: reflection-data
+      dataset: reflection
+      keyfile: /Users/annamatlin/reflection-bq-key.json
+      threads: 4
+      timeout_seconds: 300
+      location: US

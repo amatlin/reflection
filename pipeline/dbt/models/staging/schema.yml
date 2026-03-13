@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: stg_events
+    description: Cleaned and typed events from the PostHog batch export. Deduplicated by event UUID.
+    columns:
+      - name: event_id
+        description: Unique event identifier from PostHog
+        tests:
+          - unique
+          - not_null
+      - name: event_name
+        description: "Event type (e.g. $pageview, $autocapture, or custom events)"
+        tests:
+          - not_null
+      - name: visitor_id
+        description: PostHog distinct_id identifying the visitor
+      - name: event_timestamp
+        description: When the event occurred
+        tests:
+          - not_null
+
+sources:
+  - name: posthog
+    database: reflection-data
+    schema: reflection
+    tables:
+      - name: posthog_events
+        description: Raw events table populated by PostHog batch export

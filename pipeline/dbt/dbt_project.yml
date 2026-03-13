@@ -1,0 +1,14 @@
+name: reflection
+version: "1.0.0"
+
+profile: reflection
+
+model-paths: ["models"]
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  reflection:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
