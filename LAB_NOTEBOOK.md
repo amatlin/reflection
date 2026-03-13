@@ -136,7 +136,43 @@ Verified with Playwright: page loads, PostHog fires `$pageview`, `_onCapture` fo
 
 **Milestone 1 is functional.** The self-referential loop is live.
 
+### UX polish ideas (not blocking, revisit later)
+- **Blank stream on first load** — ~3s gap while PostHog SDK loads from CDN. Options: self-host the SDK, emit a server-side `page_served` event on render, or show a placeholder.
+- **PostHog internal event names** — `$pageview`, `$autocapture` are opaque to visitors. Could map to human-friendly labels.
+- **Anonymous visitor IDs** — hex fragments don't create a "that's me" moment. Could use generated names or colors.
+- **Buttons feel generic** — clicks produce `$autocapture` rather than intentional named events.
+- **Sparse with one user** — stream needs volume to feel alive.
+
+### Debugging approach that worked
+1. **Start with Playwright** — navigate to the page, check console errors immediately. The 500 on `/api/events` pointed straight to the backend.
+2. **Reproduce outside the browser** — hit the endpoint directly with `httpx` to isolate frontend vs backend. The 422 confirmed the backend was reachable but the 500 wasn't a schema issue.
+3. **Test the service layer directly** — called `insert_event()` from Python. Got `SupabaseException: Invalid API key` — root cause in one step.
+4. **Check config values** — printed key prefixes and lengths (not full secrets) to confirm the key format was wrong.
+
+Key lesson: the app ran without errors on startup. The failure was **silent at runtime** — Supabase only rejected the key on actual insert. Browser console was the fastest signal that something was wrong.
+
 ### Next session
-- Create a GitHub repo and push the initial codebase
-- Consider removing the `supabase_service_role_key` from config since it's no longer used
 - Start thinking about Milestone 2 (meaningful data model — sign-up, checkout, review flows)
+
+## 2026-03-13 — Claude Code plugins added
+
+Installed plugins: context7, code-review, security-guidance, superpowers, claude-md-management, github, commit-commands, ralph-loop, code-simplifier, typescript-lsp, frontend-design.
+
+How these help with upcoming milestones:
+
+**Milestone 2 (meaningful data model — sign-up, checkout, review flows):**
+- **superpowers:writing-plans** — plan the data model and new flows before writing code
+- **superpowers:brainstorming** — explore feature design (what makes a checkout flow interesting? what data should reviews generate?)
+- **context7** — look up current PostHog, Supabase, and FastAPI docs instead of guessing at APIs
+- **frontend-design** — generate production-quality UI for new flows (sign-up forms, checkout, review pages) since the developer has minimal frontend experience
+- **superpowers:dispatching-parallel-agents** — build independent flows (sign-up, checkout, review) in parallel
+- **code-simplifier** — clean up code after rapid feature buildout
+
+**Milestone 3+ (offline data, analytics layer, deployment):**
+- **typescript-lsp** — if frontend moves to TypeScript/React, gives type checking and autocomplete
+- **commit-commands** — streamlined git workflow as PRs become more frequent
+- **superpowers:executing-plans** — execute multi-step infrastructure work (ETL pipelines, dbt) with review checkpoints
+- **code-review** — review PRs before merging as the codebase grows
+
+### Notes
+- `supabase_service_role_key` is still in config and `.env.example` but unused. Keeping it for future admin operations that need to bypass RLS. The app runs entirely on the anon key.
