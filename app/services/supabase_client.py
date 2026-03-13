@@ -13,7 +13,7 @@ def get_client() -> Client:
     if _client is None:
         _client = create_client(
             settings.supabase_url,
-            settings.supabase_service_role_key,
+            settings.supabase_anon_key,
         )
     return _client
 

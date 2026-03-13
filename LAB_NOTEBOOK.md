@@ -124,7 +124,19 @@ Likely causes to investigate:
 
 Added GitHub Personal Access Token to `~/.zshrc` so the GitHub MCP can authenticate. The MCP was already registered via the Claude plugins marketplace but was failing to connect due to missing token.
 
+## 2026-03-13 — Bug fixed: live event stream now works
+
+Root cause: the `.env` had a Supabase `sb_secret_` key (new management API format) in the `supabase_service_role_key` field, but `supabase-py` talks to PostgREST which requires JWT tokens. The insert was failing with "Invalid API key".
+
+Fix (two changes):
+1. **Added `anon_insert` RLS policy** — `CREATE POLICY anon_insert ON public.events FOR INSERT TO anon WITH CHECK (true)`. Since events are public data, there's no reason to require the service_role superuser key for inserts.
+2. **Switched Supabase client to use anon key** — changed `supabase_client.py` to use `settings.supabase_anon_key` instead of `settings.supabase_service_role_key`.
+
+Verified with Playwright: page loads, PostHog fires `$pageview`, `_onCapture` forwards to `/api/events`, Supabase insert succeeds, WebSocket broadcasts to stream panel. Button clicks produce `$autocapture` events with element text. The full loop works.
+
+**Milestone 1 is functional.** The self-referential loop is live.
+
 ### Next session
-- Restart Claude Code to pick up the new env var, then verify GitHub MCP connects with `/mcp`
-- Debug the live event stream bug (causes listed above) — use Playwright MCP to inspect browser console
-- Once stream works, create a GitHub repo and push the initial codebase
+- Create a GitHub repo and push the initial codebase
+- Consider removing the `supabase_service_role_key` from config since it's no longer used
+- Start thinking about Milestone 2 (meaningful data model — sign-up, checkout, review flows)
