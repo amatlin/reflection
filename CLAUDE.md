@@ -24,7 +24,7 @@ Reflection is a self-referential website that analyzes its own usage. See `plan.
 
 ## Development
 
-The project is built incrementally through milestones — each one should be demo-able. Speed over polish.
+The project is built incrementally through milestones — each one should be demo-able. Speed over polish. Commit and push frequently — don't let work pile up locally.
 
 ## Session Handoff
 

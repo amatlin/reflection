@@ -176,3 +176,44 @@ How these help with upcoming milestones:
 
 ### Notes
 - `supabase_service_role_key` is still in config and `.env.example` but unused. Keeping it for future admin operations that need to bypass RLS. The app runs entirely on the anon key.
+
+## 2026-03-13 — Revised milestone ordering
+
+Reviewed the plan after M1 completion. Key insight: the original ordering (M2: flows → M3: warehouse → M4: analytics) meant the site would accumulate data for two milestones before visitors could explore it analytically. The analytics layer is more central to the spirit than the data model — the apparatus is the art (Duchamp, Warhol). Moved analytics ahead of flows so the site stays demonstrably self-referential at every milestone.
+
+Revised order:
+1. ~~Live event stream~~ (done)
+2. Analytics layer on existing data (dashboards + architecture diagram)
+3. Meaningful flows (sign-up, checkout, review) — each immediately enriches M2's analytics
+4. Offline data + deeper analytics (warehouse, dbt, SQL playground)
+5. Write-up
+
+Also promoted "expose the ETL pipeline as content" from future ideas into M4 — it's core to the concept, not a nice-to-have.
+
+## 2026-03-13 — Live architecture diagram idea
+
+The centerpiece of M2: an animated architecture diagram that shows events flowing through the real infrastructure in real time. When a visitor clicks a button, they watch their click travel: browser → API → Supabase → PostHog → (eventually) warehouse → dashboard.
+
+Design principles:
+- **Real vs. illustrated paths.** Real-time steps (event capture, DB insert, WebSocket broadcast) animate live on each action. Batch steps (snapshots, dbt transforms) show as "runs every N minutes" with a last-run timestamp. Honesty about timing teaches how data infrastructure actually works.
+- **Grows with the project.** New segments light up as milestones are completed. Visitors at any point see exactly what exists and works.
+- **Could replace the event stream.** Instead of a separate stream panel, events flow through the diagram. The stream becomes a view of one node in the pipeline.
+- **The plumbing is the product.** This isn't documentation — it's the main experience.
+
+Implementation approach: build directly in code (SVG + CSS animation) rather than designing in Figma first. The animation is the design — a static mockup wouldn't capture it. The `frontend-design` skill can generate the visual component, then wire it to the real event pipeline.
+
+## 2026-03-13 — Self-optimization idea
+
+The logical endpoint of the self-referential loop: the site doesn't just observe itself, it *optimizes* itself. Define business goals (north star metric, guardrails) for a business that doesn't exist, then let the site run experiments, measure results, and update its own UI automatically.
+
+Why this is powerful:
+- **Closes the loop.** Current flow is visit → track → analyze → display. This adds → act → visit. The site responds to what it observes about itself.
+- **The metrics problem is the art.** What does "conversion" mean on a site about nothing? Defining and optimizing for goals that are inherently absurd — but doing it with real infrastructure — is the most Reflection thing possible.
+- **Radical transparency.** Every website runs experiments on visitors. Reflection would be the only one that shows the hypothesis, the variant you're in, and the results. The optimization is the content.
+- **Guardrails create real tension.** Companies don't optimize blindly — they balance competing metrics. Exposing that tradeoff is more educational than any blog post about experimentation.
+
+This is a capstone milestone (M6), dependent on the full stack being in place. But it's worth keeping in mind as we build — the architecture should be designed so that this is possible.
+
+### Next session
+- Brainstorm the architecture diagram in detail — which nodes, what connections, what the animation looks like
+- Build M2: analytics layer with the diagram + dashboards on existing PostHog/Supabase data
