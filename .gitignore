@@ -10,4 +10,7 @@ build/
 .superpowers/
 pipeline/logs/
 pipeline/state/
+pipeline/dbt/target/
+pipeline/dbt/logs/
+pipeline/dbt/.user.yml
 *-bq-key.json

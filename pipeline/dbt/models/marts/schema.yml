@@ -1,0 +1,71 @@
+version: 2
+
+models:
+  - name: fct_events
+    description: >
+      Core event fact table. One row per event, cleaned and typed.
+      Currently a pass-through from staging; business logic gets added here.
+    columns:
+      - name: event_id
+        description: Unique event identifier from PostHog
+        tests:
+          - unique
+          - not_null
+      - name: event_name
+        description: "Event type (e.g. $pageview, $autocapture, or custom events)"
+        tests:
+          - not_null
+      - name: visitor_id
+        description: PostHog distinct_id identifying the visitor
+      - name: event_timestamp
+        description: When the event occurred
+        tests:
+          - not_null
+
+  - name: dim_visitors
+    description: >
+      Visitor dimension table. One row per distinct visitor with first/last seen,
+      session counts, and latest device/geo attributes.
+    columns:
+      - name: visitor_id
+        description: PostHog distinct_id
+        tests:
+          - unique
+          - not_null
+      - name: first_seen_at
+        description: Timestamp of visitor's earliest event
+      - name: last_seen_at
+        description: Timestamp of visitor's most recent event
+      - name: total_events
+        description: Lifetime event count for this visitor
+      - name: total_sessions
+        description: Lifetime session count for this visitor
+      - name: active_days
+        description: Number of distinct calendar days with activity
+
+  - name: metrics_daily
+    description: >
+      Daily aggregate metrics for the analytics page. One row per day.
+      Powers the site's self-referential dashboards.
+    columns:
+      - name: metric_date
+        description: Calendar date
+        tests:
+          - unique
+          - not_null
+      - name: total_events
+        description: Total events that day
+      - name: unique_visitors
+        description: Distinct visitors that day
+      - name: unique_sessions
+        description: Distinct sessions that day
+      - name: pageviews
+        description: Count of $pageview events
+      - name: clicks
+        description: Count of $autocapture (click) events
+      - name: events_per_visitor
+        description: Average events per visitor that day
+      - name: pages_per_session
+        description: Average pageviews per session that day
+      - name: click_through_rate
+        description: Ratio of clicks to pageviews
