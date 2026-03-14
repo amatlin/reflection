@@ -324,6 +324,64 @@ Brainstormed the analytics page. Key decisions:
 4. **Presentation: just the numbers.** Volume, event mix, device split, geo, ratios — plainly labeled, no narrative framing. Consistent with the spirit: "Here is the data."
 
 ### Next steps
-1. Build `/analytics` page (server-rendered, cached BigQuery queries, numbers from `metrics_daily` + `dim_visitors`)
+1. ~~Build analytics view (server-rendered, cached BigQuery queries, numbers from `metrics_daily`)~~ (done — see below)
 2. Pipeline runner (cron or script for `dbt build`) — defer until deployment
 3. SQL playground — defer to M4
+
+## 2026-03-13 — Analytics view shipped
+
+Built the analytics view as a tab on the homepage instead of a separate `/analytics` page. Design change: instead of navigating away from the live stream, visitors toggle between "Live Stream" and "Analytics" tabs in the right panel. This keeps both views one click away and preserves the stream's WebSocket connection regardless of which tab is active.
+
+### What was built
+
+**New file: `app/services/bigquery_client.py`**
+- Singleton BigQuery client mirroring the `supabase_client.py` pattern
+- `get_latest_metrics()` queries `metrics_daily` for the most recent row, returns it as a dict
+- 1-hour in-memory cache (`_cache` dict with TTL check) — matches the PostHog batch export cadence
+- `get_cache_age_minutes()` returns minutes since last fetch for the "Last updated" display
+- Graceful degradation: returns `None` on any error, so the page still renders
+
+**Modified: `app/routes/pages.py`**
+- Calls `get_latest_metrics()` and `get_cache_age_minutes()` on every page load
+- Passes `metrics` (dict or None) and `cache_age` (int or None) to the Jinja template
+
+**Modified: `app/templates/index.html`**
+- Replaced `.stream-header` + `#stream` with a tab bar + two tab content divs
+- Tab bar: "Live Stream" (with green dot) | "Analytics"
+- `#tab-stream` wraps the existing `#stream` div
+- `#tab-analytics` shows four metric groups in a 2x2 grid: Today, Event Mix, Devices, Visitors
+- Values are baked into the HTML at render time (no client-side fetching)
+- Jinja conditional: shows "No analytics data yet." when metrics is None
+
+**Modified: `app/static/style.css`**
+- Replaced `.stream-header` styles with `.tab-bar` / `.tab` styles (border-bottom active indicator)
+- Added `.tab-content` show/hide (display: none / flex)
+- Added analytics styles: `.analytics-grid` (2-col CSS grid), `.metric-group`, `.metric-value` / `.metric-label`
+- All colors from existing palette
+
+**Modified: `app/static/stream.js`**
+- Added tab switching at the top of the IIFE (before WebSocket setup)
+- Click handler toggles `active` class on tabs and corresponding content divs
+- WebSocket continues running regardless of which tab is visible
+
+### Key learnings
+
+1. **BigQuery OAuth scopes matter.** Used `bigquery.readonly` initially — queries fail with "insufficient authentication scopes" because running a query creates a Job, which requires write-like permissions. The correct scope is `bigquery` (full access). The `readonly` scope only works for reading table data directly, not for running queries.
+
+2. **Cache TTL design.** The cache only stores data after a successful fetch. If BigQuery is down, subsequent requests retry the query (no negative caching). This is intentional — better to be slow than stale when the data source recovers.
+
+3. **Tab design > separate page.** The original plan called for a separate `/analytics` route. The tab approach is better because: (a) visitors see both views exist immediately, (b) the WebSocket stays connected while browsing analytics, (c) no page navigation means no new PostHog event just for checking analytics.
+
+4. **`datetime.date` in BigQuery results.** BigQuery's DATE type comes back as `datetime.date` in Python. Jinja renders it fine as a string, but if we ever serialize to JSON we'll need a custom encoder.
+
+### Verified
+- BigQuery query returns real data (5 events, 2 visitors from the test session)
+- Cache works: first call ~1.2s, second call ~0.000002s
+- Template renders correctly with both real metrics and None
+- App loads without import errors
+- Both tab states render correctly (confirmed via template rendering test)
+
+### What's next
+- Deploy the site so it gets real traffic (currently only generating data locally)
+- Pipeline runner (cron for `dbt build`) — needed once deployed
+- Start M3: meaningful flows (sign-up, checkout, review) to generate richer data for the analytics view

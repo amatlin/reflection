@@ -29,12 +29,90 @@
       <p class="hint">Click a button. Watch the stream. That's you.</p>
     </div>
 
-    <!-- Right: live event stream -->
+    <!-- Right: live event stream + analytics -->
     <div class="panel right">
-      <div class="stream-header">
-        <span class="dot"></span> Live event stream
+      <div class="tab-bar">
+        <button class="tab active" data-tab="stream">
+          <span class="dot"></span> Live Stream
+        </button>
+        <button class="tab" data-tab="analytics">Analytics</button>
       </div>
-      <div id="stream" class="stream"></div>
+
+      <div id="tab-stream" class="tab-content active">
+        <div id="stream" class="stream"></div>
+      </div>
+
+      <div id="tab-analytics" class="tab-content">
+        {% if metrics %}
+        <div class="analytics-updated">
+          Last updated: {{ cache_age if cache_age is not none else "?" }} min ago
+        </div>
+        <div class="analytics-grid">
+          <div class="metric-group">
+            <div class="group-label">Today</div>
+            <div class="metric">
+              <span class="metric-value">{{ metrics.total_events }}</span>
+              <span class="metric-label">total events</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ metrics.unique_visitors }}</span>
+              <span class="metric-label">unique visitors</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ metrics.unique_sessions }}</span>
+              <span class="metric-label">unique sessions</span>
+            </div>
+          </div>
+          <div class="metric-group">
+            <div class="group-label">Event Mix</div>
+            <div class="metric">
+              <span class="metric-value">{{ metrics.pageviews }}</span>
+              <span class="metric-label">pageviews</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ metrics.clicks }}</span>
+              <span class="metric-label">clicks</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ metrics.custom_events }}</span>
+              <span class="metric-label">custom events</span>
+            </div>
+          </div>
+          <div class="metric-group">
+            <div class="group-label">Devices</div>
+            <div class="metric">
+              <span class="metric-value">{{ metrics.desktop_sessions }}</span>
+              <span class="metric-label">desktop</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ metrics.mobile_sessions }}</span>
+              <span class="metric-label">mobile</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ metrics.tablet_sessions }}</span>
+              <span class="metric-label">tablet</span>
+            </div>
+          </div>
+          <div class="metric-group">
+            <div class="group-label">Visitors</div>
+            <div class="metric">
+              <span class="metric-value">{{ metrics.unique_visitors }}</span>
+              <span class="metric-label">unique visitors</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ "%.1f"|format(metrics.events_per_visitor) }}</span>
+              <span class="metric-label">events / visitor</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ metrics.distinct_countries }}</span>
+              <span class="metric-label">countries</span>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="analytics-empty">No analytics data yet.</div>
+        {% endif %}
+      </div>
     </div>
   </div>
 

@@ -4,6 +4,8 @@ A website whose sole purpose is to analyze itself.
 
 You visit it, interact with it, and those interactions become the data you can explore on the site. The more people use it, the more interesting the data becomes.
 
+The homepage has two views: a **live event stream** (real-time WebSocket feed of every action on the site) and an **analytics tab** (daily metrics from the data warehouse, server-rendered with a 1-hour cache).
+
 ## Stack
 
 - **PostHog** — event capture, sessions, behavioral analytics

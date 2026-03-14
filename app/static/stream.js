@@ -1,4 +1,18 @@
 (function () {
+  // Tab switching
+  var tabs = document.querySelectorAll(".tab");
+  var tabContents = document.querySelectorAll(".tab-content");
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      var target = tab.getAttribute("data-tab");
+      tabs.forEach(function (t) { t.classList.remove("active"); });
+      tabContents.forEach(function (tc) { tc.classList.remove("active"); });
+      tab.classList.add("active");
+      document.getElementById("tab-" + target).classList.add("active");
+    });
+  });
+
   var streamEl = document.getElementById("stream");
   var ws;
   var reconnectDelay = 1000;

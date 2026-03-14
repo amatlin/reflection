@@ -4,14 +4,20 @@
 
 ```
 Browser event happens
-  → PostHog JS SDK (analytics: sessions, funnels, dashboards, behavioral data)
-  → Your API → Supabase events table (powers live stream via real-time subscriptions)
+  → PostHog JS SDK (analytics: sessions, funnels, behavioral data)
+  → FastAPI /api/events → Supabase events table → WebSocket broadcast (live stream tab)
 
-Supabase: transactional data (users, orders, reviews, merch) + events for live stream
-PostHog: behavioral analytics, session tracking, visitor identification
-Both: queryable for SQL playground and dashboards
-PostHog export → warehouse (offline layer, dbt)
+PostHog batch export (hourly) → BigQuery (raw)
+  → dbt: stg_events (view) → fct_events → metrics_daily
+                             → dim_visitors
+
+Page load → FastAPI queries BigQuery metrics_daily (1-hour in-memory cache) → analytics tab
 ```
+
+### Two data paths
+
+1. **Real-time path** (live stream tab): Browser → PostHog SDK `_onCapture` → FastAPI → Supabase insert → WebSocket broadcast → stream panel. Latency: ~50ms.
+2. **Analytical path** (analytics tab): PostHog → BigQuery (hourly batch export) → dbt models → FastAPI queries `metrics_daily` → server-rendered HTML. Latency: up to 1 hour + cache TTL.
 
 ## Decision Framework
 
@@ -40,13 +46,22 @@ Supabase serves two roles:
 FastAPI (Python). Receives custom events from the browser (writes to both PostHog and Supabase), serves pages, handles transactional logic (checkout, reviews, etc.).
 
 ### Frontend
-TBD — start with whatever is fastest for milestone 1 (Lovable, server-rendered HTML + minimal JS, etc.).
+Vanilla HTML + CSS + JS. Server-rendered Jinja2 templates. No build step, no framework. The homepage is a split layout: left panel explains the concept, right panel has a tab bar toggling between the live event stream and the analytics view.
 
 ### Hosting
 TBD — pick a managed platform (Railway, Render, Fly.io) to minimize ops. Not a consequential decision at this stage.
 
-### Offline / Analytical Layer
-PostHog export → warehouse (e.g. BigQuery, Snowflake, or just a separate Postgres). Transform with dbt. This is milestone 3.
+### Analytical Layer — BigQuery + dbt
+PostHog batch exports events to BigQuery hourly. dbt Core transforms them:
+- `stg_events` (view) — cleans raw export, extracts JSON properties into typed columns, deduplicates
+- `fct_events` (table) — clean event fact table
+- `dim_visitors` (table) — one row per visitor with first/last seen, device, geo
+- `metrics_daily` (table) — daily aggregates: volume, event mix, device split, geo, ratios
+
+The FastAPI backend queries `metrics_daily` via `app/services/bigquery_client.py` with a 1-hour in-memory cache. Results are baked into the HTML at render time — no client-side BigQuery calls.
+
+### Analytics Caching
+`bigquery_client.py` uses a module-level dict cache (`_cache`) with a 3600-second TTL. On cache miss, it runs a BigQuery query for the latest `metrics_daily` row. On error, returns `None` and the template shows a fallback message. The cache is per-process (not shared across workers), which is fine for single-process local dev.
 
 ## Event Schema
 
@@ -63,4 +78,4 @@ PostHog handles session IDs, visitor IDs, device metadata, and timestamps automa
 | `review` | rating, review_text, item_id |
 | `query_executed` | query_text, row_count, duration_ms |
 
-Additional event types will be added in milestone 2 as flows are built out.
+Additional event types will be added in milestone 3 as flows are built out.

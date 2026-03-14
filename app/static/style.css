@@ -88,18 +88,106 @@ p {
   color: #484f58;
 }
 
-/* Stream panel */
-.stream-header {
-  font-family: "SF Mono", "Fira Code", monospace;
-  font-size: 0.8rem;
-  color: #58a6ff;
-  padding-bottom: 1rem;
+/* Tab bar */
+.tab-bar {
+  display: flex;
+  gap: 0;
   border-bottom: 1px solid #21262d;
   margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.tab {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.8rem;
+  color: #7b8da6;
+  background: none;
+  border: none;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab:hover {
+  color: #e6edf3;
+}
+
+.tab.active {
+  color: #58a6ff;
+  border-bottom-color: #58a6ff;
+}
+
+/* Tab content */
+.tab-content {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.tab-content.active {
+  display: flex;
+}
+
+/* Analytics */
+.analytics-updated {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.75rem;
+  color: #484f58;
+  margin-bottom: 1.25rem;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.metric-group {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.group-label {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.7rem;
+  color: #58a6ff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.25rem 0;
+}
+
+.metric-value {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e6edf3;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  color: #7b8da6;
+}
+
+.analytics-empty {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.85rem;
+  color: #484f58;
+  text-align: center;
+  margin-top: 3rem;
 }
 
 .dot {

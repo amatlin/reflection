@@ -16,11 +16,11 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 
 1. ~~Landing page with live event stream~~ (done)
 
-2. Analytical backbone (pipeline + basic analytics page)
-- PostHog batch export → BigQuery warehouse (hourly)
-- dbt Core models: staging, facts, dimensions, daily metrics
-- Minimal analytics page on the site showing numbers from dbt models
-- Simple dashboards proving the pipeline works end-to-end
+2. ~~Analytical backbone (pipeline + analytics view)~~ (done)
+- ~~PostHog batch export → BigQuery warehouse (hourly)~~
+- ~~dbt Core models: staging, facts, dimensions, daily metrics~~
+- ~~Analytics tab on homepage showing numbers from `metrics_daily` mart~~
+- ~~Server-rendered with 1-hour in-memory BigQuery cache~~
 
 3. Meaningful data model
 - Add flows (sign-up, checkout, review) that generate richer data types: funnels, natural language, pricing
@@ -47,3 +47,4 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 
 - Merch store to generate e-commerce and funnel data
 - Open-source the infrastructure code
+- ML model serving — train on dbt marts, serve predictions in real-time using live Supabase events as features (e.g., predict visitor behavior mid-session). Dual-path architecture already supports this: BigQuery for training features, Supabase for serving features.
