@@ -416,3 +416,12 @@ What makes this powerful for the project:
 - **Self-referential loop deepens**: the text people submit about the site becomes part of the site's data, which other people then see analyzed. The content about Reflection becomes Reflection's content.
 
 Needs brainstorming: where does the text box live on the homepage (left panel? its own tab?)? How is text stored (Supabase table)? What NLP analysis is feasible and interesting? How to handle moderation/abuse?
+
+### 5. Display the cost of running the site
+Show visitors what it costs to operate Reflection — hosting, BigQuery, Supabase, PostHog, domain, etc. This is peak self-referential: the site doesn't just show you its data, it shows you the bill. Options to explore:
+- **Static cost breakdown**: manually maintained list of monthly costs per service. Simple, honest, easy to start with.
+- **Live cost tracking**: pull actual usage/billing data from GCP, Supabase, and PostHog APIs. More impressive but more complex.
+- **Cost-per-visitor or cost-per-event**: derived metric that gets more interesting as traffic grows. "Your visit cost $0.0003."
+- **Where to display**: could be a metric group on the analytics tab, a footer on the homepage, or part of a blog post about the infrastructure.
+
+Why this works: most websites hide their costs. Reflection showing its own bill is consistent with the spirit of radical transparency — the apparatus is the art, and the economics of the apparatus are part of the story.
