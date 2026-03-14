@@ -26,6 +26,8 @@ Reflection is a self-referential website that analyzes its own usage. See `plan.
 
 The project is built incrementally through milestones — each one should be demo-able. Speed over polish. Commit and push frequently — don't let work pile up locally.
 
+On every commit and push, check whether `README.md` or `plan.md` need to be updated to reflect the changes.
+
 ## Session Handoff
 
 When the user is wrapping up a session, document what was done and what's next in `LAB_NOTEBOOK.md`. Include enough context that a fresh conversation can pick up without re-reading the full transcript.
