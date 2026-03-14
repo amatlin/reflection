@@ -10,6 +10,8 @@ You visit it, interact with it, and those interactions become the data you can e
 - **Supabase** — Postgres database + real-time subscriptions for the live event stream
 - **FastAPI** — Python backend, validates and dual-writes events
 - **Vanilla JS** — lightweight frontend with WebSocket-powered stream
+- **BigQuery** — analytical warehouse (PostHog batch export, hourly)
+- **dbt Core** — data transformation (staging → facts → dimensions → daily metrics)
 
 ## Running locally
 
@@ -19,6 +21,22 @@ conda activate reflection
 pip install -r requirements.txt
 cp .env.example .env  # fill in your keys
 uvicorn app.main:app --reload --port 8000
+```
+
+## Data pipeline
+
+PostHog exports events to BigQuery hourly. dbt transforms them into mart tables:
+
+```
+posthog_events (raw) → stg_events (view) → fct_events (table) → metrics_daily (table)
+                                          → dim_visitors (table)
+```
+
+Run the pipeline manually:
+
+```bash
+cd pipeline/dbt
+dbt build  # runs all models + tests
 ```
 
 ## Project docs
