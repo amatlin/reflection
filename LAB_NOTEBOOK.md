@@ -385,3 +385,19 @@ Built the analytics view as a tab on the homepage instead of a separate `/analyt
 - Deploy the site so it gets real traffic (currently only generating data locally)
 - Pipeline runner (cron for `dbt build`) — needed once deployed
 - Start M3: meaningful flows (sign-up, checkout, review) to generate richer data for the analytics view
+
+## 2026-03-13 — Ideas to brainstorm next session
+
+### 1. Personalized visitor greeting + sign-up flow
+Homepage shows "Welcome visitor {id}" (using the PostHog distinct_id or short hash). Visitors can sign up, choose a username, and then appear in the live stream by name instead of an anonymous hex fragment. This ties sign-up (an M3 flow) directly into the existing M1 experience — the incentive to sign up is seeing your name in the stream. Needs brainstorming: what does the sign-up flow look like? Where does the username live (Supabase users table)? How does the stream resolve visitor_id → username?
+
+### 2. SQL playground — build vs. embed
+Question: do we need to build a SQL playground from scratch, or can we embed an existing tool? Options to explore:
+- **BigQuery's connected sheets or Looker Studio** — embeddable, but may not give raw SQL access
+- **Observable** or **Evidence.dev** — notebook-style tools that can connect to BigQuery
+- **Retool / Metabase embedded** — read-only SQL runners with embed support
+- **Monaco editor + API endpoint** — build it ourselves with a code editor widget and a backend that proxies read-only queries to BigQuery
+- Key constraint: must be read-only, must have cost limits (BigQuery bills by bytes scanned)
+
+### 3. Architecture diagram — simplify scope
+The live animated architecture diagram (events flowing through nodes in real time) may be over-engineered for what it adds. Alternative: a static architecture diagram in one of the M5 blog posts, or a simple SVG on the site that labels the components without live animation. The pipeline is interesting to explain, but it doesn't need to be interactive to be valuable. This frees up significant frontend effort for things that matter more (SQL playground, flows).
