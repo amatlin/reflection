@@ -401,3 +401,18 @@ Question: do we need to build a SQL playground from scratch, or can we embed an 
 
 ### 3. Architecture diagram — simplify scope
 The live animated architecture diagram (events flowing through nodes in real time) may be over-engineered for what it adds. Alternative: a static architecture diagram in one of the M5 blog posts, or a simple SVG on the site that labels the components without live animation. The pipeline is interesting to explain, but it doesn't need to be interactive to be valuable. This frees up significant frontend effort for things that matter more (SQL playground, flows).
+
+### 4. User-generated text — community participation as data
+The site could invite visitors to contribute text — not just clicks and pageviews. This turns Reflection into something communal, not just observational. Ideas for the prompt:
+- **Open-ended**: a text box on the homepage ("Say something"), no constraints. Maximum creative freedom, hardest to analyze.
+- **Feedback on Reflection**: "What do you think of this?" — narrower, but risks feeling like a survey rather than art.
+- **Specific prompt**: a rotating question that changes periodically. Gives structure without being a survey.
+- **Meta-prompt**: "What do you think happens to what you type here?" — deeply on-brand. The answer is: it becomes data, and you can see it analyzed on the analytics page.
+
+What makes this powerful for the project:
+- **New data type**: natural language alongside behavioral events. Opens up NLP/unstructured analysis in the analytics layer (sentiment, topics, word frequency, embeddings).
+- **Community feel**: visitors become participants, not just subjects. The site watches you, but you also get to speak back.
+- **Structured survey angle**: could also include a short structured survey ("Did this site change how you think about data tracking? Y/N/unsure") — results aggregated and displayed on the analytics tab. This is measurable and ties directly to the project's purpose.
+- **Self-referential loop deepens**: the text people submit about the site becomes part of the site's data, which other people then see analyzed. The content about Reflection becomes Reflection's content.
+
+Needs brainstorming: where does the text box live on the homepage (left panel? its own tab?)? How is text stored (Supabase table)? What NLP analysis is feasible and interesting? How to handle moderation/abuse?
