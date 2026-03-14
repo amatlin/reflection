@@ -249,8 +249,33 @@ Completed infrastructure setup:
 
 Updated config: added `bigquery_project`, `bigquery_dataset`, `bigquery_key_path` to app Settings. Added `dbt-core`, `dbt-bigquery`, `google-cloud-bigquery`, `requests` to requirements.
 
-### Next steps
-- Build dbt project (staging + mart models)
-- Create pipeline runner script (`dbt run` on schedule)
-- Build minimal `/analytics` page showing data from dbt models
-- Wait for first PostHog batch export to land and verify data in BigQuery
+## 2026-03-13 — dbt project scaffolded, dbt MCP attempted
+
+Created the dbt project skeleton at `pipeline/dbt/`:
+- `dbt_project.yml` — staging models as views, mart models as tables
+- `profiles.yml` — BigQuery connection using the service account key
+- `models/staging/stg_events.sql` — cleans raw PostHog export, extracts common properties (page info, device, geo, session) from JSON into real columns, deduplicates by UUID
+- `models/staging/schema.yml` — documents the staging model, defines source table `posthog_events`, adds uniqueness/not-null tests
+- `models/marts/fct_events.sql` — clean event fact table (pass-through from staging for now)
+- `models/marts/dim_visitors.sql` — one row per visitor with first/last seen, device/geo from latest event
+
+Still need: `metrics_daily.sql` (daily aggregates for the analytics page), mart schema.yml.
+
+**dbt MCP:** Tried to set up the dbt MCP server (https://docs.getdbt.com/docs/dbt-ai/about-mcp) which would give Claude tools to generate sources, staging models, and run dbt directly. Installed `uv` via Homebrew, created `.mcp.json` with config pointing to the dbt project. The MCP didn't connect on reload — may need a full Claude Code restart or a different config approach. Worth trying again next session.
+
+### Environment
+- Conda env: `reflection` (Python 3.12)
+- Run app: `conda activate reflection && cd /Users/annamatlin/repos/reflection && uvicorn app.main:app --reload --port 8000`
+- GCP project: `reflection-data`
+- BigQuery dataset: `reflection-data.reflection`
+- Service account key: `~/reflection-bq-key.json`
+- dbt project: `pipeline/dbt/`
+- PostHog batch export: configured, hourly, events → BigQuery `posthog_events` table
+
+### Next session
+- Get the dbt MCP working (try full restart of Claude Code)
+- Check if PostHog batch export has landed data in BigQuery (`bq query 'SELECT count(*) FROM reflection.posthog_events'`)
+- Finish `metrics_daily.sql` mart model + mart schema.yml
+- Run `dbt run` and `dbt test` to validate models against real data
+- Build the pipeline runner script and cron setup
+- Build minimal `/analytics` page

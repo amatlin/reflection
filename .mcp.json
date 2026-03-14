@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "dbt": {
+      "command": "/usr/local/bin/uvx",
+      "args": ["dbt-mcp"],
+      "env": {
+        "DBT_PROJECT_DIR": "/Users/annamatlin/repos/reflection/pipeline/dbt",
+        "DBT_PATH": "/Users/annamatlin/miniconda3/envs/reflection/bin/dbt"
+      }
+    }
+  }
+}
