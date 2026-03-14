@@ -308,6 +308,22 @@ First real data in the marts:
 
 **Pipeline runner deferred.** Not worth setting up cron yet — only generating events locally, can run `dbt build` manually or via dbt MCP on demand. Pipeline runner becomes valuable when the site is deployed with real traffic.
 
+## 2026-03-13 — Analytics page design decisions
+
+Brainstormed the analytics page. Key decisions:
+
+1. **Separate `/analytics` page** rather than below-the-fold on the homepage. Clean separation between live (event stream) and analytical (warehouse) views. Mirrors how real companies separate operational monitoring from BI. Two-way door — can combine later.
+
+2. **Pre-built numbers, not a SQL playground.** The SQL playground is more true to the spirit (hand visitors the apparatus), but it's a bigger investment (editor component, safe query execution, cost limits). Ship the simpler version first; playground is planned for M4.
+
+3. **Server-rendered with in-memory cache (Approach B).** Backend queries BigQuery, caches results for 1 hour (matching dbt refresh cadence). No frontend JS needed beyond styling. Considered three approaches:
+   - A: Direct BigQuery query on every page load (too slow, ~1-2s per load)
+   - **B: Query + in-memory cache** (fast, simple, matches current architecture) ← chosen
+   - C: API endpoint + frontend JS (more moving parts than needed right now; sets up for SQL playground later)
+
+4. **Presentation: just the numbers.** Volume, event mix, device split, geo, ratios — plainly labeled, no narrative framing. Consistent with the spirit: "Here is the data."
+
 ### Next steps
-1. Build minimal `/analytics` page showing numbers from the mart tables — this makes M2 demo-able
+1. Build `/analytics` page (server-rendered, cached BigQuery queries, numbers from `metrics_daily` + `dim_visitors`)
 2. Pipeline runner (cron or script for `dbt build`) — defer until deployment
+3. SQL playground — defer to M4
