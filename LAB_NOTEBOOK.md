@@ -272,9 +272,18 @@ Still need: `metrics_daily.sql` (daily aggregates for the analytics page), mart 
 - dbt project: `pipeline/dbt/`
 - PostHog batch export: configured, hourly, events → BigQuery `posthog_events` table
 
+## 2026-03-13 — Batch export failing: billing not enabled
+
+PostHog batch export to BigQuery failed 3 runs with: `403 Billing has not been enabled for this project. DML queries are not allowed in the free tier.` BigQuery requires a billing account even for free-tier usage when running DML (INSERT) queries, which is what PostHog's export uses.
+
+PostHog does have 41 events (confirmed via query with `filterTestAccounts: false`). The data is there, it just can't land in BigQuery yet.
+
+Also: PostHog's default `filterTestAccounts: true` hides localhost traffic. Need to keep this in mind when querying — always set `filterTestAccounts: false` during local development.
+
 ### Next session
+- **First:** Enable billing on GCP project `reflection-data` (`gcloud billing projects link reflection-data --billing-account=ACCOUNT_ID`), then retry failed batch exports in PostHog UI
 - Get the dbt MCP working (try full restart of Claude Code)
-- Check if PostHog batch export has landed data in BigQuery (`bq query 'SELECT count(*) FROM reflection.posthog_events'`)
+- Verify data lands in BigQuery after billing is enabled
 - Finish `metrics_daily.sql` mart model + mart schema.yml
 - Run `dbt run` and `dbt test` to validate models against real data
 - Build the pipeline runner script and cron setup
