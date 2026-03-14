@@ -280,11 +280,21 @@ PostHog does have 41 events (confirmed via query with `filterTestAccounts: false
 
 Also: PostHog's default `filterTestAccounts: true` hides localhost traffic. Need to keep this in mind when querying — always set `filterTestAccounts: false` during local development.
 
-### Next session
-- **First:** Enable billing on GCP project `reflection-data` (`gcloud billing projects link reflection-data --billing-account=ACCOUNT_ID`), then retry failed batch exports in PostHog UI
-- Get the dbt MCP working (try full restart of Claude Code)
-- Verify data lands in BigQuery after billing is enabled
-- Finish `metrics_daily.sql` mart model + mart schema.yml
-- Run `dbt run` and `dbt test` to validate models against real data
-- Build the pipeline runner script and cron setup
-- Build minimal `/analytics` page
+## 2026-03-13 — GCP billing enabled, dbt models complete
+
+Linked a billing account to GCP project `reflection-data` (required for BigQuery DML even on free tier). dbt MCP now connected and working.
+
+Completed the dbt mart layer:
+- **`metrics_daily.sql`** — daily aggregates: volume (events, visitors, sessions), event mix (pageviews, clicks, custom), device split, geo reach, derived ratios (events/visitor, pages/session, CTR)
+- **`schema.yml`** for all three mart models — documents columns, adds uniqueness and not-null tests
+- Added dbt artifacts (`target/`, `logs/`, `.user.yml`) to `.gitignore`
+
+Full DAG: `posthog_events` (source) → `stg_events` (view) → `fct_events` (table) → `metrics_daily` (table), with `dim_visitors` (table) also branching from `stg_events`.
+
+4 models, 13 tests, 1 source — all compiling. Waiting for the next hourly PostHog batch export to land real rows in BigQuery.
+
+### Next steps (in order)
+1. Verify data has landed in BigQuery (`posthog_events` row count > 0)
+2. Run `dbt build` against real data and fix any issues
+3. Set up pipeline runner (cron or script that runs `dbt build` hourly after PostHog export)
+4. Build minimal `/analytics` page showing numbers from the mart tables
