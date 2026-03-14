@@ -22,10 +22,10 @@ daily as (
         -- Depth
         count(distinct page_path) as distinct_pages_viewed,
 
-        -- Device mix
-        countif(device_type = 'Desktop') as desktop_sessions,
-        countif(device_type = 'Mobile') as mobile_sessions,
-        countif(device_type = 'Tablet') as tablet_sessions,
+        -- Device mix (distinct sessions per device type)
+        count(distinct case when device_type = 'Desktop' then session_id end) as desktop_sessions,
+        count(distinct case when device_type = 'Mobile' then session_id end) as mobile_sessions,
+        count(distinct case when device_type = 'Tablet' then session_id end) as tablet_sessions,
 
         -- Geo
         count(distinct country) as distinct_countries

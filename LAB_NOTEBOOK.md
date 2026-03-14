@@ -293,8 +293,21 @@ Full DAG: `posthog_events` (source) → `stg_events` (view) → `fct_events` (ta
 
 4 models, 13 tests, 1 source — all compiling. Waiting for the next hourly PostHog batch export to land real rows in BigQuery.
 
-### Next steps (in order)
-1. Verify data has landed in BigQuery (`posthog_events` row count > 0)
-2. Run `dbt build` against real data and fix any issues
-3. Set up pipeline runner (cron or script that runs `dbt build` hourly after PostHog export)
-4. Build minimal `/analytics` page showing numbers from the mart tables
+## 2026-03-13 — Pipeline works end-to-end
+
+PostHog batch export landed 5 rows in BigQuery after billing was enabled. Ran `dbt build` — all 4 models materialized, all 12 tests passed.
+
+Two fixes were needed:
+1. **JSON path syntax** — BigQuery's native JSON type requires quoted keys for `$`-prefixed properties: `'$."$current_url"'` not `'$.$current_url'`. Fixed all 15 `json_value()` calls in `stg_events.sql`.
+2. **Source reference** — replaced hardcoded table name with `{{ source('posthog', 'posthog_events') }}` so dbt tracks lineage properly.
+3. **Device mix bug** — `desktop_sessions` was counting events, not distinct sessions. Fixed with `count(distinct case when device_type = 'Desktop' then session_id end)`.
+
+First real data in the marts:
+- `metrics_daily`: 1 day, 5 events, 2 visitors, 2 sessions, 1 pageview, 4 clicks
+- `dim_visitors`: 2 visitors, both Chrome/Mac/Desktop from New York
+
+**Pipeline runner deferred.** Not worth setting up cron yet — only generating events locally, can run `dbt build` manually or via dbt MCP on demand. Pipeline runner becomes valuable when the site is deployed with real traffic.
+
+### Next steps
+1. Build minimal `/analytics` page showing numbers from the mart tables — this makes M2 demo-able
+2. Pipeline runner (cron or script for `dbt build`) — defer until deployment
