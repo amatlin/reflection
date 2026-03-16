@@ -7,5 +7,3 @@ supabase==2.11.0
 websockets==14.1
 google-cloud-bigquery==3.31.0
 requests==2.32.3
-dbt-core==1.9.4
-dbt-bigquery==1.9.2

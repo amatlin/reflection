@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import time
 
 from google.cloud import bigquery
@@ -17,7 +18,16 @@ def get_client() -> bigquery.Client:
     otherwise falls back to default credentials (e.g. gcloud auth)."""
     global _client
     if _client is None:
-        if settings.bigquery_key_path:
+        if settings.bigquery_key_json:
+            info = json.loads(settings.bigquery_key_json)
+            credentials = service_account.Credentials.from_service_account_info(
+                info,
+                scopes=["https://www.googleapis.com/auth/bigquery"],
+            )
+            _client = bigquery.Client(
+                project=settings.bigquery_project, credentials=credentials
+            )
+        elif settings.bigquery_key_path:
             credentials = service_account.Credentials.from_service_account_file(
                 settings.bigquery_key_path,
                 scopes=["https://www.googleapis.com/auth/bigquery"],

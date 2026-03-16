@@ -10,3 +10,12 @@ reflection:
       threads: 4
       timeout_seconds: 300
       location: US
+    prod:
+      type: bigquery
+      method: service-account-json
+      project: reflection-data
+      dataset: reflection
+      keyfile_json: "{{ env_var('BIGQUERY_KEY_JSON') }}"
+      threads: 4
+      timeout_seconds: 300
+      location: US

@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     bigquery_project: str = ""
     bigquery_dataset: str = "reflection"
     bigquery_key_path: str = ""
+    bigquery_key_json: str = ""
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

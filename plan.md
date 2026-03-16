@@ -22,29 +22,20 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 - ~~Analytics tab on homepage showing numbers from `metrics_daily` mart~~
 - ~~Server-rendered with 1-hour in-memory BigQuery cache~~
 
-3. Meaningful data model
-- Add flows (sign-up, checkout, review) that generate richer data types: funnels, natural language, pricing
-- Each new flow immediately enriches the analytics layer from M2
-- Solid, extensible event schema
+3. ~~Frontend redesign + deployment~~ (done)
+- ~~Light "reflection pool" theme replacing dark terminal aesthetic~~
+- ~~Deployed to Railway at reflection.sh~~
+- ~~Public BigQuery dataset — visitors can query the data themselves~~
 
-4. Deeper analytics + visualization
-- Live architecture diagram showing data flowing through the real infrastructure
-- SQL playground with suggested queries
-- Expose the pipeline itself as content (last snapshot, rows loaded, transformation logic)
-
-5. Write-up
-- Written posts about the architecture, the art concept, the goal of the website, how to explore the data, example analyses
-- Tutorial notebooks (colab?) showing what can be done with the data
-
-6. Self-optimization
-- Define business goals for a business that doesn't exist (north star metric, guardrails) and let the site optimize itself against them
-- Run its own experiments: generate variants, assign visitors, measure results, deploy winners — automatically
-- The visitor sees everything: the hypothesis, which variant they're in, the current results, the decision
-- The site becomes the only website that shows you the experiments it's running on you
-- Depends on M2–M4 being solid; this is the capstone
+4. Blog post
+- Write-up hosted on the site at `/blog` and cross-posted externally
+- Covers the concept, architecture, art angle, and a link to explore the data
 
 ## Future Ideas
 
+- Meaningful data model: sign-up, checkout, review flows generating richer event types
+- SQL playground with suggested queries
+- Architecture diagram showing data flowing through the infrastructure
+- Self-optimization: define business goals, run experiments, show visitors which variant they're in
 - Merch store to generate e-commerce and funnel data
-- Open-source the infrastructure code
-- ML model serving — train on dbt marts, serve predictions in real-time using live Supabase events as features (e.g., predict visitor behavior mid-session). Dual-path architecture already supports this: BigQuery for training features, Supabase for serving features.
+- ML model serving on dbt marts

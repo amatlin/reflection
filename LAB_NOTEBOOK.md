@@ -425,3 +425,41 @@ Show visitors what it costs to operate Reflection — hosting, BigQuery, Supabas
 - **Where to display**: could be a metric group on the analytics tab, a footer on the homepage, or part of a blog post about the infrastructure.
 
 Why this works: most websites hide their costs. Reflection showing its own bill is consistent with the spirit of radical transparency — the apparatus is the art, and the economics of the apparatus are part of the story.
+
+## 2026-03-15 — Scope trimmed to MVP
+
+Came back after a couple days and decided the project was getting too sprawling. Trimmed the roadmap to minimum viable: restyle the frontend, deploy, add BigQuery public access, write a blog post. Moved the richer data model, SQL playground, architecture diagram, and self-optimization to future ideas.
+
+## 2026-03-15 — Frontend redesign: "reflection pool" theme
+
+Replaced the dark terminal aesthetic with a light, calm theme inspired by a reflection pool. Key changes:
+- Color palette: light blue-gray background (#f4f7fb), white cards, slate text, blue accent
+- Typography: DM Serif Display for the title, DM Sans for body, JetBrains Mono for data
+- Kept the split-screen layout (left panel concept, right panel stream/analytics tabs)
+- Added ripple effect: each new event in the stream triggers a subtle radial blue glow that fades out over ~1.4s, like a drop on still water
+- Simplified the copy to: "Welcome to Reflection. Stay for a second or for a while. Every action you take here is recorded and visible to everyone."
+- Added footer with blog and GitHub links
+- Added BigQuery link in the analytics tab
+
+Process: built a standalone mockup.html first, iterated on copy and layout there, then applied to the real templates.
+
+## 2026-03-15 — Deployed to Railway
+
+Deployed the FastAPI app to Railway. Key setup:
+- **Dockerfile**: Python 3.12 slim, installs web deps only (split dbt into `requirements-pipeline.txt`)
+- **BigQuery credentials**: added `BIGQUERY_KEY_JSON` config field — accepts the full service account JSON as an env var string, since Railway can't mount key files. Falls back to `BIGQUERY_KEY_PATH` for local dev.
+- **dbt profiles.yml**: added `prod` target using `service-account-json` method
+- **Custom domain**: reflection.sh (Namecheap) → CNAME to Railway, with root redirect to www
+- **Railway URL**: courageous-expression-production.up.railway.app
+
+Skipping dbt cron for now — running `dbt build` manually until there's real traffic.
+
+### Environment
+- Railway project: courageous-expression
+- Domain: reflection.sh (www.reflection.sh)
+- Railway CLI: `brew install railway`, `railway login`
+
+### Next
+- Wait for DNS propagation, verify reflection.sh works
+- Phase 3: Grant BigQuery `dataViewer` to `allAuthenticatedUsers`
+- Phase 4: Blog post at `/blog`

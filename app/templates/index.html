@@ -10,24 +10,25 @@
   <div class="split">
     <!-- Left: concept -->
     <div class="panel left">
-      <h1>Reflection</h1>
-      <p class="tagline">A website that watches itself being watched.</p>
-      <p>
-        Every page view, every click, every scroll — captured and streamed
-        back to you in real time. The data you see on the right is being
-        generated <em>right now</em>, by you and everyone else on this page.
-      </p>
-      <p>
-        This is the data layer of the modern web, made visible.
-        You are both the audience and the subject.
-      </p>
-      <div class="actions">
-        <button id="btn-hello" class="btn">Say hello</button>
-        <button id="btn-curious" class="btn">I'm curious</button>
-        <button id="btn-meta" class="btn">This is meta</button>
+      <div class="left-content">
+        <h1>Reflection</h1>
+        <p class="description">
+          Welcome to Reflection. Stay for a second or for a while.
+          Every action you take here is recorded and visible to everyone.
+        </p>
+        <div class="actions">
+          <button id="btn-hello" class="btn">Say hello</button>
+          <button id="btn-curious" class="btn">I'm curious</button>
+          <button id="btn-meta" class="btn">This is meta</button>
+        </div>
       </div>
-      <p class="hint">Click a button. Watch the stream. That's you.</p>
+      <div class="footer">
+        <a href="/blog">Blog</a>
+        <a href="https://github.com/annamatlin/reflection">GitHub</a>
+      </div>
     </div>
+
+    <div class="divider"></div>
 
     <!-- Right: live event stream + analytics -->
     <div class="panel right">
@@ -60,7 +61,7 @@
             </div>
             <div class="metric">
               <span class="metric-value">{{ metrics.unique_sessions }}</span>
-              <span class="metric-label">unique sessions</span>
+              <span class="metric-label">sessions</span>
             </div>
           </div>
           <div class="metric-group">
@@ -97,7 +98,7 @@
             <div class="group-label">Visitors</div>
             <div class="metric">
               <span class="metric-value">{{ metrics.unique_visitors }}</span>
-              <span class="metric-label">unique visitors</span>
+              <span class="metric-label">unique</span>
             </div>
             <div class="metric">
               <span class="metric-value">{{ "%.1f"|format(metrics.events_per_visitor) }}</span>
@@ -108,6 +109,10 @@
               <span class="metric-label">countries</span>
             </div>
           </div>
+        </div>
+        <div class="analytics-footer">
+          <a href="https://console.cloud.google.com/bigquery?project=reflection-data&d=reflection&p=reflection-data&page=dataset">Query this data in BigQuery &rarr;</a>
+          <div class="note">Requires a Google account. Free up to 1 TB/month.</div>
         </div>
         {% else %}
         <div class="analytics-empty">No analytics data yet.</div>
