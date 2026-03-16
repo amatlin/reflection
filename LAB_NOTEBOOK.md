@@ -597,4 +597,6 @@ Clearing the decks before the museum exhibit redesign. Three changes:
 Verified with Playwright: expanded view shows full stream, collapsed view shows narrow strip with left panel filling the page, re-expanding restores the stream.
 
 ### Next session
-- Implement the museum exhibit (M4) — full design spec in `museum_idea.md`
+- Implement the museum exhibit (M5) — full design spec in `museum_idea.md`
+- Read `museum_idea.md` and `plan.md` M5 for the full design before starting
+- The collapsible livestream is the homepage; the exhibit builds on top of it
