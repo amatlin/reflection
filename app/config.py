@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     bigquery_dataset: str = "reflection"
     bigquery_key_path: str = ""
     bigquery_key_json: str = ""
+    dbt_cron_minute: int = 15
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

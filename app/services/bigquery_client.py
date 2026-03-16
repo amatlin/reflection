@@ -10,7 +10,9 @@ from app.config import settings
 
 _client: bigquery.Client | None = None
 _cache: dict = {"data": None, "fetched_at": 0.0}
+_export_cache: dict = {"data": None, "fetched_at": 0.0}
 _CACHE_TTL = 3600  # 1 hour
+_EXPORT_CACHE_TTL = 300  # 5 minutes
 
 
 def get_client() -> bigquery.Client:
@@ -68,6 +70,32 @@ def get_latest_metrics() -> dict | None:
         return data
     except Exception as e:
         print(f"[bigquery] Error fetching metrics: {e}")
+        return None
+
+
+def get_last_export_time() -> str | None:
+    """Return ISO timestamp of the most recent event exported to BigQuery.
+    Cached for 5 minutes to avoid hammering BQ on every page load."""
+    global _export_cache
+    now = time.time()
+
+    if _export_cache["data"] is not None and (now - _export_cache["fetched_at"]) < _EXPORT_CACHE_TTL:
+        return _export_cache["data"]
+
+    try:
+        table = f"{settings.bigquery_project}.{settings.bigquery_dataset}.posthog_events"
+        query = f"SELECT MAX(timestamp) as last_ts FROM `{table}`"
+        result = get_client().query(query).result()
+        rows = list(result)
+        if not rows or rows[0].last_ts is None:
+            return None
+
+        iso = rows[0].last_ts.isoformat()
+        _export_cache["data"] = iso
+        _export_cache["fetched_at"] = time.time()
+        return iso
+    except Exception as e:
+        print(f"[bigquery] Error fetching last export time: {e}")
         return None
 
 

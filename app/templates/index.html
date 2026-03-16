@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reflection</title>
-  <link rel="stylesheet" href="/static/style.css?v=2" />
+  <link rel="stylesheet" href="/static/style.css?v=3" />
 </head>
 <body>
   <div class="split">
@@ -17,9 +17,7 @@
           every action you take here is recorded and visible to everyone.
         </p>
         <div class="actions">
-          <button id="btn-hello" class="btn">Say hello</button>
-          <button id="btn-curious" class="btn">I'm curious</button>
-          <button id="btn-meta" class="btn">This is meta</button>
+          <button id="btn-fire" class="btn btn-fire">Fire an event</button>
         </div>
       </div>
       <div class="footer">
@@ -30,92 +28,35 @@
 
     <div class="divider"></div>
 
-    <!-- Right: live event stream + analytics -->
+    <!-- Right: live event stream + journey -->
     <div class="panel right">
+      <div class="pipeline-status" id="pipeline-status"></div>
       <div class="tab-bar">
         <button class="tab active" data-tab="stream">
-          <span class="dot"></span> Live Stream
+          <span class="dot"></span> Everyone
         </button>
-        <button class="tab" data-tab="analytics">Analytics</button>
+        <button class="tab" data-tab="you">You</button>
       </div>
 
       <div id="tab-stream" class="tab-content active">
         <div id="stream" class="stream"></div>
       </div>
 
-      <div id="tab-analytics" class="tab-content">
-        {% if metrics %}
-        <div class="analytics-updated">
-          Last updated: {{ cache_age if cache_age is not none else "?" }} min ago
+      <div id="tab-you" class="tab-content">
+        <div id="journey-container" class="journey-container">
+          <p class="journey-placeholder">Click "Fire an event" to see your data's journey through the pipeline.</p>
         </div>
-        <div class="analytics-grid">
-          <div class="metric-group">
-            <div class="group-label">Today</div>
-            <div class="metric">
-              <span class="metric-value">{{ metrics.total_events }}</span>
-              <span class="metric-label">total events</span>
-            </div>
-            <div class="metric">
-              <span class="metric-value">{{ metrics.unique_visitors }}</span>
-              <span class="metric-label">unique visitors</span>
-            </div>
-            <div class="metric">
-              <span class="metric-value">{{ metrics.unique_sessions }}</span>
-              <span class="metric-label">sessions</span>
-            </div>
-          </div>
-          <div class="metric-group">
-            <div class="group-label">Event Mix</div>
-            <div class="metric">
-              <span class="metric-value">{{ metrics.pageviews }}</span>
-              <span class="metric-label">pageviews</span>
-            </div>
-            <div class="metric">
-              <span class="metric-value">{{ metrics.clicks }}</span>
-              <span class="metric-label">clicks</span>
-            </div>
-            <div class="metric">
-              <span class="metric-value">{{ metrics.custom_events }}</span>
-              <span class="metric-label">custom events</span>
-            </div>
-          </div>
-          <div class="metric-group">
-            <div class="group-label">Devices</div>
-            <div class="metric">
-              <span class="metric-value">{{ metrics.desktop_sessions }}</span>
-              <span class="metric-label">desktop</span>
-            </div>
-            <div class="metric">
-              <span class="metric-value">{{ metrics.mobile_sessions }}</span>
-              <span class="metric-label">mobile</span>
-            </div>
-            <div class="metric">
-              <span class="metric-value">{{ metrics.tablet_sessions }}</span>
-              <span class="metric-label">tablet</span>
-            </div>
-          </div>
-          <div class="metric-group">
-            <div class="group-label">Visitors</div>
-            <div class="metric">
-              <span class="metric-value">{{ metrics.unique_visitors }}</span>
-              <span class="metric-label">unique</span>
-            </div>
-            <div class="metric">
-              <span class="metric-value">{{ "%.1f"|format(metrics.events_per_visitor) }}</span>
-              <span class="metric-label">events / visitor</span>
-            </div>
-            <div class="metric">
-              <span class="metric-value">{{ metrics.distinct_countries }}</span>
-              <span class="metric-label">countries</span>
-            </div>
-          </div>
-        </div>
-        {% else %}
-        <div class="analytics-empty">No analytics data yet.</div>
-        {% endif %}
       </div>
     </div>
   </div>
+
+  <!-- Pipeline config -->
+  <script>
+    window.__reflection = {
+      lastExportIso: "{{ last_export_iso }}",
+      dbtCronMinute: {{ dbt_cron_minute }}
+    };
+  </script>
 
   <!-- PostHog SDK -->
   <script>
@@ -163,10 +104,44 @@
           }
         }
 
+        // If this is a fire_event and a journey is pending, resolve "captured"
+        // and pass along PostHog properties for the transformation preview
+        if (eventName === "fire_event" && window.__pendingJourney) {
+          var props = (eventData && eventData.properties) || {};
+          window.__pendingJourney.properties = {
+            $browser: props.$browser || null,
+            $browser_version: props.$browser_version || null,
+            $os: props.$os || null,
+            $device_type: props.$device_type || null,
+            $pathname: window.location.pathname,
+            $session_id: props.$session_id || null
+          };
+          if (window.__pendingJourney.onCapture) {
+            window.__pendingJourney.onCapture();
+          }
+        }
+
         fetch("/api/events", {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify(payload)
+        }).then(function(res) {
+          return res.json();
+        }).then(function(data) {
+          // Resolve "stored" step and record event ID for stream matching
+          if (window.__pendingJourney && eventName === "fire_event" && data && data.id) {
+            window.__pendingJourney.eventId = data.id;
+            if (window.__pendingJourney.onStore) {
+              window.__pendingJourney.onStore();
+            }
+            // Check if WS message arrived before this response (race condition)
+            var buf = window.__pendingJourney._wsBuffer || [];
+            if (buf.indexOf(data.id) !== -1) {
+              if (window.__pendingJourney.onStream) {
+                window.__pendingJourney.onStream();
+              }
+            }
+          }
         }).catch(function() {});
       }
     });

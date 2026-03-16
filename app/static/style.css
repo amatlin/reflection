@@ -112,6 +112,12 @@ h1 {
   box-shadow: 0 1px 4px rgba(59, 130, 246, 0.1);
 }
 
+.btn-fire {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-faint);
+}
+
 /* ── Footer ── */
 .footer {
   margin-top: auto;
@@ -144,6 +150,15 @@ h1 {
   flex-direction: column;
   padding: 1.5rem 2rem 1.5rem 2rem;
   min-width: 0;
+}
+
+/* ── Pipeline status ── */
+.pipeline-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  padding: 0.5rem 0.25rem;
+  letter-spacing: 0.02em;
 }
 
 /* ── Tab bar ── */
@@ -241,84 +256,96 @@ h1 {
   color: var(--text-secondary);
 }
 
-/* ── Analytics ── */
-.analytics-updated {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  padding: 1rem 0 0.75rem;
-}
-
-.analytics-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
-.metric-group {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1rem 1.1rem;
-}
-
-.group-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.62rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.7rem;
+.event-line .visitor-you {
+  color: var(--accent);
   font-weight: 500;
 }
 
-.metric {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 0.2rem 0;
+/* ── Journey placeholder ── */
+.journey-container {
+  padding: 0.75rem 0;
+  flex: 1;
+  overflow-y: auto;
 }
 
-.metric-value {
+.journey-placeholder {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 1.05rem;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.metric-label {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-}
-
-.analytics-empty {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
   text-align: center;
   margin-top: 3rem;
 }
 
-.analytics-footer {
-  margin-top: auto;
-  padding: 1rem 0 0.5rem;
+/* ── Journey card ── */
+.journey-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.78rem;
+  max-width: 420px;
+}
+
+.journey-header {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.journey-steps {
+  margin-bottom: 0.25rem;
+}
+
+.journey-step {
+  padding: 0.3rem 0;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+
+.journey-step.done {
+  color: var(--green);
+}
+
+.step-icon {
+  display: inline-block;
+  width: 1.2em;
+  text-align: center;
+}
+
+/* ── Journey sections (transform + metrics) ── */
+.journey-section {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.journey-section-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5rem;
+}
+
+.journey-fields {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.2rem 1rem;
+}
+
+.journey-field-key {
   color: var(--text-muted);
 }
 
-.analytics-footer a {
-  color: var(--accent);
-  text-decoration: none;
+.journey-field-value {
+  color: var(--text-primary);
+}
+
+.journey-metric-change {
+  color: var(--green);
   font-weight: 500;
-}
-
-.analytics-footer a:hover {
-  text-decoration: underline;
-}
-
-.analytics-footer .note {
-  font-size: 0.7rem;
-  margin-top: 0.3rem;
 }
 
 /* ── Scrollbar ── */
@@ -393,7 +420,21 @@ h1 {
     padding: 1rem 1.5rem 1.5rem;
   }
 
-  .analytics-grid {
-    grid-template-columns: 1fr;
+  .pipeline-status {
+    font-size: 0.62rem;
+    padding: 0.4rem 0;
+  }
+
+  .journey-card {
+    max-width: 100%;
+    padding: 1rem 1.1rem;
+  }
+
+  .journey-header {
+    font-size: 0.76rem;
+  }
+
+  .journey-fields {
+    gap: 0.15rem 0.75rem;
   }
 }
