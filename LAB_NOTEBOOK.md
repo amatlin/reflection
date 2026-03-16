@@ -572,6 +572,12 @@ Considered: Sandbox, Lab, Analysis, Library. Went with **Sandbox** — it's dire
    - **Budget milestones**: replaced data model → analytics → write-up → self-optimization → polish with museum exhibit → sandbox → curation/refinement → blog → polish.
    - **Bio**: added museum exhibit and educational resource framing.
 
+## 2026-03-16 — Mobile responsive layout
+
+The site wasn't usable on phones — the 42%/58% side-by-side split rendered as two squished columns with no media queries. Added a `@media (max-width: 768px)` breakpoint to `style.css` that stacks the panels vertically, makes the divider horizontal, switches the analytics grid to single-column, and tightens padding. ~54 lines of CSS, no HTML changes.
+
+Verified with Playwright at 375×812 (iPhone size) — layout stacks cleanly, stream scrolls naturally.
+
 ### Next session
-- Implement the museum exhibit (M4)
-- Or: start on sandbox gallery design
+- Implement the museum exhibit (M4) — full design spec in `museum_idea.md`
+- The livestream remains the homepage front page, including for the exhibit
