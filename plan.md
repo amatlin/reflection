@@ -27,7 +27,18 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 - ~~Deployed to Railway at reflection.sh~~
 - ~~Public BigQuery dataset — visitors can query the data themselves~~
 
-4. Museum exhibit funnel
+4. ~~Livestream UX overhaul~~ (done)
+- ~~Humanized event names: `$pageview` → "viewed the page", `$autocapture` → `clicked "Button"`, hide `$pageleave`~~
+- ~~"Everyone" / "You" tabs replacing Live Stream / Analytics~~
+- ~~Single "Fire an event" button replacing three action buttons~~
+- ~~Journey card: real-time confirmations (captured → stored → streamed) with staggered animations~~
+- ~~Journey card: dbt transformation preview (event_name, device, browser, os) computed client-side~~
+- ~~Journey card: metrics contribution showing which `metrics_daily` aggregates the event affects~~
+- ~~Pipeline countdowns in header (warehouse export + dbt refresh)~~
+- ~~"you" label on your own events in the stream~~
+- ~~Mobile responsive layout~~
+
+5. Museum exhibit funnel
 - Restructure site as a guided walkthrough: Homepage → Exhibit (8 steps) → Conclusion
 - Each exhibit step explains one stage of the data pipeline (logging, streaming, export, transformation, metrics, analysis)
 - Conclusion screen: thank-you note, questionnaire (text box → `questionnaire_response` event), gift shop (Stripe → `checkout_started` / `purchase_complete` events)
@@ -35,13 +46,13 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 - Generates `funnel_step` events on every navigation — enables funnel analysis of the exhibit itself
 - See `museum_idea.md` for full design
 
-5. Sandbox
+6. Sandbox
 - Gallery page at `/sandbox` featuring analyses of Reflection's public BigQuery data
 - Featured analyses seeded by the developer — each with a title, description, and link to a hosted notebook or visualization
 - Accessible from homepage navigation and linked from the museum exhibit conclusion
 - Positions the dataset as an educational resource for students and others learning about production data ecosystems
 
-6. Blog post
+7. Blog post
 - Write-up hosted on the site at `/blog` and cross-posted externally
 - Covers the concept, architecture, art angle, and a link to explore the data
 

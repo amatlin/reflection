@@ -172,9 +172,9 @@
 
     // Real-time confirmation steps
     var steps = [
-      { key: "capture", label: "captured by posthog", promise: journey.capturePromise },
-      { key: "store", label: "stored in supabase", promise: journey.storePromise },
-      { key: "stream", label: "streamed to all", promise: journey.streamPromise }
+      { key: "capture", label: "captured by the analytics tracker (PostHog)", promise: journey.capturePromise },
+      { key: "store", label: "saved to database (Supabase)", promise: journey.storePromise },
+      { key: "stream", label: "broadcast to all visitors (WebSocket)", promise: journey.streamPromise }
     ];
 
     var stepsEl = document.createElement("div");
@@ -208,26 +208,20 @@
 
     var label = document.createElement("div");
     label.className = "journey-section-label";
-    label.textContent = "after transformation:";
+    label.textContent = "event details:";
     section.appendChild(label);
 
     var fields = [
       { key: "event_name", value: "fire_event" },
       { key: "device", value: props.$device_type || "—" },
       { key: "browser", value: (props.$browser || "—") + (props.$browser_version ? " " + props.$browser_version : "") },
-      { key: "os", value: props.$os || "—" },
-      { key: "country", value: "added by PostHog (server-side)" },
-      { key: "city", value: "added by PostHog (server-side)" },
-      { key: "page_path", value: props.$pathname || "/" }
+      { key: "os", value: props.$os || "—" }
     ];
 
     var table = document.createElement("div");
     table.className = "journey-fields";
 
     fields.forEach(function (f) {
-      var row = document.createElement("div");
-      row.className = "journey-field-row";
-
       var k = document.createElement("span");
       k.className = "journey-field-key";
       k.textContent = f.key;
@@ -236,9 +230,8 @@
       v.className = "journey-field-value";
       v.textContent = f.value;
 
-      row.appendChild(k);
-      row.appendChild(v);
-      table.appendChild(row);
+      table.appendChild(k);
+      table.appendChild(v);
     });
 
     section.appendChild(table);
@@ -284,16 +277,13 @@
 
     var label = document.createElement("div");
     label.className = "journey-section-label";
-    label.textContent = "contributes to:";
+    label.textContent = "metric changes:";
     section.appendChild(label);
 
     var table = document.createElement("div");
     table.className = "journey-fields";
 
     metrics.forEach(function (m) {
-      var row = document.createElement("div");
-      row.className = "journey-field-row";
-
       var k = document.createElement("span");
       k.className = "journey-field-key";
       k.textContent = m.name;
@@ -302,9 +292,8 @@
       v.className = "journey-field-value journey-metric-change";
       v.textContent = m.change;
 
-      row.appendChild(k);
-      row.appendChild(v);
-      table.appendChild(row);
+      table.appendChild(k);
+      table.appendChild(v);
     });
 
     section.appendChild(table);
