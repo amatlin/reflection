@@ -73,6 +73,11 @@ h1 {
   margin-bottom: 1rem;
 }
 
+.visitor-id {
+  color: var(--green);
+  font-weight: 600;
+}
+
 .description em {
   color: var(--text-primary);
   font-style: normal;

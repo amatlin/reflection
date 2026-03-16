@@ -129,8 +129,14 @@
       loaded: function(ph) {
         var id = ph.get_distinct_id();
         if (id) {
-          document.getElementById("greeting").textContent =
-            "welcome, visitor " + id.substring(0, 8) + ".";
+          var el = document.getElementById("greeting");
+          while (el.firstChild) el.removeChild(el.firstChild);
+          el.appendChild(document.createTextNode("welcome, visitor "));
+          var idSpan = document.createElement("span");
+          idSpan.className = "visitor-id";
+          idSpan.textContent = id.substring(0, 8);
+          el.appendChild(idSpan);
+          el.appendChild(document.createTextNode("."));
         }
       },
       _onCapture: function(eventName, eventData) {
