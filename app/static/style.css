@@ -241,40 +241,6 @@ h1 {
   color: var(--text-secondary);
 }
 
-/* ── Ripple effect ── */
-.event-line.ripple {
-  animation: eventRipple 1.4s ease-out forwards;
-}
-
-@keyframes eventRipple {
-  0% {
-    background: radial-gradient(
-      ellipse at 10% 50%,
-      rgba(59, 130, 246, 0.08) 0%,
-      transparent 0%
-    );
-  }
-  15% {
-    background: radial-gradient(
-      ellipse at 10% 50%,
-      rgba(59, 130, 246, 0.06) 0%,
-      rgba(59, 130, 246, 0.03) 40%,
-      transparent 70%
-    );
-  }
-  50% {
-    background: radial-gradient(
-      ellipse at 10% 50%,
-      rgba(59, 130, 246, 0.02) 0%,
-      rgba(59, 130, 246, 0.01) 50%,
-      transparent 100%
-    );
-  }
-  100% {
-    background: transparent;
-  }
-}
-
 /* ── Analytics ── */
 .analytics-updated {
   font-family: 'JetBrains Mono', monospace;
