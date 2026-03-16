@@ -29,7 +29,7 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 
 4. ~~Livestream UX overhaul~~ (done)
 - ~~Humanized event names: `$pageview` → "viewed the page", `$autocapture` → `clicked "Button"`, hide `$pageleave`~~
-- ~~"Everyone" / "You" tabs replacing Live Stream / Analytics~~
+- ~~"Everyone" / "You" tabs replacing Live Stream / Analytics~~ → tabs removed; stream is now a collapsible panel, journey card moved to left panel
 - ~~Single "Fire an event" button replacing three action buttons~~
 - ~~Journey card: real-time confirmations (captured → stored → streamed) with staggered animations~~
 - ~~Journey card: dbt transformation preview (event_name, device, browser, os) computed client-side~~

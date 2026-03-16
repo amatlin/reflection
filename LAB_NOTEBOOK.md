@@ -583,3 +583,18 @@ Verified with Playwright at 375×812 (iPhone size) — layout stacks cleanly, st
 ### Next session
 - Implement the museum exhibit (M4) — full design spec in `museum_idea.md`
 - The livestream remains the homepage front page, including for the exhibit
+
+## 2026-03-16 — UI cleanup: removed You tab, collapsible stream
+
+Clearing the decks before the museum exhibit redesign. Three changes:
+
+1. **Moved journey card to left panel.** The journey card (real-time pipeline confirmation) now renders directly below the "Fire an event" button instead of in a separate tab. `renderJourneyCard()` already targeted `#journey-container` by ID, so moving the div was all it took.
+
+2. **Removed the tab bar entirely.** The "Everyone" / "You" tab paradigm was replaced with a simple stream header: green dot + "LIVE STREAM" label + presence count + collapse chevron. All tab-switching JS (`switchTab()`, tab click handlers) deleted.
+
+3. **Collapsible stream panel.** Clicking the stream header collapses the entire right panel to a 36px vertical strip showing the green dot, rotated "LIVE STREAM" text, and presence count. The left panel expands via flex to fill the freed space. Smooth CSS transitions on flex/padding. On mobile, the collapsed state hides the stream content but keeps the header horizontal (since the layout is stacked vertically).
+
+Verified with Playwright: expanded view shows full stream, collapsed view shows narrow strip with left panel filling the page, re-expanding restores the stream.
+
+### Next session
+- Implement the museum exhibit (M4) — full design spec in `museum_idea.md`

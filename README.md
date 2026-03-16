@@ -8,11 +8,9 @@ A website whose sole purpose is to analyze itself.
 
 You visit it, you interact with it, and those interactions become the data you can explore on the site. Every click, every page view — captured, streamed live, and piped through a real analytics stack.
 
-The homepage greets you by your visitor ID and has two tabs:
-- **Everyone** — a real-time WebSocket feed of every action on the site, with human-readable event descriptions
-- **You** — click "Fire an event" to see your data's journey through the full pipeline: captured by PostHog, stored in Supabase, broadcast via WebSocket, then a preview of the dbt transformation and which daily metrics it affects
+The homepage greets you by your visitor ID and shows a collapsible live stream — a real-time WebSocket feed of every action on the site, with human-readable event descriptions. Click "Fire an event" to see your data's journey through the full pipeline: captured by PostHog, stored in Supabase, broadcast via WebSocket, then a preview of the dbt transformation and which daily metrics it affects.
 
-Pipeline countdowns in the header show when the next BigQuery export and dbt refresh will run.
+Pipeline countdowns in the header show when the next BigQuery export and dbt refresh will run. The stream panel collapses to a narrow strip if you want to focus on the left panel.
 
 You can also [query the raw data in BigQuery](https://console.cloud.google.com/bigquery?project=reflection-data&d=reflection&p=reflection-data&page=dataset) yourself (free with a Google account).
 
