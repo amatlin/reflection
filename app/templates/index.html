@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reflection</title>
-  <link rel="stylesheet" href="/static/style.css?v=4" />
+  <link rel="stylesheet" href="/static/style.css?v=7" />
 </head>
 <body>
   <div class="split">
@@ -19,6 +19,7 @@
         <div class="actions">
           <button id="btn-fire" class="btn btn-fire">Fire an event</button>
         </div>
+        <div id="journey-container" class="journey-container"></div>
       </div>
       <div class="footer">
         <a href="https://github.com/amatlin/reflection">GitHub</a>
@@ -30,21 +31,14 @@
     <!-- Right: live event stream + journey -->
     <div class="panel right">
       <div class="pipeline-status" id="pipeline-status"></div>
-      <div class="tab-bar">
-        <button class="tab active" data-tab="stream">
-          <span class="dot"></span> Everyone <span id="presence-count" class="presence-count"></span>
-        </button>
-        <button class="tab" data-tab="you">You</button>
+      <div class="stream-header" id="stream-toggle">
+        <span class="dot"></span>
+        <span class="stream-label">live stream</span>
+        <span id="presence-count" class="presence-count"></span>
+        <span class="stream-chevron">▸</span>
       </div>
-
-      <div id="tab-stream" class="tab-content active">
+      <div id="stream-collapsible" class="stream-collapsible">
         <div id="stream" class="stream"></div>
-      </div>
-
-      <div id="tab-you" class="tab-content">
-        <div id="journey-container" class="journey-container">
-          <p class="journey-placeholder">Click "Fire an event" to see your data's journey through the pipeline.</p>
-        </div>
       </div>
     </div>
   </div>

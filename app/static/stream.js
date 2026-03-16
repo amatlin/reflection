@@ -1,17 +1,19 @@
 (function () {
-  // Tab switching
-  var tabs = document.querySelectorAll(".tab");
-  var tabContents = document.querySelectorAll(".tab-content");
+  // Stream collapse toggle — collapses the right panel to a narrow strip
+  var streamToggle = document.getElementById("stream-toggle");
+  var rightPanel = streamToggle ? streamToggle.closest(".right") : null;
+  var leftPanel = document.querySelector(".panel.left");
 
-  tabs.forEach(function (tab) {
-    tab.addEventListener("click", function () {
-      var target = tab.getAttribute("data-tab");
-      tabs.forEach(function (t) { t.classList.remove("active"); });
-      tabContents.forEach(function (tc) { tc.classList.remove("active"); });
-      tab.classList.add("active");
-      document.getElementById("tab-" + target).classList.add("active");
+  if (streamToggle && rightPanel) {
+    streamToggle.addEventListener("click", function () {
+      rightPanel.classList.toggle("collapsed");
+      if (leftPanel) leftPanel.classList.toggle("stream-collapsed");
+      var chevron = streamToggle.querySelector(".stream-chevron");
+      if (chevron) {
+        chevron.textContent = rightPanel.classList.contains("collapsed") ? "◂" : "▸";
+      }
     });
-  });
+  }
 
   var streamEl = document.getElementById("stream");
   var ws;
@@ -143,16 +145,6 @@
     ws.onerror = function () {
       ws.close();
     };
-  }
-
-  // Tab switching helper
-  function switchTab(name) {
-    tabs.forEach(function (t) { t.classList.remove("active"); });
-    tabContents.forEach(function (tc) { tc.classList.remove("active"); });
-    var target = document.querySelector('.tab[data-tab="' + name + '"]');
-    if (target) target.classList.add("active");
-    var content = document.getElementById("tab-" + name);
-    if (content) content.classList.add("active");
   }
 
   // ── Journey card ──
@@ -317,7 +309,7 @@
     card.appendChild(section);
   }
 
-  // Button: fire event + switch to "You" tab + start journey
+  // Button: fire event + render journey card in left panel
   var fireBtn = document.getElementById("btn-fire");
   if (fireBtn) {
     fireBtn.addEventListener("click", function () {
@@ -333,8 +325,7 @@
       // Fire the event (posthog is a global from the SDK script)
       window.posthog.capture("fire_event");
 
-      // Switch to "You" tab and render card
-      switchTab("you");
+      // Render journey card in left panel
       renderJourneyCard(journey);
     });
   }
