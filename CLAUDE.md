@@ -30,6 +30,18 @@ The project is built incrementally through milestones — each one should be dem
 
 On every commit and push, check whether `README.md` or `plan.md` need to be updated to reflect the changes.
 
+## Session Start
+
+At the beginning of every conversation, read these files in order before doing anything else:
+
+1. `README.md` — what the project is and current state
+2. `plan.md` — milestones and status
+3. `LAB_NOTEBOOK.md` — what happened in recent sessions
+4. `spirit.md` — creative identity and tone
+5. `architecture.md` — system design
+
+Summarize what you learn and what seems like the natural next step, then ask the user what they'd like to work on.
+
 ## Session Handoff
 
 When the user is wrapping up a session, document what was done and what's next in `LAB_NOTEBOOK.md`. Include enough context that a fresh conversation can pick up without re-reading the full transcript.
