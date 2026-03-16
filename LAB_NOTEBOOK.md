@@ -543,3 +543,35 @@ Considered: Sandbox, Lab, Analysis, Library. Went with **Sandbox** — it's dire
 ### Next session
 - Implement the museum exhibit (M4)
 - Or: start on sandbox gallery design
+
+## 2026-03-16 — Frontend shipped, site deployed
+
+### What happened
+- Built HTML mockup for the "reflection pool" redesign, iterated on copy and layout
+- Applied the new theme to the real site: light palette, Lora italic title, lowercase "reflection", personalized visitor greeting ("welcome, visitor a3fb9d2c."), ripple animation on stream events, green bold visitor ID matching the stream
+- Deployed to Railway with Docker, set up env vars, BigQuery JSON credentials
+- Set up reflection.sh domain on Namecheap → Railway
+- Removed BigQuery link from analytics tab (moving to sandbox milestone)
+- Split dbt deps into `requirements-pipeline.txt` to keep the Docker image lean
+
+### Open issue
+- **SSL cert for www.reflection.sh not provisioning.** DNS is correct (CNAME `www` → `hi6tzv2n.up.railway.app`, TXT `_railway-verify.www` set). Railway domain status may need checking in the dashboard. The Railway default URL (`courageous-expression-production.up.railway.app`) works fine.
+
+## 2026-03-16 — Grant updated, CLAUDE.md refined
+
+### What was done
+
+1. **CLAUDE.md: "Ideas before code" guidance.** Added a line to the Development section establishing the project's pattern: new features start as working documents and milestone entries in `plan.md` before any code is written. This came from a session where Claude jumped to code prematurely — the pattern was clear but wasn't written down.
+
+2. **Grant rewritten around museum exhibit + sandbox.** All five grant files (`project_description.md`, `artistic_merit.md`, `public_engagement.md`, `budget.md`, `bio.md`) updated to replace the self-optimization capstone with the museum exhibit and sandbox as the project's direction. The grant now frames the work as curation and education — walking visitors through the data pipeline, then handing them the tools to explore the data themselves.
+
+   Key shifts:
+   - **Project description**: replaced self-optimization paragraph with museum exhibit walkthrough + sandbox as educational resource. Added personal motivation: the gap between what tracking systems do and what people imagine they do.
+   - **Artistic merit**: added paragraph about walking through the apparatus (not just seeing it). Reframed the closing around genuine affection for the craft — the project as an invitation to share what the developer sees in data work.
+   - **Public engagement**: expanded from 2 paragraphs to 4 — exhibit as structured engagement, sandbox as path from passive visitor to active analyst, educational framing for students.
+   - **Budget milestones**: replaced data model → analytics → write-up → self-optimization → polish with museum exhibit → sandbox → curation/refinement → blog → polish.
+   - **Bio**: added museum exhibit and educational resource framing.
+
+### Next session
+- Implement the museum exhibit (M4)
+- Or: start on sandbox gallery design
