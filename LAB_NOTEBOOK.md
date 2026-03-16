@@ -578,6 +578,8 @@ The site wasn't usable on phones — the 42%/58% side-by-side split rendered as 
 
 Verified with Playwright at 375×812 (iPhone size) — layout stacks cleanly, stream scrolls naturally.
 
+**Deployment gotcha:** `git push` alone didn't update Railway — Docker layer caching served stale static files. `railway up` (direct upload) forced a fresh build. Also discovered the `@keyframes eventRipple` block (which used `radial-gradient` inside keyframes) was breaking CSS parsing in some browsers — the `@media` block after it was silently dropped. Removed the ripple animation entirely and added `?v=2` cache-busting param to the stylesheet link. The ripple was likely never working for the same reason.
+
 ### Next session
 - Implement the museum exhibit (M4) — full design spec in `museum_idea.md`
 - The livestream remains the homepage front page, including for the exhibit
