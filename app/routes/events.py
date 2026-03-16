@@ -15,8 +15,7 @@ router = APIRouter()
 _connections: set[WebSocket] = set()
 
 
-async def _broadcast(event: EventOut) -> None:
-    payload = event.model_dump_json()
+async def _broadcast_raw(payload: str) -> None:
     stale: list[WebSocket] = []
     for ws in _connections:
         try:
@@ -25,6 +24,15 @@ async def _broadcast(event: EventOut) -> None:
             stale.append(ws)
     for ws in stale:
         _connections.discard(ws)
+
+
+async def _broadcast(event: EventOut) -> None:
+    await _broadcast_raw(event.model_dump_json())
+
+
+async def _broadcast_presence() -> None:
+    msg = json.dumps({"type": "presence", "count": len(_connections)})
+    await _broadcast_raw(msg)
 
 
 @router.post("/api/events")
@@ -38,6 +46,7 @@ async def receive_event(event: EventIn):
 async def event_stream(ws: WebSocket):
     await ws.accept()
     _connections.add(ws)
+    await _broadcast_presence()
     try:
         # Backfill last 50 events so the stream isn't blank
         history = recent_events(limit=50)
@@ -51,3 +60,4 @@ async def event_stream(ws: WebSocket):
         pass
     finally:
         _connections.discard(ws)
+        await _broadcast_presence()

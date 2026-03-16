@@ -211,6 +211,13 @@ h1 {
   50% { opacity: 0.35; }
 }
 
+/* ── Presence count ── */
+.presence-count {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+}
+
 /* ── Tab content ── */
 .tab-content {
   display: none;

@@ -28,6 +28,16 @@
     } catch (e) { return false; }
   }
 
+  function updatePresence(count) {
+    var el = document.getElementById("presence-count");
+    if (!el) return;
+    if (count === 1) {
+      el.textContent = "1 person here";
+    } else {
+      el.textContent = count + " people here";
+    }
+  }
+
   function shortVisitor(id) {
     if (!id) return "anon";
     if (isYou(id)) return id.substring(0, 8) + " (you)";
@@ -97,6 +107,13 @@
     ws.onmessage = function (msg) {
       try {
         var ev = JSON.parse(msg.data);
+
+        // Presence update — not an event
+        if (ev.type === "presence") {
+          updatePresence(ev.count);
+          return;
+        }
+
         renderEvent(ev);
 
         // Check if this is our pending journey event
