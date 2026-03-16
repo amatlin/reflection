@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reflection — Mockup</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --border-light: #f0f3f7;
+      --text-primary: #334155;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-light: #dbeafe;
+      --accent-faint: #eff6ff;
+      --green: #22c55e;
+      --green-faint: #dcfce7;
+      --ripple: rgba(59, 130, 246, 0.06);
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Split layout ── */
+    .split {
+      display: flex;
+      height: 100vh;
+    }
+
+    .panel {
+      overflow-y: auto;
+    }
+
+    /* ── Left panel ── */
+    .left {
+      flex: 0 0 42%;
+      max-width: 42%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3.5rem 3rem 2rem 4rem;
+      position: relative;
+    }
+
+    .left-content {
+      max-width: 400px;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 2.8rem;
+      font-weight: 400;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 0.6rem;
+    }
+
+    .tagline {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      margin-bottom: 2.2rem;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    .description {
+      font-size: 0.925rem;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    .description em {
+      color: var(--text-primary);
+      font-style: normal;
+      font-weight: 500;
+    }
+
+    /* ── Buttons ── */
+    .actions {
+      display: flex;
+      gap: 0.6rem;
+      margin: 2rem 0 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.55rem 1.15rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 1px 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: auto;
+      padding-top: 2rem;
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.78rem;
+    }
+
+    .footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer a:hover {
+      color: var(--accent);
+    }
+
+    /* ── Divider ── */
+    .divider {
+      width: 1px;
+      background: var(--border);
+    }
+
+    /* ── Right panel ── */
+    .right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 2rem 1.5rem 2rem;
+      min-width: 0;
+    }
+
+    /* ── Tab bar ── */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+
+    .tab {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      padding: 0.7rem 1rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: color 0.2s;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .tab:hover {
+      color: var(--text-secondary);
+    }
+
+    .tab.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--accent);
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    /* ── Tab content ── */
+    .tab-content {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .tab-content.active {
+      display: flex;
+    }
+
+    /* ── Stream ── */
+    .stream {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.74rem;
+      line-height: 1.85;
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.75rem 0;
+    }
+
+    .event-line {
+      padding: 3px 0.75rem;
+      border-radius: 4px;
+      position: relative;
+      margin: 1px 0;
+    }
+
+    .event-line .time {
+      color: var(--text-muted);
+    }
+
+    .event-line .etype {
+      color: var(--accent);
+    }
+
+    .event-line .visitor {
+      color: var(--green);
+    }
+
+    .event-line .detail {
+      color: var(--text-secondary);
+    }
+
+    /* ── Ripple effect ── */
+    .event-line.ripple {
+      animation: eventRipple 1.4s ease-out forwards;
+    }
+
+    @keyframes eventRipple {
+      0% {
+        background: radial-gradient(
+          ellipse at 10% 50%,
+          rgba(59, 130, 246, 0.08) 0%,
+          transparent 0%
+        );
+      }
+      15% {
+        background: radial-gradient(
+          ellipse at 10% 50%,
+          rgba(59, 130, 246, 0.06) 0%,
+          rgba(59, 130, 246, 0.03) 40%,
+          transparent 70%
+        );
+      }
+      50% {
+        background: radial-gradient(
+          ellipse at 10% 50%,
+          rgba(59, 130, 246, 0.02) 0%,
+          rgba(59, 130, 246, 0.01) 50%,
+          transparent 100%
+        );
+      }
+      100% {
+        background: transparent;
+      }
+    }
+
+    /* Stagger the demo ripples */
+    .event-line:nth-child(1) { animation-delay: 0.2s; }
+    .event-line:nth-child(2) { animation-delay: 0.6s; }
+    .event-line:nth-child(3) { animation-delay: 1.1s; }
+    .event-line:nth-child(4) { animation-delay: 1.7s; }
+    .event-line:nth-child(5) { animation-delay: 2.4s; }
+
+    /* ── Analytics ── */
+    .analytics-updated {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      padding: 1rem 0 0.75rem;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .metric-group {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+    }
+
+    .group-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.7rem;
+      font-weight: 500;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0.2rem 0;
+    }
+
+    .metric-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .metric-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .analytics-footer {
+      margin-top: auto;
+      padding: 1rem 0 0.5rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .analytics-footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .analytics-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .analytics-footer .note {
+      font-size: 0.7rem;
+      margin-top: 0.3rem;
+    }
+
+    /* ── Scrollbar ── */
+    .stream::-webkit-scrollbar { width: 5px; }
+    .stream::-webkit-scrollbar-track { background: transparent; }
+    .stream::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .panel::-webkit-scrollbar { width: 5px; }
+    .panel::-webkit-scrollbar-track { background: transparent; }
+    .panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── Subtle water texture on background ── */
+    .left::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 80%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.02) 0%, transparent 40%);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="split">
+    <!-- Left: concept -->
+    <div class="panel left">
+      <div class="left-content">
+        <h1>reflection</h1>
+        <p class="description">
+          welcome, visitor e7a2f1c8. stay for a second or for a while.
+          every action you take here is recorded and visible to everyone.
+        </p>
+        <div class="actions">
+          <button class="btn">Say hello</button>
+          <button class="btn">I'm curious</button>
+          <button class="btn">This is meta</button>
+        </div>
+        </div>
+      <div class="footer">
+        <a href="#">Blog</a>
+        <a href="#">GitHub</a>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Right: live event stream + analytics -->
+    <div class="panel right">
+      <div class="tab-bar">
+        <button class="tab active" data-tab="stream" onclick="switchTab('stream')">
+          <span class="dot"></span> Live Stream
+        </button>
+        <button class="tab" data-tab="analytics" onclick="switchTab('analytics')">
+          Analytics
+        </button>
+      </div>
+
+      <div id="tab-stream" class="tab-content active">
+        <div class="stream">
+          <div class="event-line ripple">
+            <span class="time">14:23:47</span> &mdash;
+            <span class="visitor">e7a2f1c8</span> &middot;
+            <span class="etype">$pageview</span>
+            <span class="detail">/</span>
+          </div>
+          <div class="event-line ripple">
+            <span class="time">14:23:45</span> &mdash;
+            <span class="visitor">3bf09d2a</span> &middot;
+            <span class="etype">$autocapture</span>
+            <span class="detail">/ "Say hello"</span>
+          </div>
+          <div class="event-line ripple">
+            <span class="time">14:23:42</span> &mdash;
+            <span class="visitor">3bf09d2a</span> &middot;
+            <span class="etype">$pageview</span>
+            <span class="detail">/</span>
+          </div>
+          <div class="event-line ripple">
+            <span class="time">14:23:38</span> &mdash;
+            <span class="visitor">91c4e0b7</span> &middot;
+            <span class="etype">$autocapture</span>
+            <span class="detail">/ "This is meta"</span>
+          </div>
+          <div class="event-line ripple">
+            <span class="time">14:23:35</span> &mdash;
+            <span class="visitor">91c4e0b7</span> &middot;
+            <span class="etype">$autocapture</span>
+            <span class="detail">/ "I'm curious"</span>
+          </div>
+          <div class="event-line">
+            <span class="time">14:23:31</span> &mdash;
+            <span class="visitor">91c4e0b7</span> &middot;
+            <span class="etype">$pageview</span>
+            <span class="detail">/</span>
+          </div>
+          <div class="event-line">
+            <span class="time">14:23:18</span> &mdash;
+            <span class="visitor">f520ca31</span> &middot;
+            <span class="etype">$autocapture</span>
+            <span class="detail">/ "Say hello"</span>
+          </div>
+          <div class="event-line">
+            <span class="time">14:23:14</span> &mdash;
+            <span class="visitor">f520ca31</span> &middot;
+            <span class="etype">$pageview</span>
+            <span class="detail">/</span>
+          </div>
+          <div class="event-line">
+            <span class="time">14:22:59</span> &mdash;
+            <span class="visitor">e7a2f1c8</span> &middot;
+            <span class="etype">$autocapture</span>
+            <span class="detail">/ "I'm curious"</span>
+          </div>
+          <div class="event-line">
+            <span class="time">14:22:51</span> &mdash;
+            <span class="visitor">e7a2f1c8</span> &middot;
+            <span class="etype">$pageview</span>
+            <span class="detail">/</span>
+          </div>
+          <div class="event-line">
+            <span class="time">14:22:33</span> &mdash;
+            <span class="visitor">a8d71e45</span> &middot;
+            <span class="etype">$autocapture</span>
+            <span class="detail">/ "This is meta"</span>
+          </div>
+          <div class="event-line">
+            <span class="time">14:22:28</span> &mdash;
+            <span class="visitor">a8d71e45</span> &middot;
+            <span class="etype">$pageview</span>
+            <span class="detail">/</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-analytics" class="tab-content">
+        <div class="analytics-updated">
+          Last updated: 12 min ago
+        </div>
+        <div class="analytics-grid">
+          <div class="metric-group">
+            <div class="group-label">Today</div>
+            <div class="metric">
+              <span class="metric-value">1,247</span>
+              <span class="metric-label">total events</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">89</span>
+              <span class="metric-label">unique visitors</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">142</span>
+              <span class="metric-label">sessions</span>
+            </div>
+          </div>
+          <div class="metric-group">
+            <div class="group-label">Event Mix</div>
+            <div class="metric">
+              <span class="metric-value">312</span>
+              <span class="metric-label">pageviews</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">891</span>
+              <span class="metric-label">clicks</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">44</span>
+              <span class="metric-label">custom events</span>
+            </div>
+          </div>
+          <div class="metric-group">
+            <div class="group-label">Devices</div>
+            <div class="metric">
+              <span class="metric-value">98</span>
+              <span class="metric-label">desktop</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">37</span>
+              <span class="metric-label">mobile</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">7</span>
+              <span class="metric-label">tablet</span>
+            </div>
+          </div>
+          <div class="metric-group">
+            <div class="group-label">Visitors</div>
+            <div class="metric">
+              <span class="metric-value">89</span>
+              <span class="metric-label">unique</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">14.0</span>
+              <span class="metric-label">events / visitor</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">12</span>
+              <span class="metric-label">countries</span>
+            </div>
+          </div>
+        </div>
+        <div class="analytics-footer">
+          <a href="#">Query this data in BigQuery &rarr;</a>
+          <div class="note">Requires a Google account. Free up to 1 TB/month.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+      document.querySelector('.tab[data-tab="' + name + '"]').classList.add('active');
+      document.getElementById('tab-' + name).classList.add('active');
+    }
+  </script>
+</body>
+</html>

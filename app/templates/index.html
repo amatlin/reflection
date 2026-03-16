@@ -11,10 +11,10 @@
     <!-- Left: concept -->
     <div class="panel left">
       <div class="left-content">
-        <h1>Reflection</h1>
+        <h1>reflection</h1>
         <p class="description">
-          Welcome to Reflection. Stay for a second or for a while.
-          Every action you take here is recorded and visible to everyone.
+          <span id="greeting">welcome.</span> stay for a second or for a while.
+          every action you take here is recorded and visible to everyone.
         </p>
         <div class="actions">
           <button id="btn-hello" class="btn">Say hello</button>
@@ -24,7 +24,7 @@
       </div>
       <div class="footer">
         <a href="/blog">Blog</a>
-        <a href="https://github.com/annamatlin/reflection">GitHub</a>
+        <a href="https://github.com/amatlin/reflection">GitHub</a>
       </div>
     </div>
 
@@ -130,6 +130,13 @@
       capture_pageview: true,
       capture_pageleave: true,
       autocapture: true,
+      loaded: function(ph) {
+        var id = ph.get_distinct_id();
+        if (id) {
+          document.getElementById("greeting").textContent =
+            "welcome, visitor " + id.substring(0, 8) + ".";
+        }
+      },
       _onCapture: function(eventName, eventData) {
         // Forward every captured event to our backend
         var payload = {
