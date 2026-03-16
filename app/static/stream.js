@@ -32,9 +32,9 @@
     var el = document.getElementById("presence-count");
     if (!el) return;
     if (count === 1) {
-      el.textContent = "1 person online";
+      el.textContent = "1 online";
     } else {
-      el.textContent = count + " people online";
+      el.textContent = count + " online";
     }
   }
 
