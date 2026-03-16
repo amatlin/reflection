@@ -27,15 +27,28 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 - ~~Deployed to Railway at reflection.sh~~
 - ~~Public BigQuery dataset — visitors can query the data themselves~~
 
-4. Blog post
+4. Museum exhibit funnel
+- Restructure site as a guided walkthrough: Homepage → Exhibit (8 steps) → Conclusion
+- Each exhibit step explains one stage of the data pipeline (logging, streaming, export, transformation, metrics, analysis)
+- Conclusion screen: thank-you note, questionnaire (text box → `questionnaire_response` event), gift shop (Stripe → `checkout_started` / `purchase_complete` events)
+- Single-page hash routing (`#home`, `#exhibit-intro`, ..., `#exhibit-conclusion`), WebSocket stays alive across screens
+- Generates `funnel_step` events on every navigation — enables funnel analysis of the exhibit itself
+- See `museum_idea.md` for full design
+
+5. Sandbox
+- Gallery page at `/sandbox` featuring analyses of Reflection's public BigQuery data
+- Featured analyses seeded by the developer — each with a title, description, and link to a hosted notebook or visualization
+- Accessible from homepage navigation and linked from the museum exhibit conclusion
+- Positions the dataset as an educational resource for students and others learning about production data ecosystems
+
+6. Blog post
 - Write-up hosted on the site at `/blog` and cross-posted externally
 - Covers the concept, architecture, art angle, and a link to explore the data
 
 ## Future Ideas
 
-- Meaningful data model: sign-up, checkout, review flows generating richer event types
-- SQL playground with suggested queries
+- Sandbox: community submissions — open contributions from visitors
+- Sandbox: built-in SQL runner for on-site exploration
 - Architecture diagram showing data flowing through the infrastructure
 - Self-optimization: define business goals, run experiments, show visitors which variant they're in
-- Merch store to generate e-commerce and funnel data
 - ML model serving on dbt marts

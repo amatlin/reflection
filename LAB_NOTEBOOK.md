@@ -463,3 +463,83 @@ Skipping dbt cron for now — running `dbt build` manually until there's real tr
 - Wait for DNS propagation, verify reflection.sh works
 - Phase 3: Grant BigQuery `dataViewer` to `allAuthenticatedUsers`
 - Phase 4: Blog post at `/blog`
+
+## 2026-03-15 — Museum exhibit funnel design
+
+Designed a restructure of the site as a museum exhibit: **Homepage → Exhibit (8 steps) → Conclusion/Gift Shop**. This maps to M3's goal of "meaningful data model / richer event types" and gives the site its first structured user journey with real e-commerce data.
+
+### Why a museum exhibit
+
+The original M3 plan called for sign-up, checkout, and review flows — but those felt bolted-on. A museum exhibit reframes the same infrastructure walkthrough the site already does as a guided, step-by-step experience. Each exhibit screen explains one stage of the pipeline that's tracking the visitor as they move through it. The funnel IS the content.
+
+### Structure
+
+8 exhibit steps, each its own screen with back/next navigation:
+1. Introduction (the concept, Duchamp/Warhol/Seinfeld lineage)
+2. Logging (PostHog captures behavior)
+3. Streaming (API → Supabase → WebSocket → live stream)
+4. Export (PostHog batch export to BigQuery, hourly)
+5. Transformation (dbt cleans and aggregates)
+6. Metrics (daily aggregates in `metrics_daily`)
+7. Analysis (analytics tab displays the pipeline's output)
+8. Conclusion (thank you + questionnaire + gift shop)
+
+### New event types
+
+| Event | Trigger | What it adds |
+|---|---|---|
+| `funnel_step` | Each screen navigation | Funnel analysis — conversion rates through the exhibit |
+| `questionnaire_response` | Text box submit on conclusion | Natural language data — opens up NLP in analytics |
+| `checkout_started` | Buy button → Stripe | E-commerce funnel start |
+| `purchase_complete` | Stripe webhook | Real revenue data — richest event type in analytics |
+
+### Technical approach
+
+Single-page with hash routing — all screens in one `index.html`, show/hide with JS, update `location.hash`. WebSocket stays alive across all screens. Hash included in `page_path` for every event, so PostHog and the Supabase events table both capture which screen the visitor is on.
+
+### What makes this work for Reflection
+
+- The funnel is analyzable — the site can show its own conversion rates
+- The exhibit content IS the infrastructure walkthrough — educational and self-referential
+- The gift shop generates real e-commerce data (the richest event type in any analytics stack)
+- The questionnaire generates natural language data (opens up NLP in the analytics layer)
+- Every new event type immediately enriches the existing pipeline
+
+### Files created
+- `museum_idea.md` — working document with full design spec
+- `plan.md` — updated milestones: museum exhibit is M4, blog post pushed to M5
+
+### Next session
+- Implement the museum exhibit: restructure `index.html`, add hash routing in `stream.js`, exhibit styles in `style.css`
+- Add questionnaire validation in `events.py`
+- Create `checkout.py` for Stripe integration
+- Set up Stripe account and add keys to config
+
+## 2026-03-16 — Sandbox idea: analysis gallery
+
+New idea: a gallery of featured analyses built on Reflection's public BigQuery data. Called "Sandbox" — the name signals exploration and grows into itself if we add interactive tools later.
+
+### What it is
+
+A curated gallery page at `/sandbox` showcasing analyses of the dataset. Each entry has a title, description, and link to a hosted notebook or visualization. Seeded with developer-created examples to establish the format and quality bar.
+
+### Why it matters
+
+- **Educational resource.** Real production-quality behavioral data is hard to find outside a job. University students, bootcamp learners, and anyone curious about data ecosystems can use this dataset to practice on real data with real infrastructure behind it.
+- **Community potential.** Starts curated, but the format naturally opens up to community contributions later (Observable notebooks, Colab, visualizations, SQL queries).
+- **Self-referential.** Analyses of the site become content on the site. The sandbox deepens the loop.
+
+### How it fits into the roadmap
+
+- M5 (separate from the museum exhibit in M4)
+- Museum exhibit conclusion links to the sandbox: "Now explore the data yourself"
+- Also accessible from homepage navigation
+- Format for seeded analyses TBD (Observable, Colab, static write-ups, or a mix)
+
+### Naming decision
+
+Considered: Sandbox, Lab, Analysis, Library. Went with **Sandbox** — it's direct, implies hands-on exploration, and the name earns itself over time if we add a built-in SQL runner or other interactive tools.
+
+### Next session
+- Implement the museum exhibit (M4)
+- Or: start on sandbox gallery design
