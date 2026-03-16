@@ -34,17 +34,25 @@
     return id.substring(0, 8);
   }
 
-  function describeEvent(ev) {
-    var parts = [];
-    if (ev.page_path) parts.push(ev.page_path);
-    if (ev.element_text) parts.push('"' + ev.element_text + '"');
-    if (ev.element_tag && !ev.element_text) parts.push("<" + ev.element_tag + ">");
-    return parts.length > 0 ? parts.join(" ") : "";
+  function humanizeEvent(ev) {
+    var t = ev.event_type;
+    if (t === "$pageview") return "viewed the page";
+    if (t === "$pageleave") return null; // filter out
+    if (t === "$autocapture") {
+      if (ev.element_text) return 'clicked "' + ev.element_text + '"';
+      if (ev.element_tag) return "clicked <" + ev.element_tag + ">";
+      return "clicked something";
+    }
+    if (t === "fire_event") return "fired an event";
+    return t; // unknown custom events: show raw name
   }
 
   function renderEvent(ev) {
+    var description = humanizeEvent(ev);
+    if (description === null) return; // filtered out (e.g. $pageleave)
+
     var line = document.createElement("div");
-    line.className = "event-line ripple";
+    line.className = "event-line";
 
     var time = document.createElement("span");
     time.className = "time";
@@ -59,20 +67,15 @@
 
     var dot = document.createTextNode(" \u00B7 ");
 
-    var etype = document.createElement("span");
-    etype.className = "etype";
-    etype.textContent = ev.event_type;
-
-    var detail = document.createElement("span");
-    detail.className = "detail";
-    detail.textContent = " " + describeEvent(ev);
+    var desc = document.createElement("span");
+    desc.className = "etype";
+    desc.textContent = description;
 
     line.appendChild(time);
     line.appendChild(dash);
     line.appendChild(visitor);
     line.appendChild(dot);
-    line.appendChild(etype);
-    line.appendChild(detail);
+    line.appendChild(desc);
 
     // Newest at top
     streamEl.insertBefore(line, streamEl.firstChild);
