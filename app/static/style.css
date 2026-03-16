@@ -377,3 +377,57 @@ h1 {
     radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.02) 0%, transparent 40%);
   pointer-events: none;
 }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  body {
+    overflow: auto;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .split {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .left {
+    flex: none;
+    max-width: 100%;
+    padding: 2rem 1.5rem 1.5rem;
+    justify-content: flex-start;
+  }
+
+  .left-content {
+    max-width: 100%;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .actions {
+    margin: 1.25rem 0 0.5rem;
+  }
+
+  .footer {
+    padding-top: 0.75rem;
+    padding-bottom: 0;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+  }
+
+  .right {
+    flex: 1;
+    min-height: 60vh;
+    padding: 1rem 1.5rem 1.5rem;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}
