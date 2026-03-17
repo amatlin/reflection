@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reflection</title>
-  <link rel="stylesheet" href="/static/style.css?v=8" />
+  <link rel="stylesheet" href="/static/style.css?v=11" />
 </head>
 <body>
   <div class="split">
@@ -27,7 +27,7 @@
 
     <div class="divider"></div>
 
-    <!-- Right: two side-by-side collapsible strips -->
+    <!-- Right: three side-by-side collapsible strips -->
     <div class="strips-container">
       <!-- Stream strip -->
       <div class="strip expanded" id="strip-stream" data-strip="stream">
@@ -43,6 +43,28 @@
         </div>
       </div>
 
+      <!-- Warehouse strip -->
+      <div class="strip" id="strip-warehouse" data-strip="warehouse">
+        <div class="strip-header" data-strip-toggle="warehouse">
+          <span class="strip-label">warehouse</span>
+          <span class="strip-chevron">▸</span>
+        </div>
+        <div class="strip-content">
+          <div class="warehouse-content">
+            <div class="warehouse-label">BigQuery · fct_events</div>
+            <textarea id="warehouse-sql" class="warehouse-textarea" spellcheck="false">SELECT
+  event_name,
+  COUNT(*) AS events,
+  COUNT(DISTINCT visitor_id) AS visitors
+FROM `reflection-data.reflection.fct_events`
+GROUP BY event_name
+ORDER BY events DESC</textarea>
+            <button id="btn-run-query" class="btn btn-query">Run query →</button>
+            <div id="warehouse-results" class="query-results"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Analytics strip -->
       <div class="strip" id="strip-analytics" data-strip="analytics">
         <div class="strip-header" data-strip-toggle="analytics">
@@ -50,15 +72,86 @@
           <span class="strip-chevron">▸</span>
         </div>
         <div class="strip-content">
-          <div class="analytics-placeholder">
-            <p>coming soon</p>
+          {% if metrics %}
+          <div class="analytics-grid">
+            <div class="metric-group">
+              <div class="metric-group-label">volume</div>
+              <div class="metric-row">
+                <span class="metric-label">events</span>
+                <span class="metric-value">{{ metrics.get('total_events', '—') }}</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">visitors</span>
+                <span class="metric-value">{{ metrics.get('unique_visitors', '—') }}</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">sessions</span>
+                <span class="metric-value">{{ metrics.get('unique_sessions', '—') }}</span>
+              </div>
+            </div>
+            <div class="metric-group">
+              <div class="metric-group-label">event mix</div>
+              <div class="metric-row">
+                <span class="metric-label">pageviews</span>
+                <span class="metric-value">{{ metrics.get('pageviews', '—') }}</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">clicks</span>
+                <span class="metric-value">{{ metrics.get('clicks', '—') }}</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">custom</span>
+                <span class="metric-value">{{ metrics.get('custom_events', '—') }}</span>
+              </div>
+            </div>
+            <div class="metric-group">
+              <div class="metric-group-label">devices</div>
+              <div class="metric-row">
+                <span class="metric-label">desktop</span>
+                <span class="metric-value">{{ metrics.get('desktop_sessions', '—') }}</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">mobile</span>
+                <span class="metric-value">{{ metrics.get('mobile_sessions', '—') }}</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">tablet</span>
+                <span class="metric-value">{{ metrics.get('tablet_sessions', '—') }}</span>
+              </div>
+            </div>
+            <div class="metric-group">
+              <div class="metric-group-label">ratios</div>
+              <div class="metric-row">
+                <span class="metric-label">events/visitor</span>
+                <span class="metric-value">{{ "%.1f"|format(metrics.get('events_per_visitor', 0)) }}</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">pages/session</span>
+                <span class="metric-value">{{ "%.1f"|format(metrics.get('pages_per_session', 0)) }}</span>
+              </div>
+            </div>
           </div>
+          {% if cache_age is not none %}
+          <div class="analytics-cache-age">data from {{ cache_age }}m ago</div>
+          {% endif %}
+          {% else %}
+          <div class="analytics-placeholder">
+            <p>No analytics data yet</p>
+          </div>
+          {% endif %}
+          <div class="ask-divider">ask a question</div>
+          <div class="ask-row">
+            <input type="text" id="ask-input" class="ask-input" placeholder="e.g. how many visitors today?" />
+            <button id="btn-ask" class="btn btn-query">Ask</button>
+          </div>
+          <div id="ask-results" class="query-results"></div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Exhibit overlay -->
+  <button class="exhibit-close" id="exhibit-close">&times;</button>
   <div id="exhibit-overlay" class="exhibit-overlay">
     <div class="exhibit-content">
       <!-- Step 1: Welcome -->
@@ -95,23 +188,45 @@
         <div id="journey-container" class="journey-container"></div>
       </div>
 
-      <!-- Step 3: The Pipeline -->
+      <!-- Step 3: The Warehouse -->
       <div class="exhibit-step" data-step="3">
+        <h2 class="exhibit-heading">the warehouse</h2>
+        <p class="exhibit-text">
+          Every hour, events are exported from the live database to
+          <a href="https://console.cloud.google.com/bigquery?project=reflection-data" class="exhibit-link" target="_blank" rel="noopener">BigQuery</a>.
+          The warehouse on the right lets you run real SQL against the public dataset.
+        </p>
+        <p class="exhibit-text">
+          Try a query:
+        </p>
+        <div class="exhibit-chips">
+          <button class="chip" data-chip="query" data-sql="SELECT event_name, COUNT(*) AS events, COUNT(DISTINCT visitor_id) AS visitors FROM `reflection-data.reflection.fct_events` GROUP BY event_name ORDER BY events DESC">events by type</button>
+          <button class="chip" data-chip="query" data-sql="SELECT COUNT(DISTINCT visitor_id) AS visitors_today FROM `reflection-data.reflection.fct_events` WHERE DATE(event_timestamp) = CURRENT_DATE()">visitors today</button>
+          <button class="chip" data-chip="query" data-sql="SELECT step_name, step_number, unique_visitors, ROUND(completion_rate, 2) AS completion_rate FROM `reflection-data.reflection.exhibit_funnel` ORDER BY step_number">exhibit completion</button>
+        </div>
+      </div>
+
+      <!-- Step 4: The Pipeline -->
+      <div class="exhibit-step" data-step="4">
         <h2 class="exhibit-heading">the pipeline</h2>
         <p class="exhibit-text">
-          Every hour, events are exported from the live database to a data warehouse.
-          A dbt pipeline transforms them into staging tables and daily metric
+          A <a href="https://github.com/amatlin/reflection/tree/main/pipeline/dbt" class="exhibit-link" target="_blank" rel="noopener">dbt pipeline</a>
+          transforms the raw warehouse data into staging tables and daily metric
           aggregations — pageviews, unique visitors, events per session.
         </p>
         <p class="exhibit-text">
-          The analytics panel on the right will eventually display those metrics.
-          The same infrastructure a real company uses to understand its users,
-          applied to nothing.
+          The analytics panel on the right shows today's metrics. Ask a question
+          in plain English — it gets translated to SQL and run against the warehouse.
         </p>
+        <div class="exhibit-chips">
+          <button class="chip" data-chip="ask" data-question="how many visitors complete the exhibit?">how many visitors complete the exhibit?</button>
+          <button class="chip" data-chip="ask" data-question="what's the most common event?">what's the most common event?</button>
+          <button class="chip" data-chip="ask" data-question="what percentage of visitors are on mobile?">what percentage of visitors are on mobile?</button>
+        </div>
       </div>
 
-      <!-- Step 4: Conclusion -->
-      <div class="exhibit-step" data-step="4">
+      <!-- Step 5: Conclusion -->
+      <div class="exhibit-step" data-step="5">
         <h2 class="exhibit-heading">the apparatus</h2>
         <p class="exhibit-text">
           Every tech company builds this machinery to track, measure, and optimize
@@ -136,7 +251,7 @@
       <!-- Navigation -->
       <div class="exhibit-nav">
         <button id="exhibit-back" class="btn exhibit-btn-nav">Back</button>
-        <span id="exhibit-step-counter" class="exhibit-step-counter">1 / 4</span>
+        <span id="exhibit-step-counter" class="exhibit-step-counter">1 / 5</span>
         <button id="exhibit-next" class="btn exhibit-btn-nav">Next</button>
       </div>
     </div>

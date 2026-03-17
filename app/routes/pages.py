@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from app.config import settings
-from app.services.bigquery_client import get_last_export_time
+from app.services.bigquery_client import get_cache_age_minutes, get_last_export_time, get_latest_metrics
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -12,6 +12,8 @@ templates = Jinja2Templates(directory="app/templates")
 @router.get("/", response_class=HTMLResponse)
 async def landing(request: Request):
     last_export_iso = get_last_export_time()
+    metrics = get_latest_metrics()
+    cache_age = get_cache_age_minutes()
     return templates.TemplateResponse(
         "index.html",
         {
@@ -20,5 +22,7 @@ async def landing(request: Request):
             "posthog_host": settings.posthog_host,
             "last_export_iso": last_export_iso or "",
             "dbt_cron_minute": settings.dbt_cron_minute,
+            "metrics": metrics,
+            "cache_age": cache_age,
         },
     )

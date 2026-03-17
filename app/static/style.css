@@ -321,6 +321,326 @@ h1 {
   font-weight: 500;
 }
 
+/* ── Warehouse strip ── */
+.warehouse-content {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+}
+
+.warehouse-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.75rem;
+}
+
+.warehouse-sql {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  margin-bottom: 0.75rem;
+}
+
+.warehouse-sql code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  line-height: 1.7;
+  color: #e2e8f0;
+  white-space: pre;
+}
+
+.warehouse-link {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.warehouse-link:hover {
+  color: #93c5fd;
+}
+
+/* ── Analytics grid ── */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.metric-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.metric-group-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.75rem;
+}
+
+.metric-label {
+  color: var(--text-secondary);
+}
+
+.metric-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.analytics-cache-age {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  margin-top: 1rem;
+  text-align: right;
+}
+
+/* ── Warehouse textarea + query button ── */
+.warehouse-textarea {
+  display: block;
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem 1.25rem;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  line-height: 1.7;
+  resize: vertical;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.2s;
+}
+
+.warehouse-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.btn-query {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-faint);
+}
+
+.btn-query:hover {
+  background: var(--accent-light);
+}
+
+.btn-query:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Query results (shared by warehouse + analytics) ── */
+.query-results {
+  margin-top: 0.75rem;
+}
+
+.query-results:empty {
+  display: none;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+}
+
+.results-table th {
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 500;
+  font-size: 0.68rem;
+}
+
+.results-table td {
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
+}
+
+.results-table tbody tr:hover {
+  background: var(--ripple);
+}
+
+.query-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  text-align: right;
+}
+
+.query-loading {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.75rem 0;
+}
+
+.query-error {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #ef4444;
+  padding: 0.75rem 0;
+}
+
+.query-empty {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.75rem 0;
+}
+
+/* ── Ask a question (analytics strip) ── */
+.ask-divider {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 1.25rem 0 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ask-divider::before,
+.ask-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.ask-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ask-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  transition: border-color 0.2s;
+}
+
+.ask-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Collapsible SQL in ask results */
+.ask-sql-details {
+  margin-bottom: 0.5rem;
+}
+
+.ask-sql-details summary {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ask-sql-block {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-top: 0.4rem;
+  overflow-x: auto;
+}
+
+.ask-sql-block code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: #e2e8f0;
+  white-space: pre;
+}
+
+/* ── Exhibit chips ── */
+.exhibit-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.chip {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid #475569;
+  border-radius: 20px;
+  background: transparent;
+  color: #94a3b8;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chip:hover {
+  border-color: #93c5fd;
+  color: #93c5fd;
+}
+
+/* ── Exhibit close button ── */
+.exhibit-close {
+  position: fixed;
+  top: 1.25rem;
+  left: calc(42% - 3rem);
+  z-index: 250;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 1.8rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  line-height: 1;
+  transition: color 0.2s;
+  display: none;
+}
+
+body.exhibit-mode .exhibit-close {
+  display: block;
+}
+
+.exhibit-close:hover {
+  color: #e2e8f0;
+}
+
 /* ── Analytics placeholder ── */
 .analytics-placeholder {
   display: flex;
@@ -754,6 +1074,112 @@ body.exhibit-mode .analytics-placeholder {
   color: #475569;
 }
 
+/* Warehouse strip dark overrides */
+body.exhibit-mode .warehouse-label {
+  color: #64748b;
+}
+
+body.exhibit-mode .warehouse-link {
+  color: #93c5fd;
+}
+
+body.exhibit-mode .warehouse-link:hover {
+  color: #bfdbfe;
+}
+
+/* Analytics grid dark overrides */
+body.exhibit-mode .metric-group-label {
+  color: #64748b;
+}
+
+body.exhibit-mode .metric-label {
+  color: #94a3b8;
+}
+
+body.exhibit-mode .metric-value {
+  color: #e2e8f0;
+}
+
+body.exhibit-mode .analytics-cache-age {
+  color: #475569;
+}
+
+/* Interactive elements dark overrides */
+body.exhibit-mode .btn-query {
+  border-color: #3b82f6;
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.15);
+}
+
+body.exhibit-mode .btn-query:hover {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+body.exhibit-mode .results-table th {
+  border-bottom-color: #334155;
+  color: #64748b;
+}
+
+body.exhibit-mode .results-table td {
+  border-bottom-color: #1e293b;
+  color: #e2e8f0;
+}
+
+body.exhibit-mode .results-table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+body.exhibit-mode .query-meta {
+  color: #475569;
+}
+
+body.exhibit-mode .query-loading {
+  color: #64748b;
+}
+
+body.exhibit-mode .query-error {
+  color: #f87171;
+}
+
+body.exhibit-mode .query-empty {
+  color: #475569;
+}
+
+body.exhibit-mode .ask-divider {
+  color: #64748b;
+}
+
+body.exhibit-mode .ask-divider::before,
+body.exhibit-mode .ask-divider::after {
+  background: #334155;
+}
+
+body.exhibit-mode .ask-input {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+body.exhibit-mode .ask-input:focus {
+  border-color: #3b82f6;
+}
+
+body.exhibit-mode .ask-sql-details summary {
+  color: #64748b;
+}
+
+/* Exhibit link style */
+.exhibit-link {
+  color: #93c5fd;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(147, 197, 253, 0.3);
+  transition: border-color 0.2s;
+}
+
+.exhibit-link:hover {
+  border-bottom-color: #93c5fd;
+}
+
 /* ── Mobile ── */
 @media (max-width: 768px) {
   body {
@@ -883,5 +1309,26 @@ body.exhibit-mode .analytics-placeholder {
     z-index: 200;
     min-height: auto;
     max-height: 50vh;
+  }
+
+  /* Mobile interactive elements */
+  .warehouse-textarea {
+    min-height: 80px;
+    font-size: 0.7rem;
+  }
+
+  .ask-row {
+    flex-direction: column;
+  }
+
+  .exhibit-chips {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .exhibit-close {
+    top: 0.75rem;
+    left: auto;
+    right: 1rem;
   }
 }

@@ -38,18 +38,25 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 - ~~"you" label on your own events in the stream~~
 - ~~Mobile responsive layout~~
 
-5. Museum exhibit funnel (in progress — code complete, needs deploy)
-- ~~Dark overlay exhibit with 4 steps: Welcome → The Loop → The Pipeline → The Apparatus~~
-- ~~Two side-by-side collapsible strips (stream + analytics) with horizontal accordion~~
-- ~~Hash routing (`#exhibit-1` through `#exhibit-4`), direct URL load supported~~
+5. Museum exhibit funnel (in progress)
+- ~~Dark overlay exhibit with 5 steps: Welcome → The Loop → The Warehouse → The Pipeline → The Apparatus~~
+- ~~Three side-by-side collapsible strips (stream + warehouse + analytics) with horizontal accordion~~
+- ~~Hash routing (`#exhibit-1` through `#exhibit-5`), direct URL load supported~~
 - ~~"Fire an event" button + journey card moved into exhibit step 2~~
-- ~~Strips hidden during exhibit, fade in at correct steps (stream at step 2, analytics at step 3)~~
+- ~~Strips hidden during exhibit, fade in at correct steps (stream at step 2, warehouse at step 3, analytics at step 4)~~
 - ~~`funnel_step` events on each navigation, `questionnaire_response` on submit~~
 - ~~Questionnaire with 500-char limit + backend validation~~
 - ~~`_onCapture` fixed: hash in page_path, custom props forwarded to raw_properties~~
-- Tip jar placeholder (Stripe integration deferred)
-- Analytics strip content TBD
+- ~~Interactive warehouse strip: SQL textarea + "Run query" button + results table (POST /api/query)~~
+- ~~Interactive analytics strip: "ask a question" input + Claude NL→SQL + results (POST /api/ask)~~
+- ~~Exhibit query chips at step 3 (events by type, visitors today, exhibit completion)~~
+- ~~Exhibit question chips at step 4 (completion rates, most common event, mobile %)~~
+- ~~`exhibit_funnel` dbt model: step completion rates from funnel_step events~~
 - ~~Deploy to Railway~~
+- Exhibit close button (×) — z-index stacking fix needed
+- Architecture diagram in exhibit step 1 (static SVG/HTML showing both data paths)
+- Tip jar placeholder (Stripe integration deferred)
+- AI-generated insight summarizing query results (fast-follow)
 - See `museum_idea.md` for full design
 
 6. Sandbox
@@ -65,7 +72,7 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 ## Future Ideas
 
 - Sandbox: community submissions — open contributions from visitors
-- Sandbox: built-in SQL runner for on-site exploration
+- ~~Sandbox: built-in SQL runner for on-site exploration~~ (shipped as warehouse strip)
 - Architecture diagram showing data flowing through the infrastructure
 - Self-optimization: define business goals, run experiments, show visitors which variant they're in
 - ML model serving on dbt marts

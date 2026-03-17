@@ -675,7 +675,70 @@ Pushed to main and ran `railway up`. Verified:
 - Analytics strip just shows "coming soon" — content TBD
 - Test with real multi-visitor traffic
 
+### TODO: Architecture diagram in exhibit step 1
+Add a static diagram to the Welcome step showing the two data paths:
+- **Real-time:** Browser → PostHog → FastAPI → Supabase → WebSocket → Stream
+- **Analytical:** PostHog → BigQuery → dbt → metrics
+
+Sets the stage before the visitor walks through each piece in steps 2-4. Simple SVG or styled HTML — no animation needed.
+
 ### Next session
+- Build the architecture diagram for step 1
 - Test with real traffic on the deployed site
 - Consider: what goes in the analytics strip?
 - Update `museum_idea.md` to reflect what was actually built vs. planned
+
+## 2026-03-16 — Three-strip layout + warehouse strip content
+
+Added a third strip (warehouse) between stream and analytics. Reworked strip content: warehouse strip shows a static SQL query + link to BigQuery console. Analytics strip shows server-rendered metrics from `metrics_daily`. Auto-expand logic: stream at exhibit step 2, warehouse at step 3, analytics at step 4+. All three strips visible at step 5.
+
+## 2026-03-16 — Interactive warehouse/analytics + exhibit chips + /api/query and /api/ask
+
+Major feature session: made the exhibit genuinely interactive. Visitors can now run SQL and ask natural-language questions about Reflection's data.
+
+### What was built
+
+**Backend (3 new files):**
+- `app/routes/query.py` — `POST /api/query` (run SQL against BigQuery) and `POST /api/ask` (natural language → Claude → SQL → BigQuery). Validation: SELECT-only, DDL/DML rejection, dataset restricted to `reflection-data.reflection.*`, auto LIMIT 100, 10s timeout, 100MB billing cap.
+- `app/services/claude_client.py` — Claude API client with system prompt containing full schema for `fct_events`, `dim_visitors`, `metrics_daily`, and `exhibit_funnel`. Uses `claude-sonnet-4-20250514`.
+- `pipeline/dbt/models/marts/exhibit_funnel.sql` — new dbt model: exhibit step completion rates from `stg_events` raw_properties.
+
+**Frontend changes:**
+- Warehouse strip: replaced static `<pre>` with editable `<textarea>` + "Run query →" button + results area
+- Analytics strip: added "ask a question" divider + text input + "Ask" button + collapsible SQL display + results below the metrics grid
+- Exhibit step 3: query chips in left panel ("events by type", "visitors today", "exhibit completion") — click auto-populates textarea and runs query
+- Exhibit step 4: question chips ("how many visitors complete the exhibit?", "what's the most common event?", "what percentage of visitors are on mobile?") — click auto-fills input and submits
+- Exhibit close button (×) — HTML + CSS added but has a z-index stacking issue (TODO)
+- Removed `renderMetricsSection` from journey card (metrics story moved to step 4)
+
+**Bug fixes:**
+- Template referenced `total_sessions` and `events_per_session` but dbt outputs `unique_sessions` and `pages_per_session`. Fixed.
+- Added `anthropic_api_key` to config, `anthropic` to requirements.
+
+### Verified with Playwright
+
+| Test | Result |
+|------|--------|
+| Homepage loads, three strips visible | Pass |
+| Warehouse strip: textarea + Run query button | Pass |
+| Click "Run query" → real BigQuery results table (2 rows, 0.7s) | Pass |
+| Analytics strip: metrics grid with real data | Pass |
+| Analytics strip: ask input + Ask button present | Pass |
+| /api/ask without API key → graceful error message | Pass |
+| Exhibit step 1 → 2 → 3 → 4 navigation | Pass |
+| Exhibit step 3: query chips visible | Pass |
+| Click "events by type" chip → auto-runs query → results in warehouse strip | Pass |
+| Exhibit step 4: question chips visible, analytics strip expanded | Pass |
+| Exhibit close button (×) clickable | **Fail** — z-index stacking issue |
+
+### TODO
+- **Fix exhibit close button z-index.** The strips-container has z-index 200 in exhibit mode, the overlay has z-index 100. The close button (inside or outside the overlay) can't sit above the strips at the boundary. Options: (a) position it clearly inside the left 42% area away from strips, (b) put it inside `.exhibit-content` rather than the overlay root, or (c) add it to the exhibit nav bar as a text button.
+- **Deploy with `ANTHROPIC_API_KEY`** set in Railway so `/api/ask` works in production.
+- **Run `dbt build`** after deploy to materialize the new `exhibit_funnel` model.
+- **AI-generated insight** summarizing query results at step 4 (fast-follow from plan).
+- **Test on mobile** — new interactive elements need verification at small viewports.
+
+### Key design decisions
+- Interactive controls live **in the strips** (not the exhibit overlay) so they work on the homepage without the exhibit. The exhibit just adds context and suggested chips.
+- SQL validation is regex-based, not a full parser — BigQuery permissions are the real security boundary. The validation catches obvious mistakes and abuse.
+- Results rendering uses safe DOM methods (`textContent`, `createElement`) — no `innerHTML` with user-controlled content.

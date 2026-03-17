@@ -69,3 +69,21 @@ models:
         description: Average pageviews per session that day
       - name: click_through_rate
         description: Ratio of clicks to pageviews
+
+  - name: exhibit_funnel
+    description: >
+      Exhibit step completion funnel. One row per exhibit step with
+      unique visitor counts and completion rate relative to step 1.
+    columns:
+      - name: step_name
+        description: "Exhibit step name (welcome, the-loop, the-warehouse, the-pipeline, the-apparatus)"
+        tests:
+          - not_null
+      - name: step_number
+        description: Step order (1-5)
+        tests:
+          - not_null
+      - name: unique_visitors
+        description: Count of distinct visitors who reached this step
+      - name: completion_rate
+        description: Fraction of step-1 visitors who reached this step

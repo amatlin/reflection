@@ -280,68 +280,6 @@
 
     section.appendChild(table);
     card.appendChild(section);
-
-    // After transform section, render metrics contribution
-    renderMetricsSection(card, journey);
-  }
-
-  // Metrics contribution — which metrics_daily aggregates this event affects
-  function renderMetricsSection(card, journey) {
-    var props = journey.properties || {};
-    var eventName = "fire_event";
-    var device = (props.$device_type || "").toLowerCase();
-
-    var metrics = [];
-    // total_events: always +1
-    metrics.push({ name: "total_events", change: "+1" });
-
-    // Event type specific
-    if (eventName === "$pageview") {
-      metrics.push({ name: "pageviews", change: "+1" });
-    } else if (eventName === "$autocapture") {
-      metrics.push({ name: "clicks", change: "+1" });
-    } else {
-      metrics.push({ name: "custom_events", change: "+1" });
-    }
-
-    // Device sessions
-    if (device === "desktop") {
-      metrics.push({ name: "desktop_sessions", change: "+1" });
-    } else if (device === "mobile") {
-      metrics.push({ name: "mobile_sessions", change: "+1" });
-    } else if (device === "tablet") {
-      metrics.push({ name: "tablet_sessions", change: "+1" });
-    }
-
-    // events_per_visitor always increases
-    metrics.push({ name: "events_per_visitor", change: "\u2191" });
-
-    var section = document.createElement("div");
-    section.className = "journey-section";
-
-    var label = document.createElement("div");
-    label.className = "journey-section-label";
-    label.textContent = "metric changes:";
-    section.appendChild(label);
-
-    var table = document.createElement("div");
-    table.className = "journey-fields";
-
-    metrics.forEach(function (m) {
-      var k = document.createElement("span");
-      k.className = "journey-field-key";
-      k.textContent = m.name;
-
-      var v = document.createElement("span");
-      v.className = "journey-field-value journey-metric-change";
-      v.textContent = m.change;
-
-      table.appendChild(k);
-      table.appendChild(v);
-    });
-
-    section.appendChild(table);
-    card.appendChild(section);
   }
 
   // Button: fire event + render journey card in left panel
@@ -400,4 +338,166 @@
   setInterval(updateCountdowns, 60000);
 
   connect();
+
+  // ── Helper: clear all children ──
+  function clearEl(el) {
+    while (el.firstChild) el.removeChild(el.firstChild);
+  }
+
+  function showMessage(container, text, className) {
+    clearEl(container);
+    var el = document.createElement("div");
+    el.className = className;
+    el.textContent = text;
+    container.appendChild(el);
+  }
+
+  // ── Query execution (warehouse strip) ──
+  var warehouseSql = document.getElementById("warehouse-sql");
+  var runBtn = document.getElementById("btn-run-query");
+  var warehouseResults = document.getElementById("warehouse-results");
+
+  function renderResultsTable(container, data) {
+    if (data.error) {
+      var err = document.createElement("div");
+      err.className = "query-error";
+      err.textContent = data.error;
+      container.appendChild(err);
+      return;
+    }
+    if (!data.rows || data.rows.length === 0) {
+      var empty = document.createElement("div");
+      empty.className = "query-empty";
+      empty.textContent = "No results.";
+      container.appendChild(empty);
+      return;
+    }
+
+    var table = document.createElement("table");
+    table.className = "results-table";
+    var thead = document.createElement("thead");
+    var headerRow = document.createElement("tr");
+    data.columns.forEach(function (col) {
+      var th = document.createElement("th");
+      th.textContent = col;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    var tbody = document.createElement("tbody");
+    data.rows.forEach(function (row) {
+      var tr = document.createElement("tr");
+      row.forEach(function (val) {
+        var td = document.createElement("td");
+        td.textContent = val === null ? "\u2014" : val;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    container.appendChild(table);
+
+    var meta = document.createElement("div");
+    meta.className = "query-meta";
+    meta.textContent = data.row_count + " row" + (data.row_count !== 1 ? "s" : "") +
+      " \u00B7 " + (data.duration_ms / 1000).toFixed(1) + "s";
+    container.appendChild(meta);
+  }
+
+  function runQuery(sql) {
+    showMessage(warehouseResults, "running...", "query-loading");
+    runBtn.disabled = true;
+    fetch("/api/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sql: sql })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        clearEl(warehouseResults);
+        renderResultsTable(warehouseResults, data);
+      })
+      .catch(function () {
+        showMessage(warehouseResults, "Network error", "query-error");
+      })
+      .finally(function () {
+        runBtn.disabled = false;
+      });
+  }
+
+  if (runBtn) {
+    runBtn.addEventListener("click", function () {
+      runQuery(warehouseSql.value);
+    });
+  }
+
+  // Expose for exhibit chip handlers
+  window.__runQuery = function (sql) {
+    if (warehouseSql) warehouseSql.value = sql;
+    runQuery(sql);
+  };
+
+  // ── Ask execution (analytics strip) ──
+  var askInput = document.getElementById("ask-input");
+  var askBtn = document.getElementById("btn-ask");
+  var askResults = document.getElementById("ask-results");
+
+  function runAsk(question) {
+    showMessage(askResults, "thinking...", "query-loading");
+    askBtn.disabled = true;
+    fetch("/api/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: question })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        clearEl(askResults);
+        // Show generated SQL (collapsible)
+        if (data.sql) {
+          var sqlWrap = document.createElement("details");
+          sqlWrap.className = "ask-sql-details";
+          var summary = document.createElement("summary");
+          summary.textContent = "generated sql";
+          sqlWrap.appendChild(summary);
+          var pre = document.createElement("pre");
+          pre.className = "ask-sql-block";
+          var code = document.createElement("code");
+          code.textContent = data.sql;
+          pre.appendChild(code);
+          sqlWrap.appendChild(pre);
+          askResults.appendChild(sqlWrap);
+        }
+        renderResultsTable(askResults, data);
+      })
+      .catch(function () {
+        showMessage(askResults, "Network error", "query-error");
+      })
+      .finally(function () {
+        askBtn.disabled = false;
+      });
+  }
+
+  if (askBtn) {
+    askBtn.addEventListener("click", function () {
+      var q = askInput.value.trim();
+      if (q) runAsk(q);
+    });
+  }
+
+  if (askInput) {
+    askInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        var q = askInput.value.trim();
+        if (q) runAsk(q);
+      }
+    });
+  }
+
+  // Expose for exhibit chip handlers
+  window.__runAsk = function (question) {
+    if (askInput) askInput.value = question;
+    runAsk(question);
+  };
 })();
