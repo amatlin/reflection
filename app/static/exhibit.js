@@ -32,9 +32,12 @@
       analyticsStrip.classList.toggle("exhibit-visible", n >= 3);
     }
 
-    // Auto-expand the stream strip when it becomes visible at step 2
+    // Auto-expand the relevant strip at each step
     if (n === 2 && streamStrip && !streamStrip.classList.contains("expanded")) {
       if (window.__toggleStrip) window.__toggleStrip("stream");
+    }
+    if (n >= 3 && analyticsStrip && !analyticsStrip.classList.contains("expanded")) {
+      if (window.__toggleStrip) window.__toggleStrip("analytics");
     }
 
     // Fire funnel_step event
