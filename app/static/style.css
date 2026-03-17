@@ -1306,7 +1306,7 @@ body.exhibit-mode .ask-sql-details summary {
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 200;
+    z-index: 90;
     min-height: auto;
     max-height: 50vh;
   }
