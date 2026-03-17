@@ -38,12 +38,18 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 - ~~"you" label on your own events in the stream~~
 - ~~Mobile responsive layout~~
 
-5. Museum exhibit funnel
-- Restructure site as a guided walkthrough: Homepage → Exhibit (8 steps) → Conclusion
-- Each exhibit step explains one stage of the data pipeline (logging, streaming, export, transformation, metrics, analysis)
-- Conclusion screen: thank-you note, questionnaire (text box → `questionnaire_response` event), gift shop (Stripe → `checkout_started` / `purchase_complete` events)
-- Single-page hash routing (`#home`, `#exhibit-intro`, ..., `#exhibit-conclusion`), WebSocket stays alive across screens
-- Generates `funnel_step` events on every navigation — enables funnel analysis of the exhibit itself
+5. Museum exhibit funnel (in progress — code complete, needs deploy)
+- ~~Dark overlay exhibit with 4 steps: Welcome → The Loop → The Pipeline → The Apparatus~~
+- ~~Two side-by-side collapsible strips (stream + analytics) with horizontal accordion~~
+- ~~Hash routing (`#exhibit-1` through `#exhibit-4`), direct URL load supported~~
+- ~~"Fire an event" button + journey card moved into exhibit step 2~~
+- ~~Strips hidden during exhibit, fade in at correct steps (stream at step 2, analytics at step 3)~~
+- ~~`funnel_step` events on each navigation, `questionnaire_response` on submit~~
+- ~~Questionnaire with 500-char limit + backend validation~~
+- ~~`_onCapture` fixed: hash in page_path, custom props forwarded to raw_properties~~
+- Tip jar placeholder (Stripe integration deferred)
+- Analytics strip content TBD
+- Deploy to Railway
 - See `museum_idea.md` for full design
 
 6. Sandbox

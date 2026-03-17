@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reflection</title>
-  <link rel="stylesheet" href="/static/style.css?v=7" />
+  <link rel="stylesheet" href="/static/style.css?v=8" />
 </head>
 <body>
   <div class="split">
@@ -17,9 +17,8 @@
           every action you take here is recorded and visible to everyone.
         </p>
         <div class="actions">
-          <button id="btn-fire" class="btn btn-fire">Fire an event</button>
+          <button id="btn-exhibit" class="btn btn-fire">Enter the exhibit</button>
         </div>
-        <div id="journey-container" class="journey-container"></div>
       </div>
       <div class="footer">
         <a href="https://github.com/amatlin/reflection">GitHub</a>
@@ -28,17 +27,117 @@
 
     <div class="divider"></div>
 
-    <!-- Right: live event stream + journey -->
-    <div class="panel right">
-      <div class="pipeline-status" id="pipeline-status"></div>
-      <div class="stream-header" id="stream-toggle">
-        <span class="dot"></span>
-        <span class="stream-label">live stream</span>
-        <span id="presence-count" class="presence-count"></span>
-        <span class="stream-chevron">▸</span>
+    <!-- Right: two side-by-side collapsible strips -->
+    <div class="strips-container">
+      <!-- Stream strip -->
+      <div class="strip expanded" id="strip-stream" data-strip="stream">
+        <div class="strip-header" data-strip-toggle="stream">
+          <span class="dot"></span>
+          <span class="strip-label">live stream</span>
+          <span id="presence-count" class="presence-count"></span>
+          <span class="strip-chevron">◂</span>
+        </div>
+        <div class="strip-content">
+          <div class="pipeline-status" id="pipeline-status"></div>
+          <div id="stream" class="stream"></div>
+        </div>
       </div>
-      <div id="stream-collapsible" class="stream-collapsible">
-        <div id="stream" class="stream"></div>
+
+      <!-- Analytics strip -->
+      <div class="strip" id="strip-analytics" data-strip="analytics">
+        <div class="strip-header" data-strip-toggle="analytics">
+          <span class="strip-label">analytics</span>
+          <span class="strip-chevron">▸</span>
+        </div>
+        <div class="strip-content">
+          <div class="analytics-placeholder">
+            <p>coming soon</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exhibit overlay -->
+  <div id="exhibit-overlay" class="exhibit-overlay">
+    <div class="exhibit-content">
+      <!-- Step 1: Welcome -->
+      <div class="exhibit-step" data-step="1">
+        <h2 class="exhibit-heading">this site analyzes itself.</h2>
+        <p class="exhibit-text">
+          Every click, every page view, every second you spend here is captured,
+          stored, transformed, and displayed back to you in real time.
+        </p>
+        <p class="exhibit-text">
+          There is no product. There is no content. There is only the infrastructure
+          — pointed at itself.
+        </p>
+        <p class="exhibit-text exhibit-text-muted">
+          This exhibit walks through how the data pipeline works. You'll fire a real
+          event and watch it travel through the system.
+        </p>
+      </div>
+
+      <!-- Step 2: The Loop -->
+      <div class="exhibit-step" data-step="2">
+        <h2 class="exhibit-heading">the loop</h2>
+        <p class="exhibit-text">
+          When you click the button below, a <code>fire_event</code> is captured by
+          the analytics tracker, sent to the backend, stored in the database, and
+          broadcast to every connected visitor.
+        </p>
+        <p class="exhibit-text">
+          Watch the stream on the right.
+        </p>
+        <div class="exhibit-actions">
+          <button id="btn-fire" class="btn btn-fire">Fire an event</button>
+        </div>
+        <div id="journey-container" class="journey-container"></div>
+      </div>
+
+      <!-- Step 3: The Pipeline -->
+      <div class="exhibit-step" data-step="3">
+        <h2 class="exhibit-heading">the pipeline</h2>
+        <p class="exhibit-text">
+          Every hour, events are exported from the live database to a data warehouse.
+          A dbt pipeline transforms them into staging tables and daily metric
+          aggregations — pageviews, unique visitors, events per session.
+        </p>
+        <p class="exhibit-text">
+          The analytics panel on the right will eventually display those metrics.
+          The same infrastructure a real company uses to understand its users,
+          applied to nothing.
+        </p>
+      </div>
+
+      <!-- Step 4: Conclusion -->
+      <div class="exhibit-step" data-step="4">
+        <h2 class="exhibit-heading">the apparatus</h2>
+        <p class="exhibit-text">
+          Every tech company builds this machinery to track, measure, and optimize
+          human behavior. This site strips it down to the bare core: the apparatus,
+          pointed at nothing but itself.
+        </p>
+        <div class="exhibit-questionnaire" id="questionnaire">
+          <label class="exhibit-label" for="questionnaire-text">leave a thought</label>
+          <textarea id="questionnaire-text" class="exhibit-textarea" maxlength="500"
+                    placeholder="what do you make of it?"></textarea>
+          <div class="exhibit-textarea-footer">
+            <span id="char-count" class="char-count">0 / 500</span>
+            <button id="btn-questionnaire" class="btn">Submit</button>
+          </div>
+          <div id="questionnaire-confirmation" class="exhibit-confirmation"></div>
+        </div>
+        <div class="exhibit-tip-jar">
+          <a href="#" class="btn" id="btn-tip">Leave a tip</a>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="exhibit-nav">
+        <button id="exhibit-back" class="btn exhibit-btn-nav">Back</button>
+        <span id="exhibit-step-counter" class="exhibit-step-counter">1 / 4</span>
+        <button id="exhibit-next" class="btn exhibit-btn-nav">Next</button>
       </div>
     </div>
   </div>
@@ -77,12 +176,22 @@
         // Forward every captured event to our backend
         var payload = {
           event_type: eventName,
-          page_path: window.location.pathname,
+          page_path: window.location.pathname + window.location.hash,
           element_id: null,
           element_tag: null,
           element_text: null,
           visitor_id: posthog.get_distinct_id(),
-          raw_properties: {}
+          raw_properties: (function() {
+            var custom = {};
+            if (eventData && eventData.properties) {
+              Object.keys(eventData.properties).forEach(function(k) {
+                if (k.charAt(0) !== '$' && k !== 'token' && k !== 'distinct_id') {
+                  custom[k] = eventData.properties[k];
+                }
+              });
+            }
+            return custom;
+          })()
         };
 
         // Extract element info from autocapture events
@@ -141,5 +250,6 @@
   </script>
 
   <script src="/static/stream.js"></script>
+  <script src="/static/exhibit.js"></script>
 </body>
 </html>

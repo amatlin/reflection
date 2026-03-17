@@ -22,6 +22,10 @@ Reflection is a self-referential website that analyzes its own usage. See `plan.
 - Frontend may be generated via AI tools, with manual customization as needed.
 - **This is a learning project.** Always explain what you're doing and why — walk through commands, code, and infrastructure decisions in enough detail that the developer builds understanding as we go. Don't just do things silently.
 
+## Environment
+
+- **Always use conda** for virtual environments, not venv or pip virtualenvs. The conda environment for this project is `reflection`. Activate with `conda activate reflection`.
+
 ## Development
 
 The project is built incrementally through milestones — each one should be demo-able. Speed over polish. Commit and push frequently — don't let work pile up locally.

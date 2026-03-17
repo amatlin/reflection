@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 
 from app.models.events import EventIn, EventOut
 from app.services.supabase_client import insert_event, recent_events
@@ -37,6 +37,14 @@ async def _broadcast_presence() -> None:
 
 @router.post("/api/events")
 async def receive_event(event: EventIn):
+    # Validate questionnaire_response events
+    if event.event_type == "questionnaire_response":
+        text = event.raw_properties.get("response_text")
+        if not text or not isinstance(text, str) or not text.strip():
+            raise HTTPException(status_code=422, detail="response_text is required")
+        if len(text) > 500:
+            raise HTTPException(status_code=422, detail="response_text must be 500 characters or fewer")
+
     saved = insert_event(event)
     await _broadcast(saved)
     return {"status": "ok", "id": saved.id}

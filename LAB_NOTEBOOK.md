@@ -600,3 +600,75 @@ Verified with Playwright: expanded view shows full stream, collapsed view shows 
 - Implement the museum exhibit (M5) — full design spec in `museum_idea.md`
 - Read `museum_idea.md` and `plan.md` M5 for the full design before starting
 - The collapsible livestream is the homepage; the exhibit builds on top of it
+
+## 2026-03-16 — Museum exhibit implemented
+
+Built the museum exhibit as a dark overlay with 4 steps, two side-by-side collapsible strips, hash routing, and new event types. This was a large change touching 5 files.
+
+### What was built
+
+**Phase 1: Two side-by-side strips**
+
+Replaced the single `.panel.right` with a `.strips-container` holding two `.strip` elements — "live stream" and "analytics". Each strip has a header (label + chevron) and content area. Clicking one expands it and collapses the other (horizontal accordion). When both are collapsed, the left panel expands to fill the space. On mobile, strips stack vertically.
+
+**Phase 2: Dark exhibit overlay + hash routing**
+
+- New `exhibit.js` handles hash routing (`#exhibit-1` through `#exhibit-4`), dark overlay transitions, step navigation, and strip visibility
+- "Enter the exhibit" button on homepage replaces the "Fire an event" button (which moved into exhibit step 2)
+- `body.exhibit-mode` class triggers dark theme overrides for strips, stream text, journey card
+- Strips are hidden by default in exhibit mode, fade in at the correct step (stream at step 2, analytics at step 3)
+- Direct URL load (e.g., `/#exhibit-3`) works — exhibit opens at that step
+- Back/Next navigation with step counter; Next becomes "Exit" on step 4
+
+**Phase 3: Content, questionnaire, new events**
+
+4 exhibit steps:
+1. **Welcome** — "this site analyzes itself." Concept intro.
+2. **The Loop** — explains real-time capture. "Fire an event" button + journey card here. Stream strip fades in.
+3. **The Pipeline** — explains hourly export, dbt, daily metrics. Analytics strip fades in.
+4. **The Apparatus** — closing note + questionnaire textarea (500 char max) + tip jar placeholder.
+
+New event types:
+- `funnel_step` — fired on each step navigation with `step` property (welcome, the-loop, the-pipeline, the-apparatus). Humanized in stream as "entered exhibit step: {step}".
+- `questionnaire_response` — fired on questionnaire submit with `response_text` property. Humanized as "left a thought". Backend validation: `response_text` required, max 500 chars.
+
+**`_onCapture` fixes:**
+- `page_path` now includes `window.location.hash` so PostHog and Supabase both capture which exhibit step the visitor is on
+- Custom properties (non-`$` prefixed) now forwarded to `raw_properties` (was always `{}` before)
+
+### Files modified
+
+| File | Changes |
+|------|---------|
+| `app/templates/index.html` | Two-strip layout, exhibit overlay HTML, moved fire button + journey card to step 2, `_onCapture` fixes, added `exhibit.js` script tag |
+| `app/static/style.css` | Complete rewrite: strip layout + accordion, dark overlay, exhibit-mode theme, strip visibility transitions, questionnaire styles, mobile responsive |
+| `app/static/stream.js` | Replaced collapse toggle with strip accordion (`toggleStrip()`), added `funnel_step` and `questionnaire_response` to `humanizeEvent()` |
+| `app/static/exhibit.js` | **New file.** Hash routing, overlay management, step navigation, strip reveal, questionnaire handler, funnel_step events |
+| `app/routes/events.py` | Added `questionnaire_response` validation (response_text required, max 500 chars) |
+| `CLAUDE.md` | Added Environment section: always use conda |
+
+### Verified with Playwright
+
+1. Homepage loads — light theme, two strips, stream receiving events
+2. Click "Enter the exhibit" — dark overlay, step 1, strips hidden, URL `#exhibit-1`
+3. `funnel_step` events appear in stream with step names
+4. Next → step 2 — "Fire an event" button, click → stream strip fades in, journey card confirms all 3 pipeline steps
+5. Next → step 3 — analytics strip fades in (collapsed, vertical label)
+6. Next → step 4 — questionnaire visible, submit → "Recorded.", "left a thought" in stream, textarea disabled
+7. Exit → light theme returns, URL back to `/`
+8. Direct load `/#exhibit-3` — exhibit opens at step 3
+9. Strip accordion — clicking analytics expands it, collapses stream
+10. Mobile (375×812) — exhibit stacks content above strips, homepage stacks vertically
+11. Backend validation — empty `response_text` returns 422, >500 chars returns 422
+
+### What's not done yet
+- Tip jar is a placeholder link (`href="#"`) — Stripe integration deferred
+- Analytics strip just shows "coming soon" — content TBD
+- Need to deploy to Railway
+- Need to test with real traffic (multiple tabs, other visitors)
+
+### Next session
+- Deploy to Railway
+- Test with real traffic
+- Update `plan.md`, `README.md`, `museum_idea.md`
+- Consider: what goes in the analytics strip?

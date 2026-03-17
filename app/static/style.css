@@ -113,6 +113,11 @@ h1 {
   box-shadow: 0 1px 4px rgba(59, 130, 246, 0.1);
 }
 
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .btn-fire {
   border-color: var(--accent);
   color: var(--accent);
@@ -144,49 +149,41 @@ h1 {
   background: var(--border);
 }
 
-/* ── Right panel ── */
-.right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 1.5rem 2rem 1.5rem 2rem;
-  min-width: 0;
-  transition: flex 0.3s ease, padding 0.3s ease, min-width 0.3s ease;
-}
-
-/* Left panel expands when stream is collapsed */
-.left.stream-collapsed {
+/* Left panel expands when all strips collapsed */
+.left.strips-collapsed {
   flex: 1;
   max-width: none;
 }
 
-.right.collapsed {
+/* ── Strips container (replaces .right) ── */
+.strips-container {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  transition: flex 0.3s ease;
+  z-index: 1;
+}
+
+/* ── Individual strip ── */
+.strip {
   flex: 0 0 36px;
   min-width: 36px;
   max-width: 36px;
-  padding: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+  transition: flex 0.3s ease, min-width 0.3s ease, max-width 0.3s ease, opacity 0.4s ease;
+  border-left: 1px solid var(--border);
 }
 
-.right.collapsed .pipeline-status {
-  display: none;
+.strip.expanded {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
 }
 
-.right.collapsed .stream-collapsible {
-  display: none;
-}
-
-/* ── Pipeline status ── */
-.pipeline-status {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  padding: 0.5rem 0.25rem;
-  letter-spacing: 0.02em;
-}
-
-/* ── Stream header ── */
-.stream-header {
+/* ── Strip header ── */
+.strip-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -203,22 +200,22 @@ h1 {
   flex-shrink: 0;
 }
 
-.stream-header:hover {
+.strip-header:hover {
   color: var(--accent);
 }
 
-.stream-label {
+.strip-label {
   flex: 1;
   white-space: nowrap;
 }
 
-.stream-chevron {
+.strip-chevron {
   color: var(--text-muted);
   font-size: 0.9rem;
 }
 
-/* Collapsed: header becomes vertical strip */
-.right.collapsed .stream-header {
+/* Collapsed strip: vertical header */
+.strip:not(.expanded) .strip-header {
   flex-direction: column;
   align-items: center;
   border-bottom: none;
@@ -227,22 +224,42 @@ h1 {
   height: 100%;
 }
 
-.right.collapsed .stream-label {
+.strip:not(.expanded) .strip-label {
   writing-mode: vertical-rl;
   text-orientation: mixed;
   font-size: 0.65rem;
 }
 
-.right.collapsed .presence-count {
+.strip:not(.expanded) .presence-count {
   writing-mode: vertical-rl;
   text-orientation: mixed;
   font-size: 0.6rem;
 }
 
-/* ── Stream collapsible ── */
-.stream-collapsible {
+/* Strip content: hidden when collapsed */
+.strip-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
+  padding: 0;
+}
+
+.strip:not(.expanded) .strip-content {
+  display: none;
+}
+
+.strip.expanded .strip-content {
+  padding: 0.5rem 1.5rem 1.5rem;
+}
+
+/* ── Pipeline status ── */
+.pipeline-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  padding: 0.5rem 0.25rem;
+  letter-spacing: 0.02em;
 }
 
 .dot {
@@ -304,7 +321,18 @@ h1 {
   font-weight: 500;
 }
 
-/* ── Journey container (left panel) ── */
+/* ── Analytics placeholder ── */
+.analytics-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+}
+
+/* ── Journey container ── */
 .journey-container {
   padding: 0.5rem 0 0;
 }
@@ -408,6 +436,324 @@ h1 {
   pointer-events: none;
 }
 
+/* ══════════════════════════════════════════
+   Exhibit overlay
+   ══════════════════════════════════════════ */
+
+.exhibit-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(15, 23, 42, 0.97);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.exhibit-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.exhibit-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 42%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3.5rem 3rem 2rem 4rem;
+  overflow-y: auto;
+}
+
+/* Steps: hidden by default, shown when active */
+.exhibit-step {
+  display: none;
+}
+
+.exhibit-step.active {
+  display: block;
+}
+
+.exhibit-heading {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 400;
+  font-style: italic;
+  color: #e2e8f0;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 1.25rem;
+}
+
+.exhibit-text {
+  font-size: 0.925rem;
+  line-height: 1.75;
+  color: #94a3b8;
+  margin-bottom: 1rem;
+}
+
+.exhibit-text-muted {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.exhibit-text code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85em;
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+
+.exhibit-actions {
+  margin: 1.5rem 0 1rem;
+}
+
+/* ── Exhibit navigation ── */
+.exhibit-nav {
+  position: absolute;
+  bottom: 2rem;
+  left: 4rem;
+  right: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.exhibit-btn-nav {
+  background: transparent;
+  border-color: #475569;
+  color: #94a3b8;
+}
+
+.exhibit-btn-nav:hover {
+  border-color: #93c5fd;
+  color: #93c5fd;
+}
+
+.exhibit-step-counter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: #475569;
+  flex: 1;
+  text-align: center;
+}
+
+/* ── Exhibit-mode overrides ── */
+
+/* Strips sit above overlay */
+body.exhibit-mode .strips-container {
+  z-index: 200;
+  position: relative;
+}
+
+/* In exhibit mode, strips hidden by default */
+body.exhibit-mode .strip {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+/* Strips become visible at the correct exhibit step */
+body.exhibit-mode .strip.exhibit-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Dark theme overrides for strips during exhibit */
+body.exhibit-mode .strip {
+  background: #1e293b;
+  border-left-color: #334155;
+}
+
+body.exhibit-mode .strip-header {
+  color: #e2e8f0;
+  border-bottom-color: #334155;
+}
+
+body.exhibit-mode .strip-header:hover {
+  color: #93c5fd;
+}
+
+body.exhibit-mode .strip-chevron {
+  color: #64748b;
+}
+
+body.exhibit-mode .pipeline-status {
+  color: #64748b;
+}
+
+body.exhibit-mode .stream {
+  color: #94a3b8;
+}
+
+body.exhibit-mode .event-line .time {
+  color: #64748b;
+}
+
+body.exhibit-mode .event-line .etype {
+  color: #93c5fd;
+}
+
+body.exhibit-mode .event-line .visitor {
+  color: #4ade80;
+}
+
+body.exhibit-mode .event-line .visitor-you {
+  color: #93c5fd;
+}
+
+body.exhibit-mode .dot {
+  background: #4ade80;
+}
+
+body.exhibit-mode .presence-count {
+  color: #64748b;
+}
+
+/* Hide the divider during exhibit */
+body.exhibit-mode .divider {
+  background: #334155;
+}
+
+/* Hide the left panel during exhibit (overlay replaces it) */
+body.exhibit-mode .panel.left {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Dark journey card in exhibit */
+body.exhibit-mode .journey-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.exhibit-mode .journey-header {
+  color: #e2e8f0;
+}
+
+body.exhibit-mode .journey-step {
+  color: #64748b;
+}
+
+body.exhibit-mode .journey-step.done {
+  color: #4ade80;
+}
+
+body.exhibit-mode .journey-section {
+  border-top-color: #334155;
+}
+
+body.exhibit-mode .journey-section-label {
+  color: #64748b;
+}
+
+body.exhibit-mode .journey-field-key {
+  color: #64748b;
+}
+
+body.exhibit-mode .journey-field-value {
+  color: #e2e8f0;
+}
+
+body.exhibit-mode .journey-metric-change {
+  color: #4ade80;
+}
+
+/* Exhibit fire button — dark variant */
+body.exhibit-mode .btn-fire {
+  border-color: #3b82f6;
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.15);
+}
+
+body.exhibit-mode .btn-fire:hover {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+/* ── Questionnaire ── */
+.exhibit-questionnaire {
+  margin: 1.5rem 0;
+}
+
+.exhibit-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.exhibit-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 0.75rem;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.exhibit-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.exhibit-textarea:disabled {
+  opacity: 0.5;
+}
+
+.exhibit-textarea-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+
+.char-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  color: #475569;
+}
+
+.exhibit-confirmation {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: #4ade80;
+  margin-top: 0.5rem;
+}
+
+/* ── Tip jar ── */
+.exhibit-tip-jar {
+  margin-top: 1rem;
+}
+
+.exhibit-tip-jar .btn {
+  background: transparent;
+  border-color: #475569;
+  color: #94a3b8;
+}
+
+.exhibit-tip-jar .btn:hover {
+  border-color: #93c5fd;
+  color: #93c5fd;
+}
+
+/* Analytics placeholder dark */
+body.exhibit-mode .analytics-placeholder {
+  color: #475569;
+}
+
 /* ── Mobile ── */
 @media (max-width: 768px) {
   body {
@@ -451,10 +797,48 @@ h1 {
     height: 1px;
   }
 
-  .right {
+  /* Strips stack vertically on mobile */
+  .strips-container {
+    flex-direction: column;
     flex: 1;
-    min-height: 60vh;
-    padding: 1rem 1.5rem 1.5rem;
+    min-height: 50vh;
+  }
+
+  .strip {
+    flex: 0 0 40px;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 40px;
+    max-height: 40px;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .strip.expanded {
+    flex: 1;
+    max-height: none;
+  }
+
+  .strip:not(.expanded) .strip-header {
+    flex-direction: row;
+    height: auto;
+    padding: 0.7rem 1.5rem;
+    gap: 0.5rem;
+  }
+
+  .strip:not(.expanded) .strip-label,
+  .strip:not(.expanded) .presence-count {
+    writing-mode: horizontal-tb;
+    text-orientation: initial;
+    font-size: 0.72rem;
+  }
+
+  .strip:not(.expanded) .presence-count {
+    font-size: 0.65rem;
+  }
+
+  .strip.expanded .strip-content {
+    padding: 0.5rem 1.5rem 1.5rem;
   }
 
   .pipeline-status {
@@ -475,30 +859,29 @@ h1 {
     gap: 0.15rem 0.75rem;
   }
 
-  /* On mobile, collapse hides stream content vertically */
-  .right.collapsed {
-    flex: none;
-    max-width: 100%;
-    min-width: 0;
-    padding: 0.5rem 1.5rem;
+  /* Exhibit mobile */
+  .exhibit-content {
+    width: 100%;
+    padding: 2rem 1.5rem 5rem;
+  }
+
+  .exhibit-heading {
+    font-size: 1.4rem;
+  }
+
+  .exhibit-nav {
+    left: 1.5rem;
+    right: 1.5rem;
+    bottom: 1rem;
+  }
+
+  body.exhibit-mode .strips-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
     min-height: auto;
-  }
-
-  .right.collapsed .stream-header {
-    flex-direction: row;
-    height: auto;
-    padding: 0.7rem 0;
-    border-bottom: none;
-  }
-
-  .right.collapsed .stream-label,
-  .right.collapsed .presence-count {
-    writing-mode: horizontal-tb;
-    text-orientation: initial;
-    font-size: 0.72rem;
-  }
-
-  .right.collapsed .presence-count {
-    font-size: 0.65rem;
+    max-height: 50vh;
   }
 }

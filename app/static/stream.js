@@ -1,19 +1,49 @@
 (function () {
-  // Stream collapse toggle — collapses the right panel to a narrow strip
-  var streamToggle = document.getElementById("stream-toggle");
-  var rightPanel = streamToggle ? streamToggle.closest(".right") : null;
+  // Strip accordion — clicking a strip header expands it and collapses the other
+  var strips = document.querySelectorAll(".strip");
   var leftPanel = document.querySelector(".panel.left");
 
-  if (streamToggle && rightPanel) {
-    streamToggle.addEventListener("click", function () {
-      rightPanel.classList.toggle("collapsed");
-      if (leftPanel) leftPanel.classList.toggle("stream-collapsed");
-      var chevron = streamToggle.querySelector(".stream-chevron");
-      if (chevron) {
-        chevron.textContent = rightPanel.classList.contains("collapsed") ? "◂" : "▸";
+  function toggleStrip(targetName) {
+    var anyExpanded = false;
+    strips.forEach(function (strip) {
+      var name = strip.getAttribute("data-strip");
+      var chevron = strip.querySelector(".strip-chevron");
+      if (name === targetName) {
+        // Toggle: if already expanded, collapse it
+        if (strip.classList.contains("expanded")) {
+          strip.classList.remove("expanded");
+          if (chevron) chevron.textContent = "▸";
+        } else {
+          strip.classList.add("expanded");
+          if (chevron) chevron.textContent = "◂";
+          anyExpanded = true;
+        }
+      } else {
+        // Collapse the other strip
+        strip.classList.remove("expanded");
+        if (chevron) chevron.textContent = "▸";
       }
     });
+    // Check if any strip is expanded after toggle
+    if (!anyExpanded) {
+      strips.forEach(function (s) {
+        if (s.classList.contains("expanded")) anyExpanded = true;
+      });
+    }
+    // Left panel expands when both strips collapsed
+    if (leftPanel) {
+      leftPanel.classList.toggle("strips-collapsed", !anyExpanded);
+    }
   }
+
+  // Expose for exhibit.js to use
+  window.__toggleStrip = toggleStrip;
+
+  document.querySelectorAll("[data-strip-toggle]").forEach(function (header) {
+    header.addEventListener("click", function () {
+      toggleStrip(header.getAttribute("data-strip-toggle"));
+    });
+  });
 
   var streamEl = document.getElementById("stream");
   var ws;
@@ -56,6 +86,11 @@
       return "clicked something";
     }
     if (t === "fire_event") return "fired an event";
+    if (t === "funnel_step") {
+      var step = (ev.raw_properties && ev.raw_properties.step) || "";
+      return step ? "entered exhibit step: " + step : "entered exhibit step";
+    }
+    if (t === "questionnaire_response") return "left a thought";
     return t; // unknown custom events: show raw name
   }
 
