@@ -34,6 +34,8 @@ The project is built incrementally through milestones — each one should be dem
 
 On every commit and push, check whether `README.md` or `plan.md` need to be updated to reflect the changes.
 
+**Always test frontend changes with Playwright** before presenting them. Navigate to the page, verify the snapshot, click interactive elements, and test mobile (375×812). Don't share frontend work without verification.
+
 ## Session Start
 
 At the beginning of every conversation, read these files in order before doing anything else:

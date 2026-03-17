@@ -801,7 +801,32 @@ Replaced the open-ended warehouse SQL textarea and analytics "ask a question" in
 - `architecture.md`: updated route descriptions, caching section, frontend description
 - `README.md`: updated interactive feature descriptions
 
+### Deployed and verified on prod
+
+Set `ANTHROPIC_API_KEY` in Railway. Initial key had no credits — added $5 to the Anthropic account, then rotated the key (old one was exposed in conversation). All three insight chips working end-to-end on prod: Claude generates SQL → BigQuery runs it → results cached 24h.
+
+Prod verification (Playwright against Railway URL):
+- Warehouse chip "events by type" → results table with real data (2 rows, 0.9s)
+- Insight chip "most common event" → `$autocapture` with 4 events (1.1s, then cached)
+- 3 visitors online during testing
+
 ### Next session
-- Deploy to Railway and verify with `ANTHROPIC_API_KEY` set
-- Consider better/different questions for the insight chips
-- Consider syntax highlighting for the readonly SQL textarea
+
+**Exhibit:**
+- Consider adding a "modeling" step between "analytics" and the conclusion — what would be modeled? Prediction, forecasting, etc.
+- Consider adding visualizations to the analytics step now that queries are limited to 3 fixed questions
+- Mobile exhibit UX: Next button works but query results/metrics are grayed out and too small — rethink how to make the complex exhibit mobile-friendly
+- "Visitors today" warehouse query returns zero rows — fix the query
+- Syntax highlighting for the readonly SQL textarea
+- Consider renaming "welcome" step → "concept" (where the artistic concept/copy will live)
+- Consider renaming steps with numerical indices (risky for long-term)
+- Tip jar vs. gift shop: selling prints of the website via Printful leans into the LACMA grant's artistic angle. A gift shop could be its own strip at the final exhibit step (currently showing analytics, which feels stale)
+- Add NL interpretation of warehouse query results — the NL→SQL works but results should get back to NL
+
+**Frontend:**
+- Rename "live stream" → "streaming"
+- Coordinate visitor ID color on homepage with color in the stream
+- Consider replacing visitor IDs with cute generated names (like Railway's app naming — more memorable/fun)
+
+**Other:**
+- Run `dbt build` to refresh marts with new traffic data
