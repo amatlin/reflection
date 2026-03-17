@@ -8,7 +8,7 @@
   var totalSteps = steps.length;
   var currentStep = 0; // 0 = not in exhibit
 
-  var stepNames = ["", "welcome", "the-loop", "the-warehouse", "the-pipeline", "the-model", "the-apparatus"];
+  var stepNames = ["", "welcome", "the-loop", "the-warehouse", "the-pipeline", "the-model", "the-shop"];
 
   function showStep(n) {
     currentStep = n;
@@ -22,11 +22,12 @@
     nextBtn.textContent = n >= totalSteps ? "Exit" : "Next";
     counter.textContent = n + " / " + totalSteps;
 
-    // Strip visibility: stream at step 2+, warehouse at step 3+, analytics at step 4+, modeling at step 5+
+    // Strip visibility: stream at step 2+, warehouse at step 3+, analytics at step 4+, modeling at step 5+, shop at step 6
     var streamStrip = document.getElementById("strip-stream");
     var warehouseStrip = document.getElementById("strip-warehouse");
     var analyticsStrip = document.getElementById("strip-analytics");
     var modelingStrip = document.getElementById("strip-modeling");
+    var shopStrip = document.getElementById("strip-shop");
     if (streamStrip) {
       streamStrip.classList.toggle("exhibit-visible", n >= 2);
     }
@@ -39,6 +40,9 @@
     if (modelingStrip) {
       modelingStrip.classList.toggle("exhibit-visible", n >= 5);
     }
+    if (shopStrip) {
+      shopStrip.classList.toggle("exhibit-visible", n >= 6);
+    }
 
     // Auto-expand the relevant strip at each step
     if (n === 2 && streamStrip && !streamStrip.classList.contains("expanded")) {
@@ -50,8 +54,11 @@
     if (n === 4 && analyticsStrip && !analyticsStrip.classList.contains("expanded")) {
       if (window.__toggleStrip) window.__toggleStrip("analytics");
     }
-    if (n >= 5 && modelingStrip && !modelingStrip.classList.contains("expanded")) {
+    if (n === 5 && modelingStrip && !modelingStrip.classList.contains("expanded")) {
       if (window.__toggleStrip) window.__toggleStrip("modeling");
+    }
+    if (n === 6 && shopStrip && !shopStrip.classList.contains("expanded")) {
+      if (window.__toggleStrip) window.__toggleStrip("shop");
     }
 
     // Fire funnel_step event
@@ -168,4 +175,48 @@
       confirmation.textContent = "Recorded.";
     });
   }
+
+  // Shop buy buttons
+  document.querySelectorAll(".shop-buy-btn").forEach(function (btn) {
+    var priceInput = btn.getAttribute("data-price-input");
+    var fixedPrice = btn.getAttribute("data-price");
+
+    // Enable buttons that have a valid price or a price input
+    if (priceInput) {
+      // "Pay what you wish" — enable when input has a valid value
+      var input = document.getElementById(priceInput);
+      if (input) {
+        btn.classList.add("active");
+        input.addEventListener("input", function () {
+          var val = parseFloat(input.value);
+          btn.classList.toggle("active", val > 0);
+        });
+      }
+    } else if (fixedPrice && parseFloat(fixedPrice) > 0) {
+      btn.classList.add("active");
+    }
+
+    btn.addEventListener("click", function () {
+      var itemId = btn.getAttribute("data-item-id");
+      var itemName = btn.getAttribute("data-item-name");
+      var price;
+
+      if (priceInput) {
+        var inp = document.getElementById(priceInput);
+        price = inp ? parseFloat(inp.value) : 0;
+        if (!price || price <= 0) return;
+      } else {
+        price = parseFloat(fixedPrice);
+        if (!price || price <= 0) return;
+      }
+
+      if (window.posthog) {
+        window.posthog.capture("checkout_started", {
+          item_id: itemId,
+          item_name: itemName,
+          price: price
+        });
+      }
+    });
+  });
 })();

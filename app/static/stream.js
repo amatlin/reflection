@@ -91,6 +91,10 @@
       return step ? "entered exhibit step: " + step : "entered exhibit step";
     }
     if (t === "questionnaire_response") return "left a thought";
+    if (t === "checkout_started") {
+      var name = (ev.raw_properties && ev.raw_properties.item_name) || "";
+      return name ? "started checkout: " + name : "started checkout";
+    }
     return t; // unknown custom events: show raw name
   }
 

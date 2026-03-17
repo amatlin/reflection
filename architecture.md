@@ -59,12 +59,14 @@ Vanilla HTML + CSS + JS. Server-rendered Jinja2 templates. No build step, no fra
 
 The homepage has a split layout:
 - **Left panel:** concept explanation, "Enter the exhibit" button, event journey card, pipeline countdowns (next warehouse export + dbt refresh)
-- **Right panel:** three collapsible strips arranged as a vertical accordion:
+- **Right panel:** five collapsible strips arranged as a vertical accordion:
   - **Stream strip** — live event feed via WebSocket, presence count, "you" labels on your own events
   - **Warehouse strip** — 3 clickable query chips, readonly SQL textarea (shows the query being run), results table. Queries are fixed server-side and cached for 24 hours.
   - **Analytics strip** — server-rendered daily metrics from `metrics_daily`, plus 3 clickable insight chips powered by Claude NL→SQL (cached daily)
+  - **Modeling strip** — placeholder for NLP analysis of questionnaire responses (content TBD)
+  - **Shop strip** — 3 gift shop items (keep the lights on, a visualization, buy the developer a coffee). Buy buttons fire `checkout_started` events. Payment integration (Stripe) deferred.
 
-The **museum exhibit** is a dark overlay with 5 hash-routed steps (`#exhibit-1` through `#exhibit-5`): Welcome → The Loop → The Warehouse → The Pipeline → The Apparatus. Strips are hidden initially and fade in at relevant steps (stream at step 2, warehouse at step 3, analytics at step 4). Exhibit steps reference the chips in the strips rather than duplicating them. Mobile responsive with stacked layout.
+The **museum exhibit** is a dark overlay with 6 hash-routed steps (`#exhibit-1` through `#exhibit-6`): Welcome → The Loop → The Warehouse → The Pipeline → The Model → The Apparatus. Strips are hidden initially and fade in at relevant steps (stream at step 2, warehouse at step 3, analytics at step 4, modeling at step 5, shop at step 6). Exhibit steps reference the chips in the strips rather than duplicating them. Mobile responsive with stacked layout.
 
 ### Hosting — Railway
 Docker container (Python 3.12, single uvicorn process). Custom domain `reflection.sh` via Namecheap DNS (CNAME → Railway). Environment variables set in Railway's dashboard. The BigQuery service account key is passed as `BIGQUERY_KEY_JSON` (the full JSON string) since Railway can't mount key files.
@@ -105,4 +107,5 @@ PostHog handles session IDs, visitor IDs, device metadata, and timestamps automa
 | `$autocapture` | (auto-tracked by PostHog — clicks, inputs) | PostHog SDK |
 | `fire_event` | (none — synthetic test event) | Exhibit step 2 |
 | `funnel_step` | `step` ("welcome", "the-loop", "the-warehouse", "the-pipeline", "the-apparatus") | Exhibit navigation |
-| `questionnaire_response` | `response_text` (string, max 500 chars, validated server-side) | Exhibit step 5 |
+| `questionnaire_response` | `response_text` (string, max 500 chars, validated server-side) | Exhibit step 6 |
+| `checkout_started` | `item_id` (string), `item_name` (string), `price` (number, > 0) | Shop strip buy button |

@@ -44,7 +44,7 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 - ~~Hash routing (`#exhibit-1` through `#exhibit-5`), direct URL load supported~~
 - ~~"Fire an event" button + journey card moved into exhibit step 2~~
 - ~~Strips hidden during exhibit, fade in at correct steps (stream at step 2, warehouse at step 3, analytics at step 4)~~
-- ~~`funnel_step` events on each navigation, `questionnaire_response` on submit~~
+- ~~`funnel_step` events on each navigation, `questionnaire_response` on submit, `checkout_started` on shop buy~~
 - ~~Questionnaire with 500-char limit + backend validation~~
 - ~~`_onCapture` fixed: hash in page_path, custom props forwarded to raw_properties~~
 - ~~Interactive warehouse strip: SQL textarea + "Run query" button + results table (POST /api/query)~~
@@ -56,7 +56,7 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 - ~~Exhibit close button (×) — moved to top-left to avoid strip z-index overlap~~
 - Modeling step (step 5, pushing "The Apparatus" to step 6): NLP analysis of questionnaire responses — topic clustering, sentiment distribution, and/or Claude summarization of what visitors have said. Batch-computed daily on accumulated `questionnaire_response` texts. Design TBD.
 - Architecture diagram in exhibit step 1 (static SVG/HTML showing both data paths)
-- Tip jar placeholder (Stripe integration deferred)
+- ~~Gift shop strip with 3 items (keep the lights on, a visualization, buy the developer a coffee) — `checkout_started` event tracking, Stripe integration deferred~~
 - AI-generated insight summarizing query results (fast-follow)
 - See `museum_idea.md` for full design
 

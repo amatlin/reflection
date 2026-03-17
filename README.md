@@ -8,7 +8,7 @@ A website whose sole purpose is to analyze itself.
 
 You visit it, you interact with it, and those interactions become the data you can explore on the site. Every click, every page view — captured, streamed live, and piped through a real analytics stack.
 
-The homepage greets you by your visitor ID and shows three collapsible strips — a live event stream, a SQL warehouse, and an analytics panel. Click "Enter the exhibit" for a dark-themed guided tour that walks you through the data pipeline step by step. Fire a real event in step 2 and watch it travel through the system. Run fixed SQL queries against BigQuery in step 3. Explore insight questions about the data in step 4 — Claude translates them to SQL. Leave a thought in step 5 — it becomes data too.
+The homepage greets you by your visitor ID and shows five collapsible strips — a live event stream, a SQL warehouse, an analytics panel, a modeling panel, and a gift shop. Click "Enter the exhibit" for a dark-themed guided tour that walks you through the data pipeline step by step. Fire a real event in step 2 and watch it travel through the system. Run fixed SQL queries against BigQuery in step 3. Explore insight questions about the data in step 4 — Claude translates them to SQL. Leave a thought in step 6 — it becomes data too.
 
 The warehouse strip has 3 clickable query chips and a readonly SQL textarea that shows the actual query being run. The analytics strip shows server-rendered daily metrics and 3 insight question chips powered by Claude NL→SQL. All query and insight results are cached daily server-side.
 

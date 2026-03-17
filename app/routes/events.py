@@ -45,6 +45,19 @@ async def receive_event(event: EventIn):
         if len(text) > 500:
             raise HTTPException(status_code=422, detail="response_text must be 500 characters or fewer")
 
+    # Validate checkout_started events
+    if event.event_type == "checkout_started":
+        props = event.raw_properties
+        item_id = props.get("item_id")
+        item_name = props.get("item_name")
+        price = props.get("price")
+        if not item_id or not isinstance(item_id, str):
+            raise HTTPException(status_code=422, detail="item_id is required")
+        if not item_name or not isinstance(item_name, str):
+            raise HTTPException(status_code=422, detail="item_name is required")
+        if not isinstance(price, (int, float)) or price <= 0:
+            raise HTTPException(status_code=422, detail="price must be a positive number")
+
     saved = insert_event(event)
     await _broadcast(saved)
     return {"status": "ok", "id": saved.id}

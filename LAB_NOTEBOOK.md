@@ -854,3 +854,30 @@ From a DS perspective, the exhibit's pipeline narrative (capture → store → t
 ### Status
 
 Idea stage — not ready for implementation. Added to `plan.md` under Milestone 5 as a tracked TODO. Design decisions (which NLP techniques, how to display results, whether to use Claude or a dedicated NLP pipeline) are all TBD.
+
+## 2026-03-17 — Gift shop strip
+
+Added a shop strip to the exhibit as the fifth collapsible panel (stream → warehouse → analytics → modeling → shop). The shop appears at step 6 and auto-expands when the visitor reaches it.
+
+Three items:
+1. **"keep the lights on"** — pay-what-you-wish contribution toward hosting (BigQuery, Railway, Supabase, PostHog). Text input for amount.
+2. **"a visualization"** — a print of the site's data. Price TBD, button disabled.
+3. **"buy the developer a coffee"** — fixed $5.
+
+All buy buttons fire a `checkout_started` event with `item_id`, `item_name`, and `price` properties. The event is validated server-side and humanized in the stream as "started checkout: {item_name}". Buttons are marked "coming soon" — Stripe integration is deferred.
+
+Replaced the old tip jar link in step 6 with text directing visitors to the shop strip on the right.
+
+Also renamed the step 6 funnel step from `"the-apparatus"` to `"the-shop"` in the exhibit's `stepNames` array (the exhibit heading still says "the apparatus").
+
+### Files changed
+- `app/templates/index.html` — shop strip HTML, removed tip jar, updated step 6 copy, cache-busted JS/CSS to v15
+- `app/static/style.css` — shop card styles (light + dark), removed `.exhibit-tip-jar`
+- `app/static/exhibit.js` — shop strip visibility/auto-expand, buy button event handlers, updated stepNames
+- `app/static/stream.js` — humanize `checkout_started`
+- `app/routes/events.py` — `checkout_started` validation
+
+### Next steps
+- Wire up Stripe for actual payments
+- Design the visualization print
+- Modeling step content (NLP on questionnaire responses)

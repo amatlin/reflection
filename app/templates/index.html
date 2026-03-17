@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reflection</title>
-  <link rel="stylesheet" href="/static/style.css?v=14" />
+  <link rel="stylesheet" href="/static/style.css?v=15" />
 </head>
 <body>
   <div class="split">
@@ -161,6 +161,59 @@
           </div>
         </div>
       </div>
+
+      <!-- Shop strip -->
+      <div class="strip" id="strip-shop" data-strip="shop">
+        <div class="strip-header" data-strip-toggle="shop">
+          <span class="strip-label">shop</span>
+          <span class="strip-chevron">▸</span>
+        </div>
+        <div class="strip-content">
+          <div class="shop-content">
+            <div class="shop-cards">
+              <div class="shop-card" data-item-id="keep-the-lights-on" data-item-name="keep the lights on">
+                <div class="shop-card-name">keep the lights on</div>
+                <div class="shop-card-description">
+                  Contribute toward hosting costs — BigQuery, Railway, Supabase, PostHog.
+                </div>
+                <div class="shop-card-price">
+                  <label class="shop-price-label" for="shop-amount">pay what you wish</label>
+                  <div class="shop-amount-row">
+                    <span class="shop-currency">$</span>
+                    <input type="number" id="shop-amount" class="shop-amount-input" min="1" step="1" placeholder="5">
+                  </div>
+                </div>
+                <button class="btn shop-buy-btn" data-item-id="keep-the-lights-on" data-item-name="keep the lights on" data-price-input="shop-amount">Buy</button>
+                <div class="shop-coming-soon">coming soon</div>
+              </div>
+
+              <div class="shop-card" data-item-id="visualization" data-item-name="a visualization">
+                <div class="shop-card-name">a visualization</div>
+                <div class="shop-card-description">
+                  A print of the site's data — event flows, metric snapshots, the pipeline in miniature.
+                </div>
+                <div class="shop-card-price">
+                  <span class="shop-fixed-price">price TBD</span>
+                </div>
+                <button class="btn shop-buy-btn" data-item-id="visualization" data-item-name="a visualization" data-price="0" disabled>Buy</button>
+                <div class="shop-coming-soon">coming soon</div>
+              </div>
+
+              <div class="shop-card" data-item-id="buy-a-coffee" data-item-name="buy the developer a coffee">
+                <div class="shop-card-name">buy the developer a coffee</div>
+                <div class="shop-card-description">
+                  A small, fixed contribution. Caffeinated gratitude.
+                </div>
+                <div class="shop-card-price">
+                  <span class="shop-fixed-price">$5</span>
+                </div>
+                <button class="btn shop-buy-btn" data-item-id="buy-a-coffee" data-item-name="buy the developer a coffee" data-price="5">Buy</button>
+                <div class="shop-coming-soon">coming soon</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -265,9 +318,9 @@
           </div>
           <div id="questionnaire-confirmation" class="exhibit-confirmation"></div>
         </div>
-        <div class="exhibit-tip-jar">
-          <a href="#" class="btn" id="btn-tip">Leave a tip</a>
-        </div>
+        <p class="exhibit-text exhibit-text-muted" style="margin-top: 1.25rem;">
+          If you'd like to support the project, check out the shop on the right.
+        </p>
       </div>
 
       <!-- Navigation -->
@@ -386,7 +439,7 @@
     });
   </script>
 
-  <script src="/static/stream.js"></script>
-  <script src="/static/exhibit.js"></script>
+  <script src="/static/stream.js?v=15"></script>
+  <script src="/static/exhibit.js?v=15"></script>
 </body>
 </html>
