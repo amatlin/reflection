@@ -661,14 +661,21 @@ New event types:
 10. Mobile (375×812) — exhibit stacks content above strips, homepage stacks vertically
 11. Backend validation — empty `response_text` returns 422, >500 chars returns 422
 
+### Deployed to Railway
+
+Pushed to main and ran `railway up`. Verified:
+- HTML contains exhibit markup (curl check)
+- `exhibit.js` served correctly
+- Questionnaire validation returns 422 on prod
+- Railway URL: `courageous-expression-production.up.railway.app`
+- SSL issue with `www.reflection.sh` persists from earlier (pre-existing)
+
 ### What's not done yet
 - Tip jar is a placeholder link (`href="#"`) — Stripe integration deferred
 - Analytics strip just shows "coming soon" — content TBD
-- Need to deploy to Railway
-- Need to test with real traffic (multiple tabs, other visitors)
+- Test with real multi-visitor traffic
 
 ### Next session
-- Deploy to Railway
-- Test with real traffic
-- Update `plan.md`, `README.md`, `museum_idea.md`
+- Test with real traffic on the deployed site
 - Consider: what goes in the analytics strip?
+- Update `museum_idea.md` to reflect what was actually built vs. planned

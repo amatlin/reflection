@@ -49,7 +49,7 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 - ~~`_onCapture` fixed: hash in page_path, custom props forwarded to raw_properties~~
 - Tip jar placeholder (Stripe integration deferred)
 - Analytics strip content TBD
-- Deploy to Railway
+- ~~Deploy to Railway~~
 - See `museum_idea.md` for full design
 
 6. Sandbox
