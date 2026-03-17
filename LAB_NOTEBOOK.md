@@ -756,3 +756,52 @@ Fixed two z-index stacking issues with the exhibit overlay:
 - Interactive controls live **in the strips** (not the exhibit overlay) so they work on the homepage without the exhibit. The exhibit just adds context and suggested chips.
 - SQL validation is regex-based, not a full parser — BigQuery permissions are the real security boundary. The validation catches obvious mistakes and abuse.
 - Results rendering uses safe DOM methods (`textContent`, `createElement`) — no `innerHTML` with user-controlled content.
+
+## 2026-03-16 — Replace freeform SQL/NL→SQL with fixed chips + daily cache
+
+Replaced the open-ended warehouse SQL textarea and analytics "ask a question" input with fixed clickable chips, cached daily server-side. Motivation: the freeform interfaces created jailbreak/prompt injection risk (analytics NL→SQL) and unbounded BigQuery cost (both).
+
+### What changed
+
+**Backend (`app/routes/query.py`):**
+- Removed `POST /api/query` and `POST /api/ask` entirely
+- Added `GET /api/warehouse/{key}` — 3 fixed SQL queries (`events-by-type`, `visitors-today`, `exhibit-completion`) with 24-hour in-memory cache
+- Added `GET /api/insights/{key}` — 3 fixed insight questions (`exhibit-completion`, `most-common-event`, `mobile-percentage`) with Claude NL→SQL translation, also 24-hour cached
+- Errors are NOT cached — next request retries
+- Removed `QueryRequest`, `AskRequest` models and SQL validation helpers (no longer needed since queries are hardcoded)
+
+**Frontend:**
+- Warehouse strip: 3 clickable `warehouse-chip` buttons above a readonly textarea. Clicking a chip fetches the cached result, populates the textarea with the SQL, and renders results below. No "Run query" button.
+- Analytics strip: replaced text input + Ask button with 3 `insight-chip` buttons. Click → "thinking..." → collapsible SQL + results table.
+- Exhibit steps 3 & 4: removed duplicate chip divs from the overlay. Text now directs visitors to the chips in the strips ("click one of the chips in the warehouse panel on the right").
+
+**CSS:**
+- Added `.chip-row`, `.warehouse-chip`, `.insight-chip` styles (light theme + dark exhibit-mode overrides)
+- Made textarea `readonly` with `resize: none`, dimmed opacity
+- Removed `.btn-query`, `.ask-row`, `.ask-input`, `.exhibit-chips` styles
+- Mobile: chips wrap naturally, slightly smaller font/padding
+
+### Verified with Playwright
+
+| Test | Result |
+|------|--------|
+| Homepage: 3 warehouse chips + readonly textarea (empty placeholder) | Pass |
+| Homepage: 3 insight chips (no text input) | Pass |
+| Click warehouse chip → textarea fills with SQL → results appear | Pass |
+| Click same chip again → instant, shows "cached" in meta | Pass |
+| Click insight chip → error (no API key locally, expected) | Pass |
+| Textarea is readonly | Pass |
+| Exhibit step 3 → no duplicate chips, text references strip | Pass |
+| Exhibit step 4 → no duplicate chips, analytics strip visible | Pass |
+| `POST /api/query` → 404 | Pass |
+| `POST /api/ask` → 404 | Pass |
+| Mobile (375×812) → chips wrap, tappable, results render | Pass |
+
+### Docs updated
+- `architecture.md`: updated route descriptions, caching section, frontend description
+- `README.md`: updated interactive feature descriptions
+
+### Next session
+- Deploy to Railway and verify with `ANTHROPIC_API_KEY` set
+- Consider better/different questions for the insight chips
+- Consider syntax highlighting for the readonly SQL textarea

@@ -1,159 +1,79 @@
-"""Endpoints for running SQL queries and natural-language questions against BigQuery."""
+"""Endpoints for running fixed SQL queries and insights against BigQuery."""
 
 from __future__ import annotations
 
-import re
 import time
 
 from fastapi import APIRouter
 from google.cloud.bigquery import QueryJobConfig
-from pydantic import BaseModel
 
 from app.services.bigquery_client import get_client
 
 router = APIRouter(prefix="/api")
 
-# ── Validation helpers ──
+# ── Fixed warehouse queries ──
 
-_DDL_DML = re.compile(
-    r"\b(INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|TRUNCATE|MERGE)\b",
-    re.IGNORECASE,
-)
+WAREHOUSE_QUERIES: dict[str, str] = {
+    "events-by-type": """SELECT
+  event_name,
+  COUNT(*) AS events,
+  COUNT(DISTINCT visitor_id) AS visitors
+FROM `reflection-data.reflection.fct_events`
+GROUP BY event_name
+ORDER BY events DESC
+LIMIT 100""",
+    "visitors-today": """SELECT
+  COUNT(DISTINCT visitor_id) AS visitors_today
+FROM `reflection-data.reflection.fct_events`
+WHERE DATE(event_timestamp) = CURRENT_DATE()""",
+    "exhibit-completion": """SELECT
+  step_name,
+  step_number,
+  unique_visitors,
+  ROUND(completion_rate, 2) AS completion_rate
+FROM `reflection-data.reflection.exhibit_funnel`
+ORDER BY step_number""",
+}
 
-_LIMIT_RE = re.compile(r"\bLIMIT\s+\d+", re.IGNORECASE)
+# ── Fixed insight questions ──
 
-ALLOWED_DATASET = "reflection-data.reflection"
+INSIGHT_QUESTIONS: dict[str, str] = {
+    "exhibit-completion": "how many visitors complete the exhibit?",
+    "most-common-event": "what's the most common event?",
+    "mobile-percentage": "what percentage of visitors are on mobile?",
+}
 
+# ── Module-level caches (key -> {data, expires_at}) ──
 
-def _validate_sql(sql: str) -> str | None:
-    """Return an error message if the SQL is invalid, else None."""
-    stripped = sql.strip()
-    # Remove leading comments
-    while stripped.startswith("--") or stripped.startswith("/*"):
-        if stripped.startswith("--"):
-            stripped = stripped.split("\n", 1)[-1].strip()
-        elif stripped.startswith("/*"):
-            end = stripped.find("*/")
-            if end == -1:
-                return "Unterminated comment"
-            stripped = stripped[end + 2 :].strip()
-
-    if not stripped.upper().startswith("SELECT"):
-        return "Only SELECT queries are allowed"
-
-    if _DDL_DML.search(sql):
-        return "DDL/DML statements are not allowed"
-
-    # Check for table references outside our dataset
-    # Match fully qualified table references like `project.dataset.table` or project.dataset.table
-    table_refs = re.findall(
-        r"`([^`]+\.[^`]+\.[^`]+)`|(?<!\w)(\w[\w-]*\.\w[\w-]*\.\w+)(?!\w)", sql
-    )
-    for ref_tuple in table_refs:
-        ref = ref_tuple[0] or ref_tuple[1]
-        if not ref.startswith(ALLOWED_DATASET):
-            return f"Queries must use tables in {ALLOWED_DATASET}"
-
-    return None
+_warehouse_cache: dict[str, dict] = {}
+_insight_cache: dict[str, dict] = {}
+_CACHE_TTL = 86400  # 24 hours
 
 
-def _ensure_limit(sql: str) -> str:
-    """Append LIMIT 100 if no LIMIT clause is present."""
-    if not _LIMIT_RE.search(sql):
-        return sql.rstrip().rstrip(";") + "\nLIMIT 100"
-    return sql
+# ── Helpers ──
 
+def _run_sql(sql: str) -> dict:
+    """Execute a SQL query and return results dict."""
+    client = get_client()
+    job_config = QueryJobConfig()
+    job_config.maximum_bytes_billed = 100 * 1024 * 1024  # 100 MB safety limit
 
-# ── Request/response models ──
+    start = time.time()
+    job = client.query(sql, job_config=job_config, timeout=10)
+    result = job.result(timeout=10)
+    duration_ms = int((time.time() - start) * 1000)
 
+    columns = [field.name for field in result.schema]
+    rows = []
+    for row in result:
+        rows.append([_serialize(row[col]) for col in columns])
 
-class QueryRequest(BaseModel):
-    sql: str
-
-
-class AskRequest(BaseModel):
-    question: str
-
-
-# ── Endpoints ──
-
-
-@router.post("/query")
-async def run_query(req: QueryRequest):
-    error = _validate_sql(req.sql)
-    if error:
-        return {"error": error}
-
-    sql = _ensure_limit(req.sql)
-
-    try:
-        client = get_client()
-        job_config = QueryJobConfig()
-        job_config.maximum_bytes_billed = 100 * 1024 * 1024  # 100 MB safety limit
-
-        start = time.time()
-        job = client.query(sql, job_config=job_config, timeout=10)
-        result = job.result(timeout=10)
-        duration_ms = int((time.time() - start) * 1000)
-
-        columns = [field.name for field in result.schema]
-        rows = []
-        for row in result:
-            rows.append([_serialize(row[col]) for col in columns])
-
-        return {
-            "columns": columns,
-            "rows": rows,
-            "row_count": len(rows),
-            "duration_ms": duration_ms,
-        }
-    except Exception as e:
-        return {"error": str(e)}
-
-
-@router.post("/ask")
-async def ask_question(req: AskRequest):
-    if not req.question.strip():
-        return {"error": "Question cannot be empty"}
-
-    try:
-        from app.services.claude_client import question_to_sql
-
-        sql = question_to_sql(req.question)
-    except Exception as e:
-        return {"error": f"Failed to generate SQL: {e}"}
-
-    # Validate the generated SQL
-    error = _validate_sql(sql)
-    if error:
-        return {"error": error, "sql": sql}
-
-    sql = _ensure_limit(sql)
-
-    try:
-        client = get_client()
-        job_config = QueryJobConfig()
-        job_config.maximum_bytes_billed = 100 * 1024 * 1024
-
-        start = time.time()
-        job = client.query(sql, job_config=job_config, timeout=10)
-        result = job.result(timeout=10)
-        duration_ms = int((time.time() - start) * 1000)
-
-        columns = [field.name for field in result.schema]
-        rows = []
-        for row in result:
-            rows.append([_serialize(row[col]) for col in columns])
-
-        return {
-            "sql": sql,
-            "columns": columns,
-            "rows": rows,
-            "row_count": len(rows),
-            "duration_ms": duration_ms,
-        }
-    except Exception as e:
-        return {"error": str(e), "sql": sql}
+    return {
+        "columns": columns,
+        "rows": rows,
+        "row_count": len(rows),
+        "duration_ms": duration_ms,
+    }
 
 
 def _serialize(val):
@@ -165,3 +85,56 @@ def _serialize(val):
     if isinstance(val, (int, float, str, bool)):
         return val
     return str(val)
+
+
+# ── Endpoints ──
+
+@router.get("/warehouse/{key}")
+async def warehouse_query(key: str):
+    if key not in WAREHOUSE_QUERIES:
+        return {"error": f"Unknown warehouse query: {key}"}
+
+    # Check cache
+    now = time.time()
+    cached = _warehouse_cache.get(key)
+    if cached and cached["expires_at"] > now:
+        return {**cached["data"], "cached": True}
+
+    sql = WAREHOUSE_QUERIES[key]
+    try:
+        data = _run_sql(sql)
+        data["sql"] = sql
+        data["cached"] = False
+        _warehouse_cache[key] = {"data": data, "expires_at": now + _CACHE_TTL}
+        return data
+    except Exception as e:
+        return {"error": str(e), "sql": sql}
+
+
+@router.get("/insights/{key}")
+async def insight_query(key: str):
+    if key not in INSIGHT_QUESTIONS:
+        return {"error": f"Unknown insight: {key}"}
+
+    # Check cache
+    now = time.time()
+    cached = _insight_cache.get(key)
+    if cached and cached["expires_at"] > now:
+        return {**cached["data"], "cached": True}
+
+    question = INSIGHT_QUESTIONS[key]
+    try:
+        from app.services.claude_client import question_to_sql
+        sql = question_to_sql(question)
+    except Exception as e:
+        return {"error": f"Failed to generate SQL: {e}"}
+
+    try:
+        data = _run_sql(sql)
+        data["sql"] = sql
+        data["question"] = question
+        data["cached"] = False
+        _insight_cache[key] = {"data": data, "expires_at": now + _CACHE_TTL}
+        return data
+    except Exception as e:
+        return {"error": str(e), "sql": sql}

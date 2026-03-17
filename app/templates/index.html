@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reflection</title>
-  <link rel="stylesheet" href="/static/style.css?v=12" />
+  <link rel="stylesheet" href="/static/style.css?v=13" />
 </head>
 <body>
   <div class="split">
@@ -52,14 +52,12 @@
         <div class="strip-content">
           <div class="warehouse-content">
             <div class="warehouse-label">BigQuery · fct_events</div>
-            <textarea id="warehouse-sql" class="warehouse-textarea" spellcheck="false">SELECT
-  event_name,
-  COUNT(*) AS events,
-  COUNT(DISTINCT visitor_id) AS visitors
-FROM `reflection-data.reflection.fct_events`
-GROUP BY event_name
-ORDER BY events DESC</textarea>
-            <button id="btn-run-query" class="btn btn-query">Run query →</button>
+            <div class="chip-row">
+              <button class="chip warehouse-chip" data-warehouse="events-by-type">events by type</button>
+              <button class="chip warehouse-chip" data-warehouse="visitors-today">visitors today</button>
+              <button class="chip warehouse-chip" data-warehouse="exhibit-completion">exhibit completion</button>
+            </div>
+            <textarea id="warehouse-sql" class="warehouse-textarea" readonly spellcheck="false" placeholder="← click a query above"></textarea>
             <div id="warehouse-results" class="query-results"></div>
           </div>
         </div>
@@ -140,9 +138,10 @@ ORDER BY events DESC</textarea>
           </div>
           {% endif %}
           <div class="ask-divider">ask a question</div>
-          <div class="ask-row">
-            <input type="text" id="ask-input" class="ask-input" placeholder="e.g. how many visitors today?" />
-            <button id="btn-ask" class="btn btn-query">Ask</button>
+          <div class="chip-row">
+            <button class="chip insight-chip" data-insight="exhibit-completion">how many visitors complete the exhibit?</button>
+            <button class="chip insight-chip" data-insight="most-common-event">what's the most common event?</button>
+            <button class="chip insight-chip" data-insight="mobile-percentage">what percentage are on mobile?</button>
           </div>
           <div id="ask-results" class="query-results"></div>
         </div>
@@ -197,13 +196,8 @@ ORDER BY events DESC</textarea>
           The warehouse on the right lets you run real SQL against the public dataset.
         </p>
         <p class="exhibit-text">
-          Try a query:
+          Try a query — click one of the chips in the warehouse panel on the right.
         </p>
-        <div class="exhibit-chips">
-          <button class="chip" data-chip="query" data-sql="SELECT event_name, COUNT(*) AS events, COUNT(DISTINCT visitor_id) AS visitors FROM `reflection-data.reflection.fct_events` GROUP BY event_name ORDER BY events DESC">events by type</button>
-          <button class="chip" data-chip="query" data-sql="SELECT COUNT(DISTINCT visitor_id) AS visitors_today FROM `reflection-data.reflection.fct_events` WHERE DATE(event_timestamp) = CURRENT_DATE()">visitors today</button>
-          <button class="chip" data-chip="query" data-sql="SELECT step_name, step_number, unique_visitors, ROUND(completion_rate, 2) AS completion_rate FROM `reflection-data.reflection.exhibit_funnel` ORDER BY step_number">exhibit completion</button>
-        </div>
       </div>
 
       <!-- Step 4: The Pipeline -->
@@ -215,14 +209,10 @@ ORDER BY events DESC</textarea>
           aggregations — pageviews, unique visitors, events per session.
         </p>
         <p class="exhibit-text">
-          The analytics panel on the right shows today's metrics. Ask a question
-          in plain English — it gets translated to SQL and run against the warehouse.
+          The analytics panel on the right shows today's metrics. Click one of the
+          question chips to ask a question — it gets translated to SQL and run against
+          the warehouse.
         </p>
-        <div class="exhibit-chips">
-          <button class="chip" data-chip="ask" data-question="how many visitors complete the exhibit?">how many visitors complete the exhibit?</button>
-          <button class="chip" data-chip="ask" data-question="what's the most common event?">what's the most common event?</button>
-          <button class="chip" data-chip="ask" data-question="what percentage of visitors are on mobile?">what percentage of visitors are on mobile?</button>
-        </div>
       </div>
 
       <!-- Step 5: Conclusion -->

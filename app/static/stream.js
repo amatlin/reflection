@@ -352,10 +352,10 @@
     container.appendChild(el);
   }
 
-  // ── Query execution (warehouse strip) ──
+  // ── Shared results rendering ──
   var warehouseSql = document.getElementById("warehouse-sql");
-  var runBtn = document.getElementById("btn-run-query");
   var warehouseResults = document.getElementById("warehouse-results");
+  var askResults = document.getElementById("ask-results");
 
   function renderResultsTable(container, data) {
     if (data.error) {
@@ -400,61 +400,42 @@
 
     var meta = document.createElement("div");
     meta.className = "query-meta";
-    meta.textContent = data.row_count + " row" + (data.row_count !== 1 ? "s" : "") +
-      " \u00B7 " + (data.duration_ms / 1000).toFixed(1) + "s";
+    var parts = [data.row_count + " row" + (data.row_count !== 1 ? "s" : "")];
+    if (data.duration_ms) parts.push((data.duration_ms / 1000).toFixed(1) + "s");
+    if (data.cached) parts.push("cached");
+    meta.textContent = parts.join(" \u00B7 ");
     container.appendChild(meta);
   }
 
-  function runQuery(sql) {
+  // ── Warehouse chip handlers ──
+  function runWarehouseChip(key) {
     showMessage(warehouseResults, "running...", "query-loading");
-    runBtn.disabled = true;
-    fetch("/api/query", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sql: sql })
-    })
+    if (warehouseSql) warehouseSql.value = "";
+    fetch("/api/warehouse/" + encodeURIComponent(key))
       .then(function (r) { return r.json(); })
       .then(function (data) {
+        if (warehouseSql && data.sql) warehouseSql.value = data.sql;
         clearEl(warehouseResults);
         renderResultsTable(warehouseResults, data);
       })
       .catch(function () {
         showMessage(warehouseResults, "Network error", "query-error");
-      })
-      .finally(function () {
-        runBtn.disabled = false;
       });
   }
 
-  if (runBtn) {
-    runBtn.addEventListener("click", function () {
-      runQuery(warehouseSql.value);
+  document.querySelectorAll(".warehouse-chip").forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      runWarehouseChip(chip.getAttribute("data-warehouse"));
     });
-  }
+  });
 
-  // Expose for exhibit chip handlers
-  window.__runQuery = function (sql) {
-    if (warehouseSql) warehouseSql.value = sql;
-    runQuery(sql);
-  };
-
-  // ── Ask execution (analytics strip) ──
-  var askInput = document.getElementById("ask-input");
-  var askBtn = document.getElementById("btn-ask");
-  var askResults = document.getElementById("ask-results");
-
-  function runAsk(question) {
+  // ── Insight chip handlers ──
+  function runInsight(key) {
     showMessage(askResults, "thinking...", "query-loading");
-    askBtn.disabled = true;
-    fetch("/api/ask", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: question })
-    })
+    fetch("/api/insights/" + encodeURIComponent(key))
       .then(function (r) { return r.json(); })
       .then(function (data) {
         clearEl(askResults);
-        // Show generated SQL (collapsible)
         if (data.sql) {
           var sqlWrap = document.createElement("details");
           sqlWrap.className = "ask-sql-details";
@@ -473,31 +454,12 @@
       })
       .catch(function () {
         showMessage(askResults, "Network error", "query-error");
-      })
-      .finally(function () {
-        askBtn.disabled = false;
       });
   }
 
-  if (askBtn) {
-    askBtn.addEventListener("click", function () {
-      var q = askInput.value.trim();
-      if (q) runAsk(q);
+  document.querySelectorAll(".insight-chip").forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      runInsight(chip.getAttribute("data-insight"));
     });
-  }
-
-  if (askInput) {
-    askInput.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        var q = askInput.value.trim();
-        if (q) runAsk(q);
-      }
-    });
-  }
-
-  // Expose for exhibit chip handlers
-  window.__runAsk = function (question) {
-    if (askInput) askInput.value = question;
-    runAsk(question);
-  };
+  });
 })();

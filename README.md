@@ -8,9 +8,9 @@ A website whose sole purpose is to analyze itself.
 
 You visit it, you interact with it, and those interactions become the data you can explore on the site. Every click, every page view — captured, streamed live, and piped through a real analytics stack.
 
-The homepage greets you by your visitor ID and shows three collapsible strips — a live event stream, a SQL warehouse, and an analytics panel. Click "Enter the exhibit" for a dark-themed guided tour that walks you through the data pipeline step by step. Fire a real event in step 2 and watch it travel through the system. Write and run SQL against BigQuery in step 3. Ask natural-language questions about the data in step 4 — Claude translates them to SQL and runs them. Leave a thought in step 5 — it becomes data too.
+The homepage greets you by your visitor ID and shows three collapsible strips — a live event stream, a SQL warehouse, and an analytics panel. Click "Enter the exhibit" for a dark-themed guided tour that walks you through the data pipeline step by step. Fire a real event in step 2 and watch it travel through the system. Run fixed SQL queries against BigQuery in step 3. Explore insight questions about the data in step 4 — Claude translates them to SQL. Leave a thought in step 5 — it becomes data too.
 
-The warehouse strip has an editable SQL textarea and a "Run query" button that executes queries against BigQuery in real time. The analytics strip shows server-rendered daily metrics and an "ask a question" input powered by Claude. Exhibit steps include suggested query chips that auto-populate and run.
+The warehouse strip has 3 clickable query chips and a readonly SQL textarea that shows the actual query being run. The analytics strip shows server-rendered daily metrics and 3 insight question chips powered by Claude NL→SQL. All query and insight results are cached daily server-side.
 
 Pipeline countdowns show when the next BigQuery export and dbt refresh will run. The exhibit generates `funnel_step` events on each navigation and `questionnaire_response` events on submit, enriching the analytics pipeline.
 
@@ -19,13 +19,13 @@ Pipeline countdowns show when the next BigQuery export and dbt refresh will run.
 Events travel two paths:
 
 1. **Real-time** — PostHog JS SDK captures events → FastAPI backend → Supabase insert → WebSocket broadcast → live stream panel (~50ms)
-2. **Analytical** — PostHog → BigQuery (hourly batch export) → dbt transforms → `metrics_daily` + `exhibit_funnel` marts → analytics strip + SQL playground + NL→SQL
+2. **Analytical** — PostHog → BigQuery (hourly batch export) → dbt transforms → `metrics_daily` + `exhibit_funnel` marts → analytics strip + warehouse query chips + insight chips (daily cache)
 
 ## Stack
 
 - **PostHog** — event capture, sessions, behavioral analytics
 - **Supabase** — Postgres database + real-time subscriptions for the live event stream
-- **FastAPI** — Python backend, validates and dual-writes events, proxies SQL queries
+- **FastAPI** — Python backend, validates and dual-writes events, serves cached warehouse queries and insight results
 - **BigQuery** — analytical warehouse (PostHog batch export, hourly)
 - **dbt Core** — data transformation (staging → facts → dimensions → daily metrics → exhibit funnel)
 - **Claude API** — natural-language → SQL translation for the "ask a question" feature

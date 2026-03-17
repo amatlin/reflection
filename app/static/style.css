@@ -411,7 +411,35 @@ h1 {
   text-align: right;
 }
 
-/* ── Warehouse textarea + query button ── */
+/* ── Chip row ── */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Warehouse / insight chips (light theme) ── */
+.warehouse-chip,
+.insight-chip {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.warehouse-chip:hover,
+.insight-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Warehouse textarea (readonly) ── */
 .warehouse-textarea {
   display: block;
   width: 100%;
@@ -424,31 +452,17 @@ h1 {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.75rem;
   line-height: 1.7;
-  resize: vertical;
+  resize: none;
   margin-bottom: 0.75rem;
-  transition: border-color 0.2s;
+  cursor: default;
+}
+
+.warehouse-textarea[readonly] {
+  opacity: 0.85;
 }
 
 .warehouse-textarea:focus {
   outline: none;
-  border-color: #3b82f6;
-}
-
-.btn-query {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-faint);
-}
-
-.btn-query:hover {
-  background: var(--accent-light);
-}
-
-.btn-query:disabled {
-  opacity: 0.5;
-  cursor: default;
 }
 
 /* ── Query results (shared by warehouse + analytics) ── */
@@ -538,27 +552,6 @@ h1 {
   background: var(--border);
 }
 
-.ask-row {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.ask-input {
-  flex: 1;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text-primary);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.82rem;
-  transition: border-color 0.2s;
-}
-
-.ask-input:focus {
-  outline: none;
-  border-color: var(--accent);
-}
 
 /* Collapsible SQL in ask results */
 .ask-sql-details {
@@ -591,30 +584,6 @@ h1 {
   white-space: pre;
 }
 
-/* ── Exhibit chips ── */
-.exhibit-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
-.chip {
-  padding: 0.4rem 0.85rem;
-  border: 1px solid #475569;
-  border-radius: 20px;
-  background: transparent;
-  color: #94a3b8;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.78rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.chip:hover {
-  border-color: #93c5fd;
-  color: #93c5fd;
-}
 
 /* ── Exhibit close button ── */
 .exhibit-close {
@@ -1105,14 +1074,17 @@ body.exhibit-mode .analytics-cache-age {
 }
 
 /* Interactive elements dark overrides */
-body.exhibit-mode .btn-query {
-  border-color: #3b82f6;
-  color: #93c5fd;
-  background: rgba(59, 130, 246, 0.15);
+body.exhibit-mode .warehouse-chip,
+body.exhibit-mode .insight-chip {
+  border-color: #475569;
+  color: #94a3b8;
+  background: transparent;
 }
 
-body.exhibit-mode .btn-query:hover {
-  background: rgba(59, 130, 246, 0.25);
+body.exhibit-mode .warehouse-chip:hover,
+body.exhibit-mode .insight-chip:hover {
+  border-color: #93c5fd;
+  color: #93c5fd;
 }
 
 body.exhibit-mode .results-table th {
@@ -1152,16 +1124,6 @@ body.exhibit-mode .ask-divider {
 body.exhibit-mode .ask-divider::before,
 body.exhibit-mode .ask-divider::after {
   background: #334155;
-}
-
-body.exhibit-mode .ask-input {
-  background: #1e293b;
-  border-color: #334155;
-  color: #e2e8f0;
-}
-
-body.exhibit-mode .ask-input:focus {
-  border-color: #3b82f6;
 }
 
 body.exhibit-mode .ask-sql-details summary {
@@ -1317,13 +1279,15 @@ body.exhibit-mode .ask-sql-details summary {
     font-size: 0.7rem;
   }
 
-  .ask-row {
-    flex-direction: column;
+  .chip-row {
+    flex-wrap: wrap;
+    gap: 0.35rem;
   }
 
-  .exhibit-chips {
-    flex-direction: column;
-    gap: 0.4rem;
+  .warehouse-chip,
+  .insight-chip {
+    font-size: 0.72rem;
+    padding: 0.3rem 0.6rem;
   }
 
   .exhibit-close {

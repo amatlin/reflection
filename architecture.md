@@ -13,14 +13,14 @@ PostHog batch export (hourly) → BigQuery (raw)
          stg_events (view) → exhibit_funnel
 
 Page load → FastAPI queries BigQuery metrics_daily (1-hour in-memory cache) → analytics strip
-Visitor runs SQL → FastAPI POST /api/query → BigQuery → results table in warehouse strip
-Visitor asks question → FastAPI POST /api/ask → Claude NL→SQL → BigQuery → analytics strip
+Visitor clicks warehouse chip → FastAPI GET /api/warehouse/{key} → BigQuery (daily cache) → results table in warehouse strip
+Visitor clicks insight chip → FastAPI GET /api/insights/{key} → Claude NL→SQL (daily cache) → BigQuery → analytics strip
 ```
 
 ### Two data paths
 
 1. **Real-time path** (stream strip): Browser → PostHog SDK `_onCapture` → FastAPI → Supabase insert → in-process WebSocket broadcast → stream panel. Latency: ~50ms.
-2. **Analytical path** (analytics strip + warehouse strip): PostHog → BigQuery (hourly batch export) → dbt models → FastAPI queries `metrics_daily` → server-rendered HTML. Visitors can also query BigQuery directly via the SQL playground or natural-language interface.
+2. **Analytical path** (analytics strip + warehouse strip): PostHog → BigQuery (hourly batch export) → dbt models → FastAPI queries `metrics_daily` → server-rendered HTML. Visitors can explore BigQuery data via 3 fixed warehouse query chips and 3 fixed insight question chips, all cached daily server-side.
 
 ## Decision Framework
 
@@ -46,8 +46,8 @@ FastAPI (Python). Routes:
 - `GET /` — homepage with server-rendered Jinja2 template, metrics baked in from BigQuery cache
 - `POST /api/events` — event ingestion (validates, writes to Supabase, broadcasts via WebSocket)
 - `WebSocket /ws/events` — live event stream (backfills last 50 events on connect, broadcasts new events, tracks presence count)
-- `POST /api/query` — execute visitor-supplied SQL against BigQuery (SELECT-only, dataset-restricted, auto LIMIT 100, 10s timeout, 100MB billing cap)
-- `POST /api/ask` — natural-language → SQL translation via Claude, then executes against BigQuery with the same validation
+- `GET /api/warehouse/{key}` — run one of 3 fixed SQL queries against BigQuery (keys: `events-by-type`, `visitors-today`, `exhibit-completion`). Results cached in-memory for 24 hours. Returns SQL, columns, rows, and cached flag.
+- `GET /api/insights/{key}` — run one of 3 fixed insight questions (keys: `exhibit-completion`, `most-common-event`, `mobile-percentage`). On cache miss: Claude NL→SQL → BigQuery → cache. 24-hour TTL. Returns SQL, question, columns, rows, and cached flag.
 
 ### Services
 - `bigquery_client.py` — lazy-init BigQuery client, `get_latest_metrics()` with 1-hour cache, `get_last_export_time()` with 5-minute cache for pipeline countdowns, `get_cache_age_minutes()` for data freshness display
@@ -61,10 +61,10 @@ The homepage has a split layout:
 - **Left panel:** concept explanation, "Enter the exhibit" button, event journey card, pipeline countdowns (next warehouse export + dbt refresh)
 - **Right panel:** three collapsible strips arranged as a vertical accordion:
   - **Stream strip** — live event feed via WebSocket, presence count, "you" labels on your own events
-  - **Warehouse strip** — editable SQL textarea + "Run query" button, executes against BigQuery, results table
-  - **Analytics strip** — server-rendered daily metrics from `metrics_daily`, plus "ask a question" input powered by Claude NL→SQL
+  - **Warehouse strip** — 3 clickable query chips, readonly SQL textarea (shows the query being run), results table. Queries are fixed server-side and cached for 24 hours.
+  - **Analytics strip** — server-rendered daily metrics from `metrics_daily`, plus 3 clickable insight chips powered by Claude NL→SQL (cached daily)
 
-The **museum exhibit** is a dark overlay with 5 hash-routed steps (`#exhibit-1` through `#exhibit-5`): Welcome → The Loop → The Warehouse → The Pipeline → The Apparatus. Strips are hidden initially and fade in at relevant steps (stream at step 2, warehouse at step 3, analytics at step 4). Exhibit steps include suggested query/question chips that auto-populate and run. Mobile responsive with stacked layout.
+The **museum exhibit** is a dark overlay with 5 hash-routed steps (`#exhibit-1` through `#exhibit-5`): Welcome → The Loop → The Warehouse → The Pipeline → The Apparatus. Strips are hidden initially and fade in at relevant steps (stream at step 2, warehouse at step 3, analytics at step 4). Exhibit steps reference the chips in the strips rather than duplicating them. Mobile responsive with stacked layout.
 
 ### Hosting — Railway
 Docker container (Python 3.12, single uvicorn process). Custom domain `reflection.sh` via Namecheap DNS (CNAME → Railway). Environment variables set in Railway's dashboard. The BigQuery service account key is passed as `BIGQUERY_KEY_JSON` (the full JSON string) since Railway can't mount key files.
@@ -77,14 +77,18 @@ PostHog batch exports events to BigQuery hourly. dbt Core transforms them:
 - `metrics_daily` (table) — daily aggregates: volume, event mix, device split, geo, ratios
 - `exhibit_funnel` (table) — step completion rates from `funnel_step` events (maps step names to numbers 1–5, calculates unique visitors and completion rate per step)
 
-The FastAPI backend queries `metrics_daily` via `bigquery_client.py` with a 1-hour in-memory cache. Results are baked into the HTML at render time. Visitors can also query all tables directly via the SQL playground (`/api/query`) or natural-language interface (`/api/ask`).
+The FastAPI backend queries `metrics_daily` via `bigquery_client.py` with a 1-hour in-memory cache. Results are baked into the HTML at render time. Visitors can also explore data via 3 fixed warehouse query chips (`/api/warehouse/{key}`) and 3 fixed insight question chips (`/api/insights/{key}`), both cached for 24 hours in module-level dicts.
 
 ### Caching
 `bigquery_client.py` uses two module-level dict caches:
 - `_cache` — latest `metrics_daily` row, 3600-second (1-hour) TTL. On cache miss, runs a BigQuery query. On error, returns `None` and the template shows a fallback message.
 - `_export_cache` — last PostHog export timestamp, 300-second (5-minute) TTL. Used to display pipeline countdowns in the UI.
 
-Both caches are per-process (not shared across workers), which is fine for single-process Railway deployment.
+`query.py` uses two additional module-level dict caches:
+- `_warehouse_cache` — results of fixed warehouse queries, 86400-second (24-hour) TTL. Keyed by query name. On error, does NOT cache (next request retries).
+- `_insight_cache` — results of fixed insight questions, 86400-second (24-hour) TTL. Keyed by question name. On error, does NOT cache.
+
+All caches are per-process (not shared across workers), which is fine for single-process Railway deployment.
 
 ### WebSocket Broadcasting
 The live event stream uses in-process WebSocket broadcasting (not Supabase Realtime). `events.py` maintains a set of active WebSocket connections. On new event ingestion, the event is broadcast to all connected clients. On connect, the last 50 events are backfilled from Supabase so the stream isn't blank. Presence count is tracked and broadcast when connections open or close. This is simple and sufficient for single-process deployment.

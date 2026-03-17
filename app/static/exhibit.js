@@ -112,20 +112,6 @@
     });
   }
 
-  // Exhibit chips — populate strip inputs and auto-submit
-  overlay.addEventListener("click", function (e) {
-    var chip = e.target.closest("[data-chip]");
-    if (!chip) return;
-    var type = chip.getAttribute("data-chip");
-    if (type === "query") {
-      var sql = chip.getAttribute("data-sql");
-      if (sql && window.__runQuery) window.__runQuery(sql);
-    } else if (type === "ask") {
-      var question = chip.getAttribute("data-question");
-      if (question && window.__runAsk) window.__runAsk(question);
-    }
-  });
-
   // Hash routing
   window.addEventListener("hashchange", function () {
     var hash = window.location.hash;
