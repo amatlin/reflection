@@ -54,6 +54,7 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 - ~~`exhibit_funnel` dbt model: step completion rates from funnel_step events~~
 - ~~Deploy to Railway~~
 - ~~Exhibit close button (×) — moved to top-left to avoid strip z-index overlap~~
+- Modeling step (step 5, pushing "The Apparatus" to step 6): NLP analysis of questionnaire responses — topic clustering, sentiment distribution, and/or Claude summarization of what visitors have said. Batch-computed daily on accumulated `questionnaire_response` texts. Design TBD.
 - Architecture diagram in exhibit step 1 (static SVG/HTML showing both data paths)
 - Tip jar placeholder (Stripe integration deferred)
 - AI-generated insight summarizing query results (fast-follow)

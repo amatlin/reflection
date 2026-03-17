@@ -830,3 +830,27 @@ Prod verification (Playwright against Railway URL):
 
 **Other:**
 - Run `dbt build` to refresh marts with new traffic data
+
+## 2026-03-17 — Brainstorm: modeling step for the exhibit
+
+### Rationale
+
+From a DS perspective, the exhibit's pipeline narrative (capture → store → transform → analyze → reflect) is missing a step that any real company's data stack would have: **modeling**. After analytics, you build models on the data. Adding this step makes the exhibit a more complete representation of a production data stack.
+
+### Options considered
+
+- **Real-time scoring** (e.g., predict next click): ruled out — the exhibit's analytical path is batch, and real-time ML would require a serving layer that doesn't fit the current architecture.
+- **Predictive modeling** (e.g., churn, return visit): not enough data volume yet to make this meaningful.
+- **Text analysis on questionnaire responses**: NLP on the free-text responses visitors leave at the end of the exhibit. Topic clustering, sentiment distribution, and/or Claude summarization of what visitors have said.
+
+### Direction chosen: text analysis on questionnaire responses
+
+**Why this fits:**
+- **Self-referential.** Visitors leave their thoughts about the site, and the site models those thoughts back at them. The loop deepens.
+- **Batch-native.** Runs daily on accumulated `questionnaire_response` texts — fits the existing analytical path (BigQuery + dbt + daily refresh).
+- **Gets richer with more data.** Unlike behavioral event modeling, text analysis becomes more interesting as more visitors contribute. Topic clusters emerge, sentiment shifts over time.
+- **Completes the pipeline narrative.** The exhibit would become: capture → store → transform → analyze → **model** → reflect.
+
+### Status
+
+Idea stage — not ready for implementation. Added to `plan.md` under Milestone 5 as a tracked TODO. Design decisions (which NLP techniques, how to display results, whether to use Claude or a dedicated NLP pipeline) are all TBD.

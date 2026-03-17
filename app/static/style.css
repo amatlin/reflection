@@ -610,6 +610,18 @@ body.exhibit-mode .exhibit-close {
   color: #e2e8f0;
 }
 
+/* ── Modeling placeholder ── */
+.modeling-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  padding: 1rem;
+}
+
 /* ── Analytics placeholder ── */
 .analytics-placeholder {
   display: flex;
@@ -1036,6 +1048,11 @@ body.exhibit-mode .btn-fire:hover {
 .exhibit-tip-jar .btn:hover {
   border-color: #93c5fd;
   color: #93c5fd;
+}
+
+/* Modeling placeholder dark */
+body.exhibit-mode .modeling-placeholder {
+  color: #475569;
 }
 
 /* Analytics placeholder dark */
