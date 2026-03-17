@@ -95,6 +95,10 @@
       var name = (ev.raw_properties && ev.raw_properties.item_name) || "";
       return name ? "started checkout: " + name : "started checkout";
     }
+    if (t === "purchase_complete") {
+      var pName = (ev.raw_properties && ev.raw_properties.item_name) || "";
+      return pName ? "purchased: " + pName : "completed a purchase";
+    }
     return t; // unknown custom events: show raw name
   }
 

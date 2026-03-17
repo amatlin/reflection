@@ -48,6 +48,8 @@ FastAPI (Python). Routes:
 - `WebSocket /ws/events` — live event stream (backfills last 50 events on connect, broadcasts new events, tracks presence count)
 - `GET /api/warehouse/{key}` — run one of 3 fixed SQL queries against BigQuery (keys: `events-by-type`, `visitors-today`, `exhibit-completion`). Results cached in-memory for 24 hours. Returns SQL, columns, rows, and cached flag.
 - `GET /api/insights/{key}` — run one of 3 fixed insight questions (keys: `exhibit-completion`, `most-common-event`, `mobile-percentage`). On cache miss: Claude NL→SQL → BigQuery → cache. 24-hour TTL. Returns SQL, question, columns, rows, and cached flag.
+- `POST /api/checkout/create-session` — creates a Stripe Checkout Session for "keep the lights on" donations. Accepts `{ item_id, item_name, price }`, validates, returns `{ url }` for redirect.
+- `POST /api/stripe/webhook` — receives Stripe webhook events. On `checkout.session.completed`, inserts a `purchase_complete` event into Supabase and broadcasts via WebSocket.
 
 ### Services
 - `bigquery_client.py` — lazy-init BigQuery client, `get_latest_metrics()` with 1-hour cache, `get_last_export_time()` with 5-minute cache for pipeline countdowns, `get_cache_age_minutes()` for data freshness display
@@ -64,9 +66,18 @@ The homepage has a split layout:
   - **Warehouse strip** — 3 clickable query chips, readonly SQL textarea (shows the query being run), results table. Queries are fixed server-side and cached for 24 hours.
   - **Analytics strip** — server-rendered daily metrics from `metrics_daily`, plus 3 clickable insight chips powered by Claude NL→SQL (cached daily)
   - **Modeling strip** — placeholder for NLP analysis of questionnaire responses (content TBD)
-  - **Shop strip** — 3 gift shop items (keep the lights on, a visualization, buy the developer a coffee). Buy buttons fire `checkout_started` events. Payment integration (Stripe) deferred.
+  - **Shop strip** — 2 gift shop items (a visualization, keep the lights on). "Keep the lights on" has a live Stripe Checkout flow; the visualization has a "coming soon" overlay. Buy buttons fire `checkout_started` events; Stripe webhook fires `purchase_complete` events back through the pipeline.
 
 The **museum exhibit** is a dark overlay with 6 hash-routed steps (`#exhibit-1` through `#exhibit-6`): Welcome → The Loop → The Warehouse → The Pipeline → The Model → The Apparatus. Strips are hidden initially and fade in at relevant steps (stream at step 2, warehouse at step 3, analytics at step 4, modeling at step 5, shop at step 6). Exhibit steps reference the chips in the strips rather than duplicating them. Mobile responsive with stacked layout.
+
+### Payments — Stripe
+The "keep the lights on" donation uses Stripe Checkout (hosted payment page). Flow:
+1. Visitor enters amount, clicks Buy → frontend POSTs to `/api/checkout/create-session` → creates a Stripe Checkout Session → redirects visitor to Stripe
+2. Visitor completes payment on Stripe → Stripe sends `checkout.session.completed` webhook to `/api/stripe/webhook`
+3. Webhook handler inserts a `purchase_complete` event into Supabase (with `item_id`, `item_name`, `price`, `stripe_session_id`) and broadcasts it via WebSocket to the live stream
+4. Visitor is redirected back to `/?checkout=success` and sees a thank-you toast
+
+Purchase events flow through the same pipeline as all other events (Supabase → BigQuery → dbt), so they appear in warehouse queries and analytics alongside behavioral data. Stripe is the source of truth for payment state; the Supabase event is an analytical record.
 
 ### Hosting — Railway
 Docker container (Python 3.12, single uvicorn process). Custom domain `reflection.sh` via Namecheap DNS (CNAME → Railway). Environment variables set in Railway's dashboard. The BigQuery service account key is passed as `BIGQUERY_KEY_JSON` (the full JSON string) since Railway can't mount key files.
@@ -109,3 +120,4 @@ PostHog handles session IDs, visitor IDs, device metadata, and timestamps automa
 | `funnel_step` | `step` ("welcome", "the-loop", "the-warehouse", "the-pipeline", "the-apparatus") | Exhibit navigation |
 | `questionnaire_response` | `response_text` (string, max 500 chars, validated server-side) | Exhibit step 6 |
 | `checkout_started` | `item_id` (string), `item_name` (string), `price` (number, > 0) | Shop strip buy button |
+| `purchase_complete` | `item_id` (string), `item_name` (string), `price` (number), `stripe_session_id` (string) | Stripe webhook |

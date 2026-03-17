@@ -1445,3 +1445,30 @@ body.exhibit-mode .ask-sql-details summary {
     padding: 1rem;
   }
 }
+
+/* Checkout error message */
+.shop-checkout-error {
+  font-size: 0.7rem;
+  color: #ef4444;
+  margin-top: 0.35rem;
+}
+
+/* Checkout success toast */
+.checkout-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  z-index: 10000;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.checkout-toast-fade {
+  opacity: 0;
+}

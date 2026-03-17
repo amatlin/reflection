@@ -210,6 +210,7 @@
         if (!price || price <= 0) return;
       }
 
+      // Fire PostHog event
       if (window.posthog) {
         window.posthog.capture("checkout_started", {
           item_id: itemId,
@@ -217,6 +218,66 @@
           price: price
         });
       }
+
+      // For keep-the-lights-on, redirect to Stripe Checkout
+      if (itemId === "keep-the-lights-on") {
+        btn.disabled = true;
+        btn.textContent = "Redirecting...";
+
+        fetch("/api/checkout/create-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ item_id: itemId, item_name: itemName, price: price })
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data.url) {
+              window.location.href = data.url;
+            } else {
+              btn.disabled = false;
+              btn.textContent = "Buy";
+              var errEl = btn.parentElement.querySelector(".shop-checkout-error");
+              if (!errEl) {
+                errEl = document.createElement("div");
+                errEl.className = "shop-checkout-error";
+                btn.parentElement.appendChild(errEl);
+              }
+              errEl.textContent = data.detail || "Something went wrong.";
+            }
+          })
+          .catch(function () {
+            btn.disabled = false;
+            btn.textContent = "Buy";
+            var errEl = btn.parentElement.querySelector(".shop-checkout-error");
+            if (!errEl) {
+              errEl = document.createElement("div");
+              errEl.className = "shop-checkout-error";
+              btn.parentElement.appendChild(errEl);
+            }
+            errEl.textContent = "Network error. Please try again.";
+          });
+      }
     });
   });
+
+  // Checkout success message
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") === "success") {
+      // Show a brief thank-you toast
+      var toast = document.createElement("div");
+      toast.className = "checkout-toast";
+      toast.textContent = "Thank you for your contribution.";
+      document.body.appendChild(toast);
+
+      // Auto-dismiss after 5 seconds
+      setTimeout(function () {
+        toast.classList.add("checkout-toast-fade");
+        setTimeout(function () { toast.remove(); }, 500);
+      }, 5000);
+
+      // Clean the query param
+      history.replaceState(null, "", window.location.pathname + window.location.hash);
+    }
+  })();
 })();

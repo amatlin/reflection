@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reflection</title>
-  <link rel="stylesheet" href="/static/style.css?v=17" />
+  <link rel="stylesheet" href="/static/style.css?v=18" />
 </head>
 <body>
   <div class="split">
@@ -171,22 +171,6 @@
         <div class="strip-content">
           <div class="shop-content">
             <div class="shop-cards">
-              <div class="shop-card" data-item-id="keep-the-lights-on" data-item-name="keep the lights on">
-                <div class="shop-card-name">keep the lights on</div>
-                <div class="shop-card-description">
-                  Contribute toward hosting costs — BigQuery, Railway, Supabase, PostHog.
-                </div>
-                <div class="shop-card-price">
-                  <label class="shop-price-label" for="shop-amount">pay what you wish</label>
-                  <div class="shop-amount-row">
-                    <span class="shop-currency">$</span>
-                    <input type="number" id="shop-amount" class="shop-amount-input" min="1" step="1" placeholder="5">
-                  </div>
-                </div>
-                <button class="btn shop-buy-btn" data-item-id="keep-the-lights-on" data-item-name="keep the lights on" data-price-input="shop-amount">Buy</button>
-                <div class="shop-coming-soon">coming soon</div>
-              </div>
-
               <div class="shop-card" data-item-id="visualization" data-item-name="a visualization">
                 <div class="shop-card-name">a visualization</div>
                 <div class="shop-card-description">
@@ -199,16 +183,19 @@
                 <div class="shop-coming-soon">coming soon</div>
               </div>
 
-              <div class="shop-card" data-item-id="buy-a-coffee" data-item-name="buy the developer a coffee">
-                <div class="shop-card-name">buy the developer a coffee</div>
+              <div class="shop-card" data-item-id="keep-the-lights-on" data-item-name="keep the lights on">
+                <div class="shop-card-name">keep the lights on</div>
                 <div class="shop-card-description">
-                  A small, fixed contribution. Caffeinated gratitude.
+                  Contribute toward hosting costs — BigQuery, Railway, Supabase, PostHog.
                 </div>
                 <div class="shop-card-price">
-                  <span class="shop-fixed-price">$5</span>
+                  <label class="shop-price-label" for="shop-amount">pay what you wish</label>
+                  <div class="shop-amount-row">
+                    <span class="shop-currency">$</span>
+                    <input type="number" id="shop-amount" class="shop-amount-input" min="1" step="1" value="5">
+                  </div>
                 </div>
-                <button class="btn shop-buy-btn" data-item-id="buy-a-coffee" data-item-name="buy the developer a coffee" data-price="5">Buy</button>
-                <div class="shop-coming-soon">coming soon</div>
+                <button class="btn shop-buy-btn" data-item-id="keep-the-lights-on" data-item-name="keep the lights on" data-price-input="shop-amount">Buy</button>
               </div>
             </div>
           </div>
@@ -434,7 +421,7 @@
     });
   </script>
 
-  <script src="/static/stream.js?v=15"></script>
-  <script src="/static/exhibit.js?v=15"></script>
+  <script src="/static/stream.js?v=16"></script>
+  <script src="/static/exhibit.js?v=16"></script>
 </body>
 </html>

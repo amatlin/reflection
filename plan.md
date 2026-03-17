@@ -56,7 +56,8 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 - ~~Exhibit close button (×) — moved to top-left to avoid strip z-index overlap~~
 - Modeling step (step 5, pushing "The Apparatus" to step 6): NLP analysis of questionnaire responses — topic clustering, sentiment distribution, and/or Claude summarization of what visitors have said. Batch-computed daily on accumulated `questionnaire_response` texts. Design TBD.
 - Architecture diagram in exhibit step 1 (static SVG/HTML showing both data paths)
-- ~~Gift shop strip with 3 items (keep the lights on, a visualization, buy the developer a coffee) — `checkout_started` event tracking, Stripe integration deferred~~
+- ~~Gift shop strip with 2 items (a visualization, keep the lights on) — `checkout_started` event tracking~~
+- ~~Stripe Checkout integration for "keep the lights on" donation — pay-what-you-wish, webhook fires `purchase_complete` through pipeline~~
 - AI-generated insight summarizing query results (fast-follow)
 - See `museum_idea.md` for full design
 

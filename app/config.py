@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     bigquery_key_path: str = ""
     bigquery_key_json: str = ""
     anthropic_api_key: str = ""
+    stripe_secret_key: str = ""
+    stripe_publishable_key: str = ""
+    stripe_webhook_secret: str = ""
     dbt_cron_minute: int = 15
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}

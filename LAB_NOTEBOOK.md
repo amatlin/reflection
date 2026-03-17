@@ -881,3 +881,41 @@ Also renamed the step 6 funnel step from `"the-apparatus"` to `"the-shop"` in th
 - Wire up Stripe for actual payments
 - Design the visualization print
 - Modeling step content (NLP on questionnaire responses)
+
+## 2026-03-17 — Stripe integration for "keep the lights on"
+
+Wired up Stripe Checkout so the "keep the lights on" donation in the shop strip actually processes payments. The visualization card keeps its "coming soon" overlay.
+
+**How it works:** Visitor enters an amount → clicks Buy → frontend POSTs to `/api/checkout/create-session` → backend creates a Stripe Checkout Session → visitor is redirected to Stripe's hosted payment page → after payment, Stripe sends a `checkout.session.completed` webhook to `/api/stripe/webhook` → webhook handler inserts a `purchase_complete` event into Supabase and broadcasts it via WebSocket to the live stream.
+
+The self-referential loop is preserved: purchase events flow through the same pipeline as all other events (Supabase → BigQuery → dbt), so they show up in warehouse queries, analytics, and the live stream.
+
+**Key decisions:**
+- Used Stripe Checkout (hosted page) rather than Stripe Elements (embedded form) — simpler, PCI compliant out of the box, no need to handle card inputs ourselves.
+- Redirect URLs are built dynamically from the incoming request origin, so they work on both the Railway URL and `reflection.sh` without code changes.
+- The `purchase_complete` event is inserted server-side by the webhook (not the frontend) so it's authoritative — only fires on actual completed payments.
+- Default donation amount is $5 (set as `value`, not `placeholder`, so clicking Buy without changing it works).
+
+**Stripe setup (sandbox/test mode):**
+- Created webhook endpoint pointing to Railway URL (`/api/stripe/webhook`), listening for `checkout.session.completed`
+- Three env vars in Railway: `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`
+- `reflection.sh` DNS wasn't resolving, so webhook uses the Railway URL for now
+
+### Files changed
+- `requirements.txt` — added `stripe>=8.0.0`
+- `app/config.py` — added Stripe settings
+- `.env.example` — added Stripe env vars
+- `app/routes/checkout.py` — new file, checkout session + webhook endpoints
+- `app/main.py` — registered checkout router
+- `app/templates/index.html` — removed "coming soon" from keep-the-lights-on card, set default amount to $5, cache-busted to v16/v18
+- `app/static/exhibit.js` — buy button redirects to Stripe, success toast on return, error handling
+- `app/static/stream.js` — humanize `purchase_complete` events
+- `app/static/style.css` — checkout error + success toast styles
+- `architecture.md` — Stripe section, new event type, new API routes
+- `plan.md` — marked Stripe integration as complete
+
+### Next steps
+- Fix `reflection.sh` DNS so the custom domain works again
+- Design the visualization print
+- Modeling step content (NLP on questionnaire responses)
+- Switch Stripe from sandbox to live mode when ready
