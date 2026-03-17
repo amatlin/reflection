@@ -620,7 +620,7 @@ h1 {
 .exhibit-close {
   position: fixed;
   top: 1.25rem;
-  left: calc(42% - 3rem);
+  left: 1.25rem;
   z-index: 250;
   background: transparent;
   border: none;
@@ -1328,7 +1328,6 @@ body.exhibit-mode .ask-sql-details summary {
 
   .exhibit-close {
     top: 0.75rem;
-    left: auto;
-    right: 1rem;
+    left: 0.75rem;
   }
 }

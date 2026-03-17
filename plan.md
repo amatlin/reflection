@@ -53,7 +53,7 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 - ~~Exhibit question chips at step 4 (completion rates, most common event, mobile %)~~
 - ~~`exhibit_funnel` dbt model: step completion rates from funnel_step events~~
 - ~~Deploy to Railway~~
-- Exhibit close button (×) — z-index stacking fix needed
+- ~~Exhibit close button (×) — moved to top-left to avoid strip z-index overlap~~
 - Architecture diagram in exhibit step 1 (static SVG/HTML showing both data paths)
 - Tip jar placeholder (Stripe integration deferred)
 - AI-generated insight summarizing query results (fast-follow)
