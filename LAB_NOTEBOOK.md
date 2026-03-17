@@ -708,7 +708,7 @@ Major feature session: made the exhibit genuinely interactive. Visitors can now 
 - Analytics strip: added "ask a question" divider + text input + "Ask" button + collapsible SQL display + results below the metrics grid
 - Exhibit step 3: query chips in left panel ("events by type", "visitors today", "exhibit completion") — click auto-populates textarea and runs query
 - Exhibit step 4: question chips ("how many visitors complete the exhibit?", "what's the most common event?", "what percentage of visitors are on mobile?") — click auto-fills input and submits
-- Exhibit close button (×) — HTML + CSS added but has a z-index stacking issue (TODO)
+- Exhibit close button (×) — positioned top-left, works on desktop and mobile
 - Removed `renderMetricsSection` from journey card (metrics story moved to step 4)
 
 **Bug fixes:**
@@ -729,14 +729,28 @@ Major feature session: made the exhibit genuinely interactive. Visitors can now 
 | Exhibit step 3: query chips visible | Pass |
 | Click "events by type" chip → auto-runs query → results in warehouse strip | Pass |
 | Exhibit step 4: question chips visible, analytics strip expanded | Pass |
-| Exhibit close button (×) clickable | **Fail** — z-index stacking issue |
+| Exhibit close button (×) clickable | Pass |
 
 ### TODO
-- **Fix exhibit close button z-index.** The strips-container has z-index 200 in exhibit mode, the overlay has z-index 100. The close button (inside or outside the overlay) can't sit above the strips at the boundary. Options: (a) position it clearly inside the left 42% area away from strips, (b) put it inside `.exhibit-content` rather than the overlay root, or (c) add it to the exhibit nav bar as a text button.
 - **Deploy with `ANTHROPIC_API_KEY`** set in Railway so `/api/ask` works in production.
 - **Run `dbt build`** after deploy to materialize the new `exhibit_funnel` model.
 - **AI-generated insight** summarizing query results at step 4 (fast-follow from plan).
-- **Test on mobile** — new interactive elements need verification at small viewports.
+
+---
+
+## 2026-03-16 — Exhibit close button + mobile nav fix
+
+Fixed two z-index stacking issues with the exhibit overlay:
+
+1. **Close button (×):** Moved from `left: calc(42% - 3rem)` (overlapping with strips) to `left: 1.25rem` (top-left corner, inside the overlay's left panel area). No more z-index conflict with the strips-container.
+
+2. **Mobile Next/Back buttons:** On mobile, the strips-container was `position: fixed; z-index: 200` at the bottom of the screen, sitting above the exhibit overlay (`z-index: 100`). The nav buttons inside the overlay were unreachable. Fix: lowered mobile strips z-index to 90 during exhibit mode so the overlay's nav buttons are tappable.
+
+### Verified with Playwright (mobile 375×812)
+- Next button works at every step (1→2→3→4→5)
+- Exit button works at step 5
+- × close button works from step 1
+- Desktop close button also works (tested from steps 1 and 3)
 
 ### Key design decisions
 - Interactive controls live **in the strips** (not the exhibit overlay) so they work on the homepage without the exhibit. The exhibit just adds context and suggested chips.
