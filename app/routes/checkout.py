@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 
+import requests as http_requests
 import stripe
 from fastapi import APIRouter, HTTPException, Request
 
@@ -90,6 +91,26 @@ async def stripe_webhook(request: Request):
 
         # Broadcast to live stream
         await _broadcast(saved)
+
+        # Send to PostHog so it flows through the BigQuery export pipeline
+        try:
+            http_requests.post(
+                f"{settings.posthog_host}/capture/",
+                json={
+                    "api_key": settings.posthog_api_key,
+                    "event": "purchase_complete",
+                    "distinct_id": "stripe-webhook",
+                    "properties": {
+                        "item_id": item_id,
+                        "item_name": item_name,
+                        "price": price_dollars,
+                        "stripe_session_id": session.get("id", ""),
+                    },
+                },
+                timeout=5,
+            )
+        except Exception:
+            logger.warning("Failed to send purchase_complete to PostHog")
 
         logger.info(
             "purchase_complete: %s $%.2f (session %s)",
