@@ -914,8 +914,47 @@ The self-referential loop is preserved: purchase events flow through the same pi
 - `architecture.md` — Stripe section, new event type, new API routes
 - `plan.md` — marked Stripe integration as complete
 
+### Also in this session
+
+**PostHog server-side capture (`f8b7b08`):** The Stripe webhook inserts `purchase_complete` into Supabase but that doesn't flow to PostHog (PostHog capture happens client-side via `_onCapture`). Added server-side `posthog.capture()` in the webhook handler so purchase events reach BigQuery through the PostHog → BigQuery pipeline. Required adding `posthog-python` to requirements and initializing the PostHog client in the checkout router.
+
+**`fct_purchases` mart + metrics_daily purchase columns (`52ff5f2`):** Created `pipeline/dbt/models/marts/fct_purchases.sql` — extracts purchase events from `stg_events` with amount, item_id, item_name parsed from `raw_properties`. Added purchase columns to `metrics_daily`: `total_purchases`, `total_revenue`, `unique_purchasers`. Updated `schema.yml` with documentation for both.
+
+**Copy fix (`69e34e1`):** Removed directional "on the right" from exhibit step copy — it's wrong on mobile where strips stack below.
+
+### Additional files changed
+| File | Changes |
+|------|---------|
+| `app/routes/checkout.py` | PostHog server-side capture in webhook handler |
+| `app/templates/index.html` | Removed "on the right" from exhibit copy |
+| `pipeline/dbt/models/marts/fct_purchases.sql` | New mart: purchase events with amount/item/visitor |
+| `pipeline/dbt/models/marts/metrics_daily.sql` | Added purchase columns (total_purchases, total_revenue, unique_purchasers) |
+| `pipeline/dbt/models/marts/schema.yml` | Documentation for fct_purchases and new metrics_daily columns |
+
 ### Next steps
+
+**Exhibit content:**
+- **Modeling step (step 5) — open question.** The NLP-on-questionnaire-responses idea has a sequencing problem: step 5 comes *before* step 6 (the apparatus), which is where visitors leave their thoughts. So at step 5 the current visitor hasn't contributed yet. Need to rethink what goes here — maybe show results from *previous* visitors' responses, or find a different modeling concept entirely. Leaving as TODO.
+- Architecture diagram for step 1 (the two data paths: real-time and analytical)
+- AI-generated insight summarizing query results at step 4
+- NL interpretation of warehouse query results (SQL results → natural language)
+
+**Shop / Stripe:**
 - Fix `reflection.sh` DNS so the custom domain works again
-- Design the visualization print
-- Modeling step content (NLP on questionnaire responses)
 - Switch Stripe from sandbox to live mode when ready
+- Design the visualization print (item 2 in shop, currently "coming soon")
+- End-to-end purchase test: buy → webhook → stream → BigQuery → dbt → metrics
+
+**Frontend polish:**
+- Mobile exhibit UX: query results/metrics are grayed out and too small — rethink for mobile
+- "Visitors today" warehouse query returns zero rows — fix the query
+- Coordinate visitor ID color on homepage with color in the stream
+- Consider replacing visitor IDs with cute generated names (like Railway's app naming)
+
+**Pipeline:**
+- `questionnaire_responses` model (staged but not committed — in `pipeline/dbt/models/marts/`)
+- Run `dbt build` to materialize all new marts with real traffic data
+
+**Future milestones:**
+- Sandbox mode (plan.md Milestone 6) — let visitors write and run their own dbt models
+- Blog / write-up of the project
