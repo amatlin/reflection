@@ -69,6 +69,55 @@ models:
         description: Average pageviews per session that day
       - name: click_through_rate
         description: Ratio of clicks to pageviews
+      - name: total_purchases
+        description: Count of completed purchases that day
+      - name: total_revenue
+        description: Sum of purchase amounts (USD) that day
+
+  - name: fct_purchases
+    description: >
+      Purchase fact table. One row per completed purchase with item details
+      and Stripe session ID. Sourced from purchase_complete events fired by
+      the Stripe webhook.
+    columns:
+      - name: event_id
+        description: Unique event identifier from PostHog
+        tests:
+          - unique
+          - not_null
+      - name: purchased_at
+        description: When the purchase was completed
+        tests:
+          - not_null
+      - name: item_id
+        description: "Product identifier (e.g. keep-the-lights-on)"
+      - name: item_name
+        description: "Human-readable product name"
+      - name: price
+        description: Purchase amount in USD
+      - name: stripe_session_id
+        description: Stripe Checkout Session ID for reconciliation
+
+  - name: questionnaire_responses
+    description: >
+      Questionnaire responses from exhibit visitors. One row per response,
+      with the extracted response text. Source for future modeling step.
+    columns:
+      - name: event_id
+        description: Unique event identifier from PostHog
+        tests:
+          - unique
+          - not_null
+      - name: visitor_id
+        description: PostHog distinct_id of the respondent
+      - name: responded_at
+        description: When the response was submitted
+        tests:
+          - not_null
+      - name: response_text
+        description: Free-text response (max 500 chars)
+        tests:
+          - not_null
 
   - name: exhibit_funnel
     description: >

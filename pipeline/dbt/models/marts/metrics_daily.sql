@@ -5,6 +5,10 @@ with events as (
     select * from {{ ref('fct_events') }}
 ),
 
+purchases as (
+    select * from {{ ref('fct_purchases') }}
+),
+
 daily as (
     select
         date(event_timestamp) as metric_date,
@@ -33,26 +37,40 @@ daily as (
     from events
     where event_timestamp is not null
     group by metric_date
+),
+
+daily_purchases as (
+    select
+        date(purchased_at) as metric_date,
+        count(*) as total_purchases,
+        coalesce(sum(price), 0) as total_revenue
+    from purchases
+    group by metric_date
 )
 
 select
-    metric_date,
-    total_events,
-    unique_visitors,
-    unique_sessions,
-    pageviews,
-    clicks,
-    custom_events,
-    distinct_pages_viewed,
-    desktop_sessions,
-    mobile_sessions,
-    tablet_sessions,
-    distinct_countries,
+    d.metric_date,
+    d.total_events,
+    d.unique_visitors,
+    d.unique_sessions,
+    d.pageviews,
+    d.clicks,
+    d.custom_events,
+    d.distinct_pages_viewed,
+    d.desktop_sessions,
+    d.mobile_sessions,
+    d.tablet_sessions,
+    d.distinct_countries,
+
+    -- Purchases
+    coalesce(p.total_purchases, 0) as total_purchases,
+    coalesce(p.total_revenue, 0) as total_revenue,
 
     -- Derived ratios
-    safe_divide(total_events, unique_visitors) as events_per_visitor,
-    safe_divide(pageviews, unique_sessions) as pages_per_session,
-    safe_divide(clicks, pageviews) as click_through_rate
+    safe_divide(d.total_events, d.unique_visitors) as events_per_visitor,
+    safe_divide(d.pageviews, d.unique_sessions) as pages_per_session,
+    safe_divide(d.clicks, d.pageviews) as click_through_rate
 
-from daily
-order by metric_date desc
+from daily d
+left join daily_purchases p on d.metric_date = p.metric_date
+order by d.metric_date desc
