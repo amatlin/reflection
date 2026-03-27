@@ -46,7 +46,7 @@ FastAPI (Python). Routes:
 - `GET /` — homepage with server-rendered Jinja2 template, metrics baked in from BigQuery cache
 - `POST /api/events` — event ingestion (validates, writes to Supabase, broadcasts via WebSocket)
 - `WebSocket /ws/events` — live event stream (backfills last 50 events on connect, broadcasts new events, tracks presence count)
-- `GET /api/warehouse/{key}` — run one of 3 fixed SQL queries against BigQuery (keys: `events-by-type`, `visitors-today`, `exhibit-completion`). Results cached in-memory for 24 hours. Returns SQL, columns, rows, and cached flag.
+- `GET /api/warehouse/{key}` — run one of 3 fixed SQL queries against BigQuery (keys: `events-by-type`, `visitors-this-week`, `exhibit-completion`). Results cached in-memory for 24 hours. Returns SQL, columns, rows, and cached flag.
 - `GET /api/insights/{key}` — run one of 3 fixed insight questions (keys: `exhibit-completion`, `most-common-event`, `mobile-percentage`). On cache miss: Claude NL→SQL → BigQuery → cache. 24-hour TTL. Returns SQL, question, columns, rows, and cached flag.
 - `POST /api/checkout/create-session` — creates a Stripe Checkout Session for "keep the lights on" donations. Accepts `{ item_id, item_name, price }`, validates, returns `{ url }` for redirect.
 - `POST /api/stripe/webhook` — receives Stripe webhook events. On `checkout.session.completed`, inserts a `purchase_complete` event into Supabase and broadcasts via WebSocket.
@@ -83,7 +83,7 @@ Purchase events flow through the same pipeline as all other events (Supabase →
 Docker container (Python 3.12, single uvicorn process). Custom domain `reflection.sh` via Namecheap DNS (CNAME → Railway). Environment variables set in Railway's dashboard. The BigQuery service account key is passed as `BIGQUERY_KEY_JSON` (the full JSON string) since Railway can't mount key files.
 
 ### Analytical Layer — BigQuery + dbt
-PostHog batch exports events to BigQuery hourly. dbt Core transforms them:
+PostHog batch exports events to BigQuery hourly. dbt Core transforms them on a daily GitHub Actions cron (`dbt build --target prod` at 6am UTC, with manual trigger). The workflow writes the BigQuery service account key from a GitHub secret to a temp file.
 - `stg_events` (view) — cleans raw export, extracts JSON properties into typed columns, deduplicates
 - `fct_events` (table) — clean event fact table
 - `dim_visitors` (table) — one row per visitor with first/last seen, device, geo

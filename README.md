@@ -52,7 +52,7 @@ posthog_events (raw) → stg_events (view) → fct_events (table) → metrics_da
                        stg_events (view) → exhibit_funnel (table)
 ```
 
-Run the pipeline manually:
+The pipeline runs automatically via a daily GitHub Actions cron (6am UTC). To run manually:
 
 ```bash
 cd pipeline/dbt

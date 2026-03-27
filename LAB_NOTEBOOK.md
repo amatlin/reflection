@@ -958,3 +958,27 @@ The self-referential loop is preserved: purchase events flow through the same pi
 **Future milestones:**
 - Sandbox mode (plan.md Milestone 6) — let visitors write and run their own dbt models
 - Blog / write-up of the project
+
+## 2026-03-27 — Fixed "visitors today" query + daily dbt cron
+
+### What was done
+
+1. **"Visitors today" → "visitors this week"**: The warehouse chip query returned zero rows because `fct_events` is a dbt-materialized table and the query used `CURRENT_DATE()`. Changed to query last 7 days with daily breakdown (`DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)`, grouped by day). Renamed chip label and query key from `visitors-today` to `visitors-this-week`.
+
+2. **Daily dbt build via GitHub Actions**: Created `.github/workflows/dbt-build.yml` — runs `dbt build --target prod` daily at 6am UTC with manual `workflow_dispatch` trigger. Uses `BIGQUERY_KEY_JSON` GitHub secret written to a temp file (`/tmp/bq-key.json`), since dbt's `service-account-json` method doesn't reliably parse JSON from env vars.
+
+3. **dbt profiles.yml prod target**: Changed from `method: service-account-json` with `keyfile_json` (broken — dbt expects a YAML dict, not a JSON string from `env_var()`) to `method: service-account` with `keyfile: /tmp/bq-key.json` (written by the GitHub Actions workflow step).
+
+### Key learning
+
+dbt's `service-account-json` with `env_var()` is fragile — the env var returns a string but dbt expects a parsed dict. Writing the JSON to a temp file and using `service-account` with `keyfile` is more reliable and works identically.
+
+### Files changed
+- `app/routes/query.py` — new query SQL and key name
+- `app/templates/index.html` — chip label updated
+- `.github/workflows/dbt-build.yml` — new file
+- `pipeline/dbt/profiles.yml` — prod target switched to keyfile method
+
+### Deployed
+- Railway: `railway up` for the query fix
+- GitHub Actions: dbt build #2 succeeded (1m 22s), all marts refreshed
