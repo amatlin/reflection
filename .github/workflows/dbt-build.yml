@@ -22,7 +22,10 @@ jobs:
       - name: Install dbt
         run: pip install -r ../../requirements-pipeline.txt
 
-      - name: Run dbt build
+      - name: Write BigQuery credentials
         env:
           BIGQUERY_KEY_JSON: ${{ secrets.BIGQUERY_KEY_JSON }}
+        run: echo "$BIGQUERY_KEY_JSON" > /tmp/bq-key.json
+
+      - name: Run dbt build
         run: dbt build --target prod
