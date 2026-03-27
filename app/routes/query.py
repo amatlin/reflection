@@ -22,10 +22,13 @@ FROM `reflection-data.reflection.fct_events`
 GROUP BY event_name
 ORDER BY events DESC
 LIMIT 100""",
-    "visitors-today": """SELECT
-  COUNT(DISTINCT visitor_id) AS visitors_today
+    "visitors-this-week": """SELECT
+  DATE(event_timestamp) AS day,
+  COUNT(DISTINCT visitor_id) AS visitors
 FROM `reflection-data.reflection.fct_events`
-WHERE DATE(event_timestamp) = CURRENT_DATE()""",
+WHERE DATE(event_timestamp) >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
+GROUP BY day
+ORDER BY day DESC""",
     "exhibit-completion": """SELECT
   step_name,
   step_number,
