@@ -125,7 +125,7 @@ models:
       unique visitor counts and completion rate relative to step 1.
     columns:
       - name: step_name
-        description: "Exhibit step name (welcome, the-loop, the-warehouse, the-pipeline, the-apparatus)"
+        description: "Exhibit step name (welcome, stream, warehouse, analytics, shop). Also maps legacy names: the-loop, the-warehouse, the-pipeline, the-apparatus, the-shop."
         tests:
           - not_null
       - name: step_number

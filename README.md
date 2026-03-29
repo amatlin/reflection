@@ -8,9 +8,9 @@ A website whose sole purpose is to analyze itself.
 
 You visit it, you interact with it, and those interactions become the data you can explore on the site. Every click, every page view — captured, streamed live, and piped through a real analytics stack.
 
-The homepage greets you by your visitor ID and shows five collapsible strips — a live event stream, a SQL warehouse, an analytics panel, a modeling panel, and a gift shop. Click "Enter the exhibit" for a dark-themed guided tour that walks you through the data pipeline step by step. Fire a real event in step 2 and watch it travel through the system. Run fixed SQL queries against BigQuery in step 3. Explore insight questions about the data in step 4 — Claude translates them to SQL. Leave a thought in step 6 — it becomes data too.
+The homepage greets you by your visitor ID and shows four collapsible strips — a live event stream, a SQL warehouse, an analytics panel, and a gift shop. Click "Enter the exhibit" for a dark-themed guided tour that walks you through the data pipeline step by step. Fire a real event in step 2 and watch it travel through the system. Run fixed SQL queries against BigQuery in step 3. Explore insight questions about the data in step 4. Leave a thought in step 5 — it becomes data too.
 
-The warehouse strip has 3 clickable query chips and a readonly SQL textarea that shows the actual query being run. The analytics strip shows server-rendered daily metrics and 3 insight question chips powered by Claude NL→SQL. All query and insight results are cached daily server-side.
+The warehouse strip has 3 clickable query chips and a readonly SQL textarea that shows the actual query being run. The analytics strip shows server-rendered daily metrics and 3 insight chips with hardcoded SQL and Claude-generated summaries. All query and insight results are cached daily server-side.
 
 Pipeline countdowns show when the next BigQuery export and dbt refresh will run. The exhibit generates `funnel_step` events on each navigation and `questionnaire_response` events on submit, enriching the analytics pipeline.
 
@@ -28,7 +28,7 @@ Events travel two paths:
 - **FastAPI** — Python backend, validates and dual-writes events, serves cached warehouse queries and insight results
 - **BigQuery** — analytical warehouse (PostHog batch export, hourly)
 - **dbt Core** — data transformation (staging → facts → dimensions → daily metrics → exhibit funnel)
-- **Claude API** — natural-language → SQL translation for the "ask a question" feature
+- **Claude API** — summarizes insight query results in plain English
 - **Railway** — hosting (Docker container, env vars in dashboard)
 
 ## Running locally

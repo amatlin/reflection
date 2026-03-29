@@ -17,9 +17,14 @@ step_visitors as (
         case step_name
             when 'welcome' then 1
             when 'the-loop' then 2
+            when 'stream' then 2
             when 'the-warehouse' then 3
+            when 'warehouse' then 3
             when 'the-pipeline' then 4
+            when 'analytics' then 4
             when 'the-apparatus' then 5
+            when 'the-shop' then 5
+            when 'shop' then 5
         end as step_number,
         count(distinct visitor_id) as unique_visitors
     from funnel_events

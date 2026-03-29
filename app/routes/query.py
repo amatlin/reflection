@@ -38,12 +38,38 @@ FROM `reflection-data.reflection.exhibit_funnel`
 ORDER BY step_number""",
 }
 
-# ── Fixed insight questions ──
+# ── Fixed insight queries (hardcoded SQL + display question) ──
 
-INSIGHT_QUESTIONS: dict[str, str] = {
-    "exhibit-completion": "how many visitors complete the exhibit?",
-    "most-common-event": "what's the most common event?",
-    "mobile-percentage": "what percentage of visitors are on mobile?",
+INSIGHT_QUERIES: dict[str, dict] = {
+    "exhibit-completion": {
+        "question": "how many visitors complete the exhibit?",
+        "sql": """SELECT
+  step_name,
+  unique_visitors,
+  ROUND(completion_rate, 2) AS completion_rate
+FROM `reflection-data.reflection.exhibit_funnel`
+ORDER BY step_number""",
+    },
+    "most-common-event": {
+        "question": "what's the most common event?",
+        "sql": """SELECT
+  event_name,
+  COUNT(*) AS count
+FROM `reflection-data.reflection.fct_events`
+GROUP BY event_name
+ORDER BY count DESC
+LIMIT 10""",
+    },
+    "mobile-percentage": {
+        "question": "what percentage of visitors are on mobile?",
+        "sql": """SELECT
+  device_type,
+  COUNT(DISTINCT visitor_id) AS visitors,
+  ROUND(100.0 * COUNT(DISTINCT visitor_id) / SUM(COUNT(DISTINCT visitor_id)) OVER(), 1) AS pct
+FROM `reflection-data.reflection.fct_events`
+GROUP BY device_type
+ORDER BY visitors DESC""",
+    },
 }
 
 # ── Module-level caches (key -> {data, expires_at}) ──
@@ -116,7 +142,7 @@ async def warehouse_query(key: str):
 
 @router.get("/insights/{key}")
 async def insight_query(key: str):
-    if key not in INSIGHT_QUESTIONS:
+    if key not in INSIGHT_QUERIES:
         return {"error": f"Unknown insight: {key}"}
 
     # Check cache
@@ -125,18 +151,20 @@ async def insight_query(key: str):
     if cached and cached["expires_at"] > now:
         return {**cached["data"], "cached": True}
 
-    question = INSIGHT_QUESTIONS[key]
-    try:
-        from app.services.claude_client import question_to_sql
-        sql = question_to_sql(question)
-    except Exception as e:
-        return {"error": f"Failed to generate SQL: {e}"}
+    entry = INSIGHT_QUERIES[key]
+    sql = entry["sql"]
+    question = entry["question"]
 
     try:
         data = _run_sql(sql)
         data["sql"] = sql
         data["question"] = question
         data["cached"] = False
+
+        # Generate Claude summary of the results
+        from app.services.claude_client import summarize_results
+        data["summary"] = summarize_results(question, data["columns"], data["rows"])
+
         _insight_cache[key] = {"data": data, "expires_at": now + _CACHE_TTL}
         return data
     except Exception as e:

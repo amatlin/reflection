@@ -8,7 +8,7 @@
   var totalSteps = steps.length;
   var currentStep = 0; // 0 = not in exhibit
 
-  var stepNames = ["", "welcome", "the-loop", "the-warehouse", "the-pipeline", "the-model", "the-shop"];
+  var stepNames = ["", "welcome", "stream", "warehouse", "analytics", "shop"];
 
   function showStep(n) {
     currentStep = n;
@@ -22,11 +22,10 @@
     nextBtn.textContent = n >= totalSteps ? "Exit" : "Next";
     counter.textContent = n + " / " + totalSteps;
 
-    // Strip visibility: stream at step 2+, warehouse at step 3+, analytics at step 4+, modeling at step 5+, shop at step 6
+    // Strip visibility: stream at step 2+, warehouse at step 3+, analytics at step 4+, shop at step 5
     var streamStrip = document.getElementById("strip-stream");
     var warehouseStrip = document.getElementById("strip-warehouse");
     var analyticsStrip = document.getElementById("strip-analytics");
-    var modelingStrip = document.getElementById("strip-modeling");
     var shopStrip = document.getElementById("strip-shop");
     if (streamStrip) {
       streamStrip.classList.toggle("exhibit-visible", n >= 2);
@@ -37,11 +36,8 @@
     if (analyticsStrip) {
       analyticsStrip.classList.toggle("exhibit-visible", n >= 4);
     }
-    if (modelingStrip) {
-      modelingStrip.classList.toggle("exhibit-visible", n >= 5);
-    }
     if (shopStrip) {
-      shopStrip.classList.toggle("exhibit-visible", n >= 6);
+      shopStrip.classList.toggle("exhibit-visible", n >= 5);
     }
 
     // Auto-expand the relevant strip at each step
@@ -54,10 +50,7 @@
     if (n === 4 && analyticsStrip && !analyticsStrip.classList.contains("expanded")) {
       if (window.__toggleStrip) window.__toggleStrip("analytics");
     }
-    if (n === 5 && modelingStrip && !modelingStrip.classList.contains("expanded")) {
-      if (window.__toggleStrip) window.__toggleStrip("modeling");
-    }
-    if (n === 6 && shopStrip && !shopStrip.classList.contains("expanded")) {
+    if (n === 5 && shopStrip && !shopStrip.classList.contains("expanded")) {
       if (window.__toggleStrip) window.__toggleStrip("shop");
     }
 

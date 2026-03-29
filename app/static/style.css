@@ -610,16 +610,17 @@ body.exhibit-mode .exhibit-close {
   color: #e2e8f0;
 }
 
-/* ── Modeling placeholder ── */
-.modeling-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--text-muted);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.78rem;
-  padding: 1rem;
+/* ── Insight summary ── */
+.insight-summary {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg);
+  border-radius: 4px;
+  border-left: 2px solid var(--accent);
 }
 
 /* ── Analytics placeholder ── */
@@ -1175,9 +1176,11 @@ body.exhibit-mode .shop-coming-soon {
   color: #475569;
 }
 
-/* Modeling placeholder dark */
-body.exhibit-mode .modeling-placeholder {
-  color: #475569;
+/* Insight summary dark */
+body.exhibit-mode .insight-summary {
+  background: #1e293b;
+  color: #cbd5e1;
+  border-left-color: #3b82f6;
 }
 
 /* Analytics placeholder dark */

@@ -47,13 +47,13 @@ FastAPI (Python). Routes:
 - `POST /api/events` — event ingestion (validates, writes to Supabase, broadcasts via WebSocket)
 - `WebSocket /ws/events` — live event stream (backfills last 50 events on connect, broadcasts new events, tracks presence count)
 - `GET /api/warehouse/{key}` — run one of 3 fixed SQL queries against BigQuery (keys: `events-by-type`, `visitors-this-week`, `exhibit-completion`). Results cached in-memory for 24 hours. Returns SQL, columns, rows, and cached flag.
-- `GET /api/insights/{key}` — run one of 3 fixed insight questions (keys: `exhibit-completion`, `most-common-event`, `mobile-percentage`). On cache miss: Claude NL→SQL → BigQuery → cache. 24-hour TTL. Returns SQL, question, columns, rows, and cached flag.
+- `GET /api/insights/{key}` — run one of 3 fixed insight queries (keys: `exhibit-completion`, `most-common-event`, `mobile-percentage`). Hardcoded SQL, cached 24 hours. Claude summarizes results in 1-2 sentences (optional — works without API key). Returns SQL, question, columns, rows, summary, and cached flag.
 - `POST /api/checkout/create-session` — creates a Stripe Checkout Session for "keep the lights on" donations. Accepts `{ item_id, item_name, price }`, validates, returns `{ url }` for redirect.
 - `POST /api/stripe/webhook` — receives Stripe webhook events. On `checkout.session.completed`, inserts a `purchase_complete` event into Supabase and broadcasts via WebSocket.
 
 ### Services
 - `bigquery_client.py` — lazy-init BigQuery client, `get_latest_metrics()` with 1-hour cache, `get_last_export_time()` with 5-minute cache for pipeline countdowns, `get_cache_age_minutes()` for data freshness display
-- `claude_client.py` — Claude API client (Sonnet) with a system prompt containing full schema for `fct_events`, `dim_visitors`, `metrics_daily`, and `exhibit_funnel`. Translates natural-language questions to BigQuery SQL.
+- `claude_client.py` — Claude API client (Sonnet). Summarizes insight query results in 1-2 sentences. Gracefully returns None if no API key or on error.
 - `supabase_client.py` — Supabase client for event inserts and recent event reads
 
 ### Frontend
@@ -61,14 +61,13 @@ Vanilla HTML + CSS + JS. Server-rendered Jinja2 templates. No build step, no fra
 
 The homepage has a split layout:
 - **Left panel:** concept explanation, "Enter the exhibit" button, event journey card, pipeline countdowns (next warehouse export + dbt refresh)
-- **Right panel:** five collapsible strips arranged as a vertical accordion:
+- **Right panel:** four collapsible strips arranged as a vertical accordion:
   - **Stream strip** — live event feed via WebSocket, presence count, "you" labels on your own events
   - **Warehouse strip** — 3 clickable query chips, readonly SQL textarea (shows the query being run), results table. Queries are fixed server-side and cached for 24 hours.
-  - **Analytics strip** — server-rendered daily metrics from `metrics_daily`, plus 3 clickable insight chips powered by Claude NL→SQL (cached daily)
-  - **Modeling strip** — placeholder for NLP analysis of questionnaire responses (content TBD)
+  - **Analytics strip** — server-rendered daily metrics from `metrics_daily`, plus 3 clickable insight chips with hardcoded SQL queries and Claude-generated summaries (cached daily)
   - **Shop strip** — 2 gift shop items (a visualization, keep the lights on). "Keep the lights on" has a live Stripe Checkout flow; the visualization has a "coming soon" overlay. Buy buttons fire `checkout_started` events; Stripe webhook fires `purchase_complete` events back through the pipeline.
 
-The **museum exhibit** is a dark overlay with 6 hash-routed steps (`#exhibit-1` through `#exhibit-6`): Welcome → The Loop → The Warehouse → The Pipeline → The Model → The Apparatus. Strips are hidden initially and fade in at relevant steps (stream at step 2, warehouse at step 3, analytics at step 4, modeling at step 5, shop at step 6). Exhibit steps reference the chips in the strips rather than duplicating them. Mobile responsive with stacked layout.
+The **museum exhibit** is a dark overlay with 5 hash-routed steps (`#exhibit-1` through `#exhibit-5`): Welcome → Stream → Warehouse → Analytics → Shop. Strips are hidden initially and fade in at relevant steps (stream at step 2, warehouse at step 3, analytics at step 4, shop at step 5). Exhibit steps reference the chips in the strips rather than duplicating them. Mobile responsive with stacked layout.
 
 ### Payments — Stripe
 The "keep the lights on" donation uses Stripe Checkout (hosted payment page). Flow:

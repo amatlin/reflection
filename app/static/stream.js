@@ -444,12 +444,18 @@
       .then(function (r) { return r.json(); })
       .then(function (data) {
         clearEl(askResults);
+        if (data.summary) {
+          var summaryEl = document.createElement("p");
+          summaryEl.className = "insight-summary";
+          summaryEl.textContent = data.summary;
+          askResults.appendChild(summaryEl);
+        }
         if (data.sql) {
           var sqlWrap = document.createElement("details");
           sqlWrap.className = "ask-sql-details";
-          var summary = document.createElement("summary");
-          summary.textContent = "generated sql";
-          sqlWrap.appendChild(summary);
+          var detailsSummary = document.createElement("summary");
+          detailsSummary.textContent = "sql";
+          sqlWrap.appendChild(detailsSummary);
           var pre = document.createElement("pre");
           pre.className = "ask-sql-block";
           var code = document.createElement("code");
