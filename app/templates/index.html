@@ -129,8 +129,8 @@
               </div>
             </div>
           </div>
-          {% if cache_age is not none %}
-          <div class="analytics-cache-age">data from {{ cache_age }}m ago</div>
+          {% if metrics.metric_date is defined %}
+          <div class="analytics-cache-age">latest data: {{ metrics.metric_date }}</div>
           {% endif %}
           {% else %}
           <div class="analytics-placeholder">
