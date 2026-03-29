@@ -43,7 +43,7 @@ def get_client() -> bigquery.Client:
 
 
 def get_latest_metrics() -> dict | None:
-    """Return the most recent row from metrics_daily as a dict.
+    """Return last-7-days aggregated metrics from metrics_daily as a dict.
     Results are cached in memory for _CACHE_TTL seconds."""
     global _cache
     now = time.time()
@@ -54,10 +54,21 @@ def get_latest_metrics() -> dict | None:
     try:
         table = f"{settings.bigquery_project}.{settings.bigquery_dataset}.metrics_daily"
         query = f"""
-            SELECT *
+            SELECT
+                MAX(metric_date) AS metric_date,
+                SUM(total_events) AS total_events,
+                SUM(unique_visitors) AS unique_visitors,
+                SUM(unique_sessions) AS unique_sessions,
+                SUM(pageviews) AS pageviews,
+                SUM(clicks) AS clicks,
+                SUM(custom_events) AS custom_events,
+                SUM(desktop_sessions) AS desktop_sessions,
+                SUM(mobile_sessions) AS mobile_sessions,
+                SUM(tablet_sessions) AS tablet_sessions,
+                SAFE_DIVIDE(SUM(total_events), SUM(unique_visitors)) AS events_per_visitor,
+                SAFE_DIVIDE(SUM(pageviews), SUM(unique_sessions)) AS pages_per_session
             FROM `{table}`
-            ORDER BY metric_date DESC
-            LIMIT 1
+            WHERE metric_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
         """
         result = get_client().query(query).result()
         rows = list(result)

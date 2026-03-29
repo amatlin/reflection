@@ -130,7 +130,7 @@
             </div>
           </div>
           {% if metrics.metric_date is defined %}
-          <div class="analytics-cache-age">latest data: {{ metrics.metric_date }}</div>
+          <div class="analytics-cache-age">last 7 days · through {{ metrics.metric_date }}</div>
           {% endif %}
           {% else %}
           <div class="analytics-placeholder">
