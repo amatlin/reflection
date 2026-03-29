@@ -982,3 +982,42 @@ dbt's `service-account-json` with `env_var()` is fragile — the env var returns
 ### Deployed
 - Railway: `railway up` for the query fix
 - GitHub Actions: dbt build #2 succeeded (1m 22s), all marts refreshed
+
+## 2026-03-28 — Hardcode insight SQL, Claude summaries, remove modeling step
+
+### What was done
+
+1. **Replaced Claude NL→SQL with hardcoded SQL + Claude summaries.** The 3 insight chips ("how many visitors complete the exhibit?", "what's the most common event?", "what percentage are on mobile?") now use hardcoded SQL instead of asking Claude to generate it. Claude now summarizes the query results in 1-2 sentences, shown above the results table. If the API key is missing, results still display — just without a summary. `claude_client.py` rewritten: `summarize_results()` replaces `question_to_sql()`.
+
+2. **Removed the modeling step and strip.** The empty "the model" step (step 5) and the modeling strip ("Coming soon.") are gone. Exhibit is now 5 steps instead of 6.
+
+3. **Renamed exhibit steps to match strip names.** Funnel step events changed from `the-loop`, `the-warehouse`, `the-pipeline`, `the-model`, `the-shop` to `welcome`, `stream`, `warehouse`, `analytics`, `shop`. The `exhibit_funnel` dbt model maps both old and new names to the same step numbers so historical data still works.
+
+### Key decisions
+
+- Claude is more useful summarizing data than generating SQL for fixed questions. The SQL never changes, but the data does — so the summary is the part that should be dynamic.
+- Step names now match strip names exactly — simpler mental model, no "the-" prefix naming convention to maintain.
+
+### Files changed
+- `app/routes/query.py` — `INSIGHT_QUERIES` dict with hardcoded SQL, endpoint calls `summarize_results()`
+- `app/services/claude_client.py` — rewritten for result summarization
+- `app/templates/index.html` — removed modeling strip + step, renumbered, "insights" divider
+- `app/static/exhibit.js` — updated stepNames, removed modeling logic
+- `app/static/stream.js` — shows summary paragraph, updated SQL label
+- `app/static/style.css` — replaced modeling styles with insight-summary styles
+- `pipeline/dbt/models/marts/exhibit_funnel.sql` — maps both old + new step names
+- `pipeline/dbt/models/marts/schema.yml` — updated step name description
+- `architecture.md`, `README.md` — updated
+
+### Verified
+- Desktop: all 5 exhibit steps work, strips appear at correct steps
+- Mobile (375×812): exhibit navigable, all buttons accessible
+- New funnel step names appear in live stream ("entered exhibit step: stream")
+- Deployed to Railway
+
+### TODO (deferred)
+- Rewrite exhibit copy (step headings + body text)
+- Pick better insight questions
+- Mobile exhibit UX improvements (query results/metrics still small)
+- `reflection.sh` DNS/SSL fix
+- Stripe sandbox → live
