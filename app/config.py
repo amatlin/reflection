@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     stripe_secret_key: str = ""
     stripe_publishable_key: str = ""
     stripe_webhook_secret: str = ""
-    dbt_cron_minute: int = 15
+    dbt_cron_hour_utc: int = 6
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

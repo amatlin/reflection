@@ -338,15 +338,18 @@
     var bqMins = Math.max(0, Math.round((nextHour - now) / 60000));
     parts.push("next one in " + bqMins + "m");
 
-    // Metrics refresh countdown: next occurrence of :MM past the hour
-    var cronMin = config.dbtCronMinute || 30;
+    // Metrics refresh countdown: daily dbt run at configured hour UTC
+    var cronHour = config.dbtCronHourUtc || 6;
     var nextDbt = new Date(now);
-    nextDbt.setMinutes(cronMin, 0, 0);
+    nextDbt.setUTCHours(cronHour, 0, 0, 0);
     if (nextDbt <= now) {
-      nextDbt.setHours(nextDbt.getHours() + 1);
+      nextDbt.setUTCDate(nextDbt.getUTCDate() + 1);
     }
-    var dbtMins = Math.max(0, Math.round((nextDbt - now) / 60000));
-    parts.push("metrics refresh in " + dbtMins + "m");
+    var dbtDiffMs = nextDbt - now;
+    var dbtHours = Math.floor(dbtDiffMs / 3600000);
+    var dbtMins = Math.max(0, Math.round((dbtDiffMs % 3600000) / 60000));
+    var dbtLabel = dbtHours > 0 ? dbtHours + "h " + dbtMins + "m" : dbtMins + "m";
+    parts.push("metrics refresh in " + dbtLabel);
 
     el.textContent = parts.join(" \u00B7 ");
   }

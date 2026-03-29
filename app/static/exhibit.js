@@ -21,7 +21,9 @@
 
     // Nav visibility
     backBtn.style.display = n <= 1 ? "none" : "";
-    nextBtn.textContent = n >= totalSteps ? "Exit" : "Next";
+    var isLast = n >= totalSteps;
+    nextBtn.textContent = isLast ? "Exit" : "Next";
+    nextBtn.classList.toggle("exhibit-btn-exit", isLast);
     counter.textContent = n + " / " + totalSteps;
 
     // On mobile, strips are hidden — content is inlined in exhibit steps.

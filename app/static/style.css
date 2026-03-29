@@ -842,6 +842,16 @@ body.exhibit-mode .exhibit-close {
   color: #93c5fd;
 }
 
+.exhibit-btn-exit {
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.exhibit-btn-exit:hover {
+  border-color: #fbbf24;
+  color: #fbbf24;
+}
+
 .exhibit-step-counter {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.72rem;

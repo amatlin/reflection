@@ -34,7 +34,7 @@ The project is built incrementally through milestones — each one should be dem
 
 On every commit and push, check whether `README.md` or `plan.md` need to be updated to reflect the changes.
 
-**Track open work in `TODO.md`.** When new work surfaces during a session — bugs found, features deferred, ideas discussed but not implemented — propose adding them to `TODO.md`. Check items off when they're completed. The lab notebook records history; `TODO.md` is the living checklist.
+**Track open work in `TODO.md`.** When new work surfaces during a session — bugs found, features deferred, ideas discussed but not implemented — propose adding them to `TODO.md`. When items are completed, remove them from `TODO.md` entirely — don't use checkboxes. Completed work goes in `LAB_NOTEBOOK.md`, not TODO. The lab notebook records history; `TODO.md` is the living checklist of what's left.
 
 **Always test frontend changes with Playwright** before presenting them. Navigate to the page, verify the snapshot, click interactive elements, and test mobile (375×812). Don't share frontend work without verification.
 

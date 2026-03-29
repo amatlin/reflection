@@ -20,7 +20,7 @@ async def landing(request: Request):
             "posthog_api_key": settings.posthog_api_key,
             "posthog_host": settings.posthog_host,
             "last_export_iso": last_export_iso or "",
-            "dbt_cron_minute": settings.dbt_cron_minute,
+            "dbt_cron_hour_utc": settings.dbt_cron_hour_utc,
             "metrics": metrics,
         },
     )
