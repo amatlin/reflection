@@ -14,52 +14,36 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 
 ## Milestones
 
-1. ~~Landing page with live event stream~~ (done)
+1. Landing page with live event stream (done)
 
-2. ~~Analytical backbone (pipeline + analytics view)~~ (done)
-- ~~PostHog batch export → BigQuery warehouse (hourly)~~
-- ~~dbt Core models: staging, facts, dimensions, daily metrics~~
-- ~~Analytics tab on homepage showing numbers from `metrics_daily` mart~~
-- ~~Server-rendered with 1-hour in-memory BigQuery cache~~
+2. Analytical backbone — pipeline + analytics view (done)
+- PostHog batch export → BigQuery warehouse (hourly)
+- dbt Core models: staging, facts, dimensions, daily metrics
+- Analytics tab on homepage with server-rendered metrics from `metrics_daily`
 
-3. ~~Frontend redesign + deployment~~ (done)
-- ~~Light "reflection pool" theme replacing dark terminal aesthetic~~
-- ~~Deployed to Railway at reflection.sh~~
-- ~~Public BigQuery dataset — visitors can query the data themselves~~
+3. Frontend redesign + deployment (done)
+- Light "reflection pool" theme
+- Deployed to Railway at reflection.sh
 
-4. ~~Livestream UX overhaul~~ (done)
-- ~~Humanized event names: `$pageview` → "viewed the page", `$autocapture` → `clicked "Button"`, hide `$pageleave`~~
-- ~~"Everyone" / "You" tabs replacing Live Stream / Analytics~~ → tabs removed; stream is now a collapsible panel, journey card moved to left panel
-- ~~Single "Fire an event" button replacing three action buttons~~
-- ~~Journey card: real-time confirmations (captured → stored → streamed) with staggered animations~~
-- ~~Journey card: dbt transformation preview (event_name, device, browser, os) computed client-side~~
-- ~~Journey card: metrics contribution showing which `metrics_daily` aggregates the event affects~~
-- ~~Pipeline countdowns in header (warehouse export + dbt refresh)~~
-- ~~"you" label on your own events in the stream~~
-- ~~Mobile responsive layout~~
+4. Livestream UX overhaul (done)
+- Humanized event names, journey card with real-time confirmations
+- Pipeline countdowns, "you" labels, mobile responsive layout
+- Collapsible stream panel with fire-an-event button
 
-5. Museum exhibit funnel (in progress)
-- ~~Dark overlay exhibit with 5 steps: Welcome → The Loop → The Warehouse → The Pipeline → The Apparatus~~
-- ~~Three side-by-side collapsible strips (stream + warehouse + analytics) with horizontal accordion~~
-- ~~Hash routing (`#exhibit-1` through `#exhibit-5`), direct URL load supported~~
-- ~~"Fire an event" button + journey card moved into exhibit step 2~~
-- ~~Strips hidden during exhibit, fade in at correct steps (stream at step 2, warehouse at step 3, analytics at step 4)~~
-- ~~`funnel_step` events on each navigation, `questionnaire_response` on submit, `checkout_started` on shop buy~~
-- ~~Questionnaire with 500-char limit + backend validation~~
-- ~~`_onCapture` fixed: hash in page_path, custom props forwarded to raw_properties~~
-- ~~Interactive warehouse strip: SQL textarea + "Run query" button + results table (POST /api/query)~~
-- ~~Interactive analytics strip: "ask a question" input + Claude NL→SQL + results (POST /api/ask)~~
-- ~~Exhibit query chips at step 3 (events by type, visitors today, exhibit completion)~~
-- ~~Exhibit question chips at step 4 (completion rates, most common event, mobile %)~~
-- ~~`exhibit_funnel` dbt model: step completion rates from funnel_step events~~
-- ~~Deploy to Railway~~
-- ~~Exhibit close button (×) — moved to top-left to avoid strip z-index overlap~~
-- Modeling step (step 5, pushing "The Apparatus" to step 6): NLP analysis of questionnaire responses — topic clustering, sentiment distribution, and/or Claude summarization of what visitors have said. Batch-computed daily on accumulated `questionnaire_response` texts. Design TBD.
-- Architecture diagram in exhibit step 1 (static SVG/HTML showing both data paths)
-- ~~Gift shop strip with 2 items (a visualization, keep the lights on) — `checkout_started` event tracking~~
-- ~~Stripe Checkout integration for "keep the lights on" donation — pay-what-you-wish, webhook fires `purchase_complete` through pipeline~~
-- AI-generated insight summarizing query results (fast-follow)
-- See `museum_idea.md` for full design
+5. Museum exhibit funnel (done — polish items in [TODO.md](TODO.md))
+- Dark overlay exhibit with 5 steps: Welcome → Stream → Warehouse → Analytics → Shop
+- Collapsible strips (stream + warehouse + analytics + shop) with horizontal accordion
+- Hash routing (`#exhibit-1` through `#exhibit-5`), direct URL load supported
+- "Fire an event" button + journey card in step 2
+- Strips fade in at correct steps (stream at 2, warehouse at 3, analytics at 4, shop at 5)
+- `funnel_step` events on navigation, `questionnaire_response` on submit, `checkout_started` on buy
+- Interactive warehouse strip: SQL textarea + 3 query chips + results table
+- Interactive analytics strip: 7-day server-rendered metrics + 3 insight chips with hardcoded SQL + Claude result summaries
+- `exhibit_funnel` dbt model with step completion rates
+- Daily dbt cron via GitHub Actions (6am UTC)
+- Gift shop with Stripe Checkout (pay-what-you-wish donation)
+- Deployed to Railway
+- See `museum_idea.md` for original design
 
 6. Sandbox
 - Gallery page at `/sandbox` featuring analyses of Reflection's public BigQuery data
@@ -74,7 +58,5 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 ## Future Ideas
 
 - Sandbox: community submissions — open contributions from visitors
-- ~~Sandbox: built-in SQL runner for on-site exploration~~ (shipped as warehouse strip)
-- Architecture diagram showing data flowing through the infrastructure
 - Self-optimization: define business goals, run experiments, show visitors which variant they're in
-- ML model serving on dbt marts
+- UMAP visualization of embedded questionnaire responses (design in lab notebook)

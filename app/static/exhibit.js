@@ -10,6 +10,8 @@
 
   var stepNames = ["", "welcome", "stream", "warehouse", "analytics", "shop"];
 
+  var isMobile = window.innerWidth <= 768;
+
   function showStep(n) {
     currentStep = n;
     steps.forEach(function (el) {
@@ -22,41 +24,54 @@
     nextBtn.textContent = n >= totalSteps ? "Exit" : "Next";
     counter.textContent = n + " / " + totalSteps;
 
-    // Strip visibility: stream at step 2+, warehouse at step 3+, analytics at step 4+, shop at step 5
-    var streamStrip = document.getElementById("strip-stream");
-    var warehouseStrip = document.getElementById("strip-warehouse");
-    var analyticsStrip = document.getElementById("strip-analytics");
-    var shopStrip = document.getElementById("strip-shop");
-    if (streamStrip) {
-      streamStrip.classList.toggle("exhibit-visible", n >= 2);
-    }
-    if (warehouseStrip) {
-      warehouseStrip.classList.toggle("exhibit-visible", n >= 3);
-    }
-    if (analyticsStrip) {
-      analyticsStrip.classList.toggle("exhibit-visible", n >= 4);
-    }
-    if (shopStrip) {
-      shopStrip.classList.toggle("exhibit-visible", n >= 5);
+    // On mobile, strips are hidden — content is inlined in exhibit steps.
+    // On desktop, toggle strip visibility and auto-expand.
+    if (!isMobile) {
+      var streamStrip = document.getElementById("strip-stream");
+      var warehouseStrip = document.getElementById("strip-warehouse");
+      var analyticsStrip = document.getElementById("strip-analytics");
+      var shopStrip = document.getElementById("strip-shop");
+      if (streamStrip) streamStrip.classList.toggle("exhibit-visible", n >= 2);
+      if (warehouseStrip) warehouseStrip.classList.toggle("exhibit-visible", n >= 3);
+      if (analyticsStrip) analyticsStrip.classList.toggle("exhibit-visible", n >= 4);
+      if (shopStrip) shopStrip.classList.toggle("exhibit-visible", n >= 5);
+
+      if (n === 2 && streamStrip && !streamStrip.classList.contains("expanded")) {
+        if (window.__toggleStrip) window.__toggleStrip("stream");
+      }
+      if (n === 3 && warehouseStrip && !warehouseStrip.classList.contains("expanded")) {
+        if (window.__toggleStrip) window.__toggleStrip("warehouse");
+      }
+      if (n === 4 && analyticsStrip && !analyticsStrip.classList.contains("expanded")) {
+        if (window.__toggleStrip) window.__toggleStrip("analytics");
+      }
+      if (n === 5 && shopStrip && !shopStrip.classList.contains("expanded")) {
+        if (window.__toggleStrip) window.__toggleStrip("shop");
+      }
     }
 
-    // Auto-expand the relevant strip at each step
-    if (n === 2 && streamStrip && !streamStrip.classList.contains("expanded")) {
-      if (window.__toggleStrip) window.__toggleStrip("stream");
-    }
-    if (n === 3 && warehouseStrip && !warehouseStrip.classList.contains("expanded")) {
-      if (window.__toggleStrip) window.__toggleStrip("warehouse");
-    }
-    if (n === 4 && analyticsStrip && !analyticsStrip.classList.contains("expanded")) {
-      if (window.__toggleStrip) window.__toggleStrip("analytics");
-    }
-    if (n === 5 && shopStrip && !shopStrip.classList.contains("expanded")) {
-      if (window.__toggleStrip) window.__toggleStrip("shop");
+    // On mobile step 2, populate mini-stream with recent events
+    if (isMobile && n === 2) {
+      populateMobileStream();
     }
 
     // Fire funnel_step event
     if (window.posthog && stepNames[n]) {
       window.posthog.capture("funnel_step", { step: stepNames[n] });
+    }
+  }
+
+  // Copy recent events from the main stream into the mobile mini-stream
+  function populateMobileStream() {
+    var mobileStream = document.getElementById("mobile-stream");
+    var mainStream = document.getElementById("stream");
+    if (!mobileStream || !mainStream) return;
+    // Clear and copy the last 8 events
+    while (mobileStream.firstChild) mobileStream.removeChild(mobileStream.firstChild);
+    var events = mainStream.querySelectorAll(".event-line");
+    var count = Math.min(events.length, 8);
+    for (var i = 0; i < count; i++) {
+      mobileStream.appendChild(events[i].cloneNode(true));
     }
   }
 

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reflection</title>
-  <link rel="stylesheet" href="/static/style.css?v=18" />
+  <link rel="stylesheet" href="/static/style.css?v=19" />
 </head>
 <body>
   <div class="split">
@@ -225,6 +225,9 @@
           <button id="btn-fire" class="btn btn-fire">Fire an event</button>
         </div>
         <div id="journey-container" class="journey-container"></div>
+        <div class="exhibit-mobile-content">
+          <div id="mobile-stream" class="mobile-stream"></div>
+        </div>
       </div>
 
       <!-- Step 3: The Warehouse -->
@@ -236,8 +239,18 @@
           The warehouse lets you run real SQL against the public dataset.
         </p>
         <p class="exhibit-text">
-          Try a query — click one of the chips in the warehouse panel.
+          Try a query — click one of the chips<span class="desktop-only"> in the warehouse panel</span>.
         </p>
+        <div class="exhibit-mobile-content">
+          <div class="warehouse-label">BigQuery · fct_events</div>
+          <div class="chip-row">
+            <button class="chip warehouse-chip" data-warehouse="events-by-type">events by type</button>
+            <button class="chip warehouse-chip" data-warehouse="visitors-this-week">visitors this week</button>
+            <button class="chip warehouse-chip" data-warehouse="exhibit-completion">exhibit completion</button>
+          </div>
+          <textarea id="mobile-warehouse-sql" class="warehouse-textarea" readonly spellcheck="false" placeholder="← click a query above"></textarea>
+          <div id="mobile-warehouse-results" class="query-results"></div>
+        </div>
       </div>
 
       <!-- Step 4: The Pipeline -->
@@ -249,10 +262,41 @@
           aggregations — pageviews, unique visitors, events per session.
         </p>
         <p class="exhibit-text">
-          The analytics panel shows today's metrics. Click one of the
-          question chips to ask a question — it gets translated to SQL and run against
-          the warehouse.
+          The analytics panel shows the last 7 days of metrics.
+          Click an insight chip to query the warehouse.
         </p>
+        <div class="exhibit-mobile-content">
+          {% if metrics %}
+          <div class="analytics-grid">
+            <div class="metric-group">
+              <div class="metric-group-label">volume</div>
+              <div class="metric-row"><span class="metric-label">events</span><span class="metric-value">{{ metrics.get('total_events', '—') }}</span></div>
+              <div class="metric-row"><span class="metric-label">visitors</span><span class="metric-value">{{ metrics.get('unique_visitors', '—') }}</span></div>
+              <div class="metric-row"><span class="metric-label">sessions</span><span class="metric-value">{{ metrics.get('unique_sessions', '—') }}</span></div>
+            </div>
+            <div class="metric-group">
+              <div class="metric-group-label">devices</div>
+              <div class="metric-row"><span class="metric-label">desktop</span><span class="metric-value">{{ metrics.get('desktop_sessions', '—') }}</span></div>
+              <div class="metric-row"><span class="metric-label">mobile</span><span class="metric-value">{{ metrics.get('mobile_sessions', '—') }}</span></div>
+            </div>
+            <div class="metric-group">
+              <div class="metric-group-label">ratios</div>
+              <div class="metric-row"><span class="metric-label">events/visitor</span><span class="metric-value">{{ "%.1f"|format(metrics.get('events_per_visitor', 0)) }}</span></div>
+              <div class="metric-row"><span class="metric-label">pages/session</span><span class="metric-value">{{ "%.1f"|format(metrics.get('pages_per_session', 0)) }}</span></div>
+            </div>
+          </div>
+          {% if metrics.metric_date is defined %}
+          <div class="analytics-cache-age">last 7 days · through {{ metrics.metric_date }}</div>
+          {% endif %}
+          {% endif %}
+          <div class="ask-divider">insights</div>
+          <div class="chip-row">
+            <button class="chip insight-chip" data-insight="exhibit-completion">how many visitors complete the exhibit?</button>
+            <button class="chip insight-chip" data-insight="most-common-event">what's the most common event?</button>
+            <button class="chip insight-chip" data-insight="mobile-percentage">what percentage are on mobile?</button>
+          </div>
+          <div id="mobile-ask-results" class="query-results"></div>
+        </div>
       </div>
 
       <!-- Step 5: The Shop -->
@@ -276,6 +320,22 @@
         <p class="exhibit-text exhibit-text-muted" style="margin-top: 1.25rem;">
           If you'd like to support the project, check out the shop.
         </p>
+        <div class="exhibit-mobile-content">
+          <div class="shop-cards">
+            <div class="shop-card" data-item-id="keep-the-lights-on" data-item-name="keep the lights on">
+              <div class="shop-card-name">keep the lights on</div>
+              <div class="shop-card-description">Contribute toward hosting costs — BigQuery, Railway, Supabase, PostHog.</div>
+              <div class="shop-card-price">
+                <label class="shop-price-label" for="mobile-shop-amount">pay what you wish</label>
+                <div class="shop-amount-row">
+                  <span class="shop-currency">$</span>
+                  <input type="number" id="mobile-shop-amount" class="shop-amount-input" min="1" step="1" value="5">
+                </div>
+              </div>
+              <button class="btn shop-buy-btn" data-item-id="keep-the-lights-on" data-item-name="keep the lights on" data-price-input="mobile-shop-amount">Buy</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Navigation -->

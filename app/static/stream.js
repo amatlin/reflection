@@ -139,6 +139,15 @@
     while (streamEl.children.length > 200) {
       streamEl.removeChild(streamEl.lastChild);
     }
+
+    // Also append to mobile mini-stream if visible
+    var mobileStream = document.getElementById("mobile-stream");
+    if (mobileStream && mobileStream.offsetParent !== null) {
+      mobileStream.insertBefore(line.cloneNode(true), mobileStream.firstChild);
+      while (mobileStream.children.length > 8) {
+        mobileStream.removeChild(mobileStream.lastChild);
+      }
+    }
   }
 
   function connect() {
@@ -360,6 +369,16 @@
     container.appendChild(el);
   }
 
+  // ── Mobile: collapse stream strip on load ──
+  if (window.innerWidth <= 768) {
+    var streamStrip = document.getElementById("strip-stream");
+    if (streamStrip && streamStrip.classList.contains("expanded")) {
+      streamStrip.classList.remove("expanded");
+      var chevron = streamStrip.querySelector(".strip-chevron");
+      if (chevron) chevron.textContent = "▸";
+    }
+  }
+
   // ── Shared results rendering ──
   var warehouseSql = document.getElementById("warehouse-sql");
   var warehouseResults = document.getElementById("warehouse-results");
@@ -416,39 +435,51 @@
   }
 
   // ── Warehouse chip handlers ──
-  function runWarehouseChip(key) {
-    showMessage(warehouseResults, "running...", "query-loading");
-    if (warehouseSql) warehouseSql.value = "";
+  function runWarehouseChip(key, chipEl) {
+    // Find the result containers closest to the clicked chip (mobile or strip)
+    var container = chipEl ? chipEl.closest(".exhibit-mobile-content") || chipEl.closest(".strip-content") : null;
+    var sqlEl = container ? container.querySelector(".warehouse-textarea") : warehouseSql;
+    var resultsEl = container ? container.querySelector(".query-results") : warehouseResults;
+    if (!resultsEl) resultsEl = warehouseResults;
+    if (!sqlEl) sqlEl = warehouseSql;
+
+    showMessage(resultsEl, "running...", "query-loading");
+    if (sqlEl) sqlEl.value = "";
     fetch("/api/warehouse/" + encodeURIComponent(key))
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (warehouseSql && data.sql) warehouseSql.value = data.sql;
-        clearEl(warehouseResults);
-        renderResultsTable(warehouseResults, data);
+        if (sqlEl && data.sql) sqlEl.value = data.sql;
+        clearEl(resultsEl);
+        renderResultsTable(resultsEl, data);
       })
       .catch(function () {
-        showMessage(warehouseResults, "Network error", "query-error");
+        showMessage(resultsEl, "Network error", "query-error");
       });
   }
 
   document.querySelectorAll(".warehouse-chip").forEach(function (chip) {
     chip.addEventListener("click", function () {
-      runWarehouseChip(chip.getAttribute("data-warehouse"));
+      runWarehouseChip(chip.getAttribute("data-warehouse"), chip);
     });
   });
 
   // ── Insight chip handlers ──
-  function runInsight(key) {
-    showMessage(askResults, "thinking...", "query-loading");
+  function runInsight(key, chipEl) {
+    // Find the result container closest to the clicked chip (mobile or strip)
+    var container = chipEl ? chipEl.closest(".exhibit-mobile-content") || chipEl.closest(".strip-content") : null;
+    var resultsEl = container ? container.querySelector(".query-results") : askResults;
+    if (!resultsEl) resultsEl = askResults;
+
+    showMessage(resultsEl, "thinking...", "query-loading");
     fetch("/api/insights/" + encodeURIComponent(key))
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        clearEl(askResults);
+        clearEl(resultsEl);
         if (data.summary) {
           var summaryEl = document.createElement("p");
           summaryEl.className = "insight-summary";
           summaryEl.textContent = data.summary;
-          askResults.appendChild(summaryEl);
+          resultsEl.appendChild(summaryEl);
         }
         if (data.sql) {
           var sqlWrap = document.createElement("details");
@@ -462,18 +493,18 @@
           code.textContent = data.sql;
           pre.appendChild(code);
           sqlWrap.appendChild(pre);
-          askResults.appendChild(sqlWrap);
+          resultsEl.appendChild(sqlWrap);
         }
-        renderResultsTable(askResults, data);
+        renderResultsTable(resultsEl, data);
       })
       .catch(function () {
-        showMessage(askResults, "Network error", "query-error");
+        showMessage(resultsEl, "Network error", "query-error");
       });
   }
 
   document.querySelectorAll(".insight-chip").forEach(function (chip) {
     chip.addEventListener("click", function () {
-      runInsight(chip.getAttribute("data-insight"));
+      runInsight(chip.getAttribute("data-insight"), chip);
     });
   });
 })();
