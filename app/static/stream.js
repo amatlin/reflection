@@ -322,23 +322,17 @@
 
   // ── Pipeline countdowns ──
   function updateCountdowns() {
-    var el = document.getElementById("pipeline-status");
-    if (!el) return;
-
     var config = window.__reflection || {};
     var now = new Date();
-    var parts = [];
 
-    // Warehouse export: runs hourly on the hour
+    // Hourly warehouse export
     var lastHour = new Date(now);
     lastHour.setMinutes(0, 0, 0);
     var agoMins = Math.max(0, Math.round((now - lastHour) / 60000));
-    parts.push("last warehouse export: " + agoMins + "m ago");
     var nextHour = new Date(lastHour.getTime() + 60 * 60 * 1000);
     var bqMins = Math.max(0, Math.round((nextHour - now) / 60000));
-    parts.push("next one in " + bqMins + "m");
 
-    // Metrics refresh countdown: daily dbt run at configured hour UTC
+    // Daily dbt run at configured hour UTC
     var cronHour = config.dbtCronHourUtc || 6;
     var nextDbt = new Date(now);
     nextDbt.setUTCHours(cronHour, 0, 0, 0);
@@ -349,9 +343,24 @@
     var dbtHours = Math.floor(dbtDiffMs / 3600000);
     var dbtMins = Math.max(0, Math.round((dbtDiffMs % 3600000) / 60000));
     var dbtLabel = dbtHours > 0 ? dbtHours + "h " + dbtMins + "m" : dbtMins + "m";
-    parts.push("metrics refresh in " + dbtLabel);
 
-    el.textContent = parts.join(" \u00B7 ");
+    // Streaming strip
+    var streamEl = document.getElementById("pipeline-status");
+    if (streamEl) {
+      streamEl.textContent = "last export: " + agoMins + "m ago \u00B7 next in " + bqMins + "m";
+    }
+
+    // Warehouse strip
+    var warehouseEl = document.getElementById("warehouse-status");
+    if (warehouseEl) {
+      warehouseEl.textContent = "raw data landed " + agoMins + "m ago (hourly) \u00B7 next pipeline refresh in " + dbtLabel + " (daily)";
+    }
+
+    // Analytics strip
+    var analyticsEl = document.getElementById("analytics-status");
+    if (analyticsEl) {
+      analyticsEl.textContent = "next pipeline refresh in " + dbtLabel;
+    }
   }
 
   updateCountdowns();

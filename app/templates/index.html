@@ -51,6 +51,7 @@
         </div>
         <div class="strip-content">
           <div class="warehouse-content">
+            <div class="pipeline-status" id="warehouse-status"></div>
             <div class="warehouse-label">BigQuery · fct_events</div>
             <div class="chip-row">
               <button class="chip warehouse-chip" data-warehouse="events-by-type">events by type</button>
@@ -70,6 +71,7 @@
           <span class="strip-chevron">▸</span>
         </div>
         <div class="strip-content">
+          <div class="pipeline-status" id="analytics-status"></div>
           {% if metrics %}
           <div class="analytics-grid">
             <div class="metric-group">
