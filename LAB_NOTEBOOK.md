@@ -1021,3 +1021,42 @@ dbt's `service-account-json` with `env_var()` is fragile — the env var returns
 - Mobile exhibit UX improvements (query results/metrics still small)
 - `reflection.sh` DNS/SSL fix
 - Stripe sandbox → live
+- UMAP visualization of questionnaire responses (see below)
+
+## 2026-03-28 — Idea: UMAP visualization of questionnaire responses
+
+Replace the shop as the final exhibit strip with a 2D UMAP scatter plot of embedded questionnaire responses. Each dot is a response; hovering shows the text. The visitor leaves a thought at the last exhibit step and sees where it lands in the space of everyone else's thoughts. The shop moves to appear only when the user exits the exhibit.
+
+### Why this fits
+
+The self-referential loop deepens: you contribute text, it gets embedded and projected alongside everyone else's contributions, and you see the result immediately. It's the modeling step that was missing — not ML for ML's sake, but a genuine use of embeddings that makes the data visible in a new way.
+
+### Architecture sketch
+
+**Daily batch (GitHub Actions cron):**
+1. Fetch questionnaire responses from BigQuery
+2. Embed with external API (OpenAI or Voyage — cheap at this scale)
+3. Fit UMAP on all embeddings
+4. Save 2D coordinates to a BigQuery table (or Supabase)
+5. Pickle the fitted UMAP model → upload to Supabase Storage
+
+**FastAPI server:**
+1. On startup: download fitted UMAP model from Supabase Storage, cache in memory
+2. Serve batch coordinates from BigQuery (cached) for the scatter plot
+
+**Live path (on questionnaire submit):**
+1. Embed the new response via external API
+2. `umap_model.transform([embedding])` → get 2D coordinates
+3. Broadcast coordinates + text via WebSocket → dot appears live on everyone's screen
+
+**Frontend:**
+- 2D scatter plot (D3 or canvas) showing all responses
+- Hover/click shows response text
+- New responses animate in via WebSocket
+
+### Open questions
+- Which embedding API? OpenAI `text-embedding-3-small` is cheap and good enough.
+- UMAP parameters (n_neighbors, min_dist) — need to experiment once there's enough data.
+- How many responses before the visualization is interesting? Probably need 20-30 minimum for clusters to emerge.
+- Color coding? Could color by sentiment, time period, or just use a single color.
+- What happens with very few responses? Show a message like "N more thoughts needed before the map appears."
