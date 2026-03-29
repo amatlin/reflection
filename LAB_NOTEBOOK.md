@@ -1060,3 +1060,33 @@ The self-referential loop deepens: you contribute text, it gets embedded and pro
 - How many responses before the visualization is interesting? Probably need 20-30 minimum for clusters to emerge.
 - Color coding? Could color by sentiment, time period, or just use a single color.
 - What happens with very few responses? Show a message like "N more thoughts needed before the map appears."
+
+---
+
+## 2026-03-29 — Mobile exhibit redesign + cleanup
+
+### Problem
+
+The desktop exhibit uses a split layout — exhibit text on the left, interactive strips on the right. On mobile this was completely broken: the overlay sat at z-index 100 blocking all strip interaction, strip content bled through the semi-transparent background, and query/insight chips were untappable.
+
+### Solution
+
+On mobile (≤768px), the exhibit is now a self-contained vertical walkthrough. Each step inlines the relevant strip content directly:
+- **Step 2 (stream):** Mini-stream showing last 8 events, updated live via WebSocket
+- **Step 3 (warehouse):** Query chips + SQL textarea + results table, all inline
+- **Step 4 (analytics):** Metrics grid + insight chips with Claude summaries, all inline
+- **Step 5 (shop):** "Keep the lights on" donation card with working Buy button
+
+Desktop is unchanged — strips still appear alongside the overlay as before.
+
+### Implementation details
+- Added `exhibit-mobile-content` divs inside each exhibit step, hidden on desktop via CSS (`display: none`)
+- On mobile during exhibit, strips container is `display: none` — no z-index conflicts
+- Warehouse/insight chip click handlers use `closest()` to find their result container, so the same handler works for both strip-based and inline chips
+- Stream strip no longer auto-expands on mobile homepage — all four strip headers visible
+
+### Other changes
+- Created `TODO.md` as a living checklist (separate from lab notebook history)
+- Cleaned up `plan.md` — removed strikethrough noise, condensed done milestones, linked TODO
+- Fixed stale exhibit copy: step 4 now says "last 7 days" instead of "today's metrics"
+- Added `CLAUDE.md` instruction to propose `TODO.md` additions when new work surfaces

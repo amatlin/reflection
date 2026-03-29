@@ -14,12 +14,9 @@ Open work items for Reflection. The [lab notebook](LAB_NOTEBOOK.md) tracks what'
 
 ## Mobile
 
-- [x] Redesign mobile exhibit as inline walkthrough — strip content embedded in each step
-- [x] Strip content no longer bleeds through exhibit overlay
-- [x] Query chips, insight chips, and shop buttons are tappable on mobile
-- [x] Metrics and query results readable on mobile
-- [x] Shop card inline at step 5, Buy button works
-- [x] Homepage: all strips collapsed on mobile, none auto-expanded
+Mobile exhibit redesigned as inline walkthrough (2026-03-29). Remaining:
+
+- [ ] Test on real iOS/Android devices (only verified via Playwright viewport resize)
 
 ## Payments
 
