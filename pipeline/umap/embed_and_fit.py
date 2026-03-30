@@ -1,45 +1,67 @@
 """Embed responses and fit UMAP to produce 2D coordinates.
 
-Reads seed_data.json (and optionally real responses from BigQuery),
-embeds all texts with OpenAI text-embedding-3-small, fits UMAP,
-and outputs coordinates.json + umap_model.pkl.
+Fetches real questionnaire responses from BigQuery, embeds them with
+OpenAI text-embedding-3-small, fits UMAP, and outputs coordinates.json
++ umap_model.pkl.
+
+Only runs if there are enough responses (MIN_RESPONSES). Below that threshold, exits early.
 
 Usage:
     conda activate reflection
     python pipeline/umap/embed_and_fit.py
 
-Requires OPENAI_API_KEY in environment or .env file.
+Requires OPENAI_API_KEY and BigQuery credentials in environment or .env file.
 """
 
 import json
+import os
 import pickle
 from pathlib import Path
 
 import numpy as np
 import umap
+from google.cloud import bigquery
+from google.oauth2 import service_account
 from openai import OpenAI
 
-SEED_PATH = Path(__file__).parent / "seed_data.json"
 COORDS_PATH = Path(__file__).parent / "coordinates.json"
 MODEL_PATH = Path(__file__).parent / "umap_model.pkl"
 
 EMBEDDING_MODEL = "text-embedding-3-small"
-BATCH_SIZE = 100  # OpenAI embeddings batch size
+BATCH_SIZE = 100
+MIN_RESPONSES = 50
+
+# BigQuery config — mirrors app/config.py defaults
+BQ_PROJECT = os.environ.get("BIGQUERY_PROJECT", "reflection-data")
+BQ_DATASET = os.environ.get("BIGQUERY_DATASET", "reflection")
+BQ_KEY_JSON = os.environ.get("BIGQUERY_KEY_JSON", "")
+BQ_KEY_PATH = os.environ.get("BIGQUERY_KEY_PATH", "")
 
 
-def load_responses() -> list[dict]:
-    """Load seed data and return list of {text, is_synthetic} dicts."""
-    if not SEED_PATH.exists():
-        raise FileNotFoundError(f"Run seed_responses.py first: {SEED_PATH}")
+def get_bq_client() -> bigquery.Client:
+    """Create a BigQuery client from environment credentials."""
+    if BQ_KEY_JSON:
+        info = json.loads(BQ_KEY_JSON)
+        credentials = service_account.Credentials.from_service_account_info(
+            info, scopes=["https://www.googleapis.com/auth/bigquery"]
+        )
+        return bigquery.Client(project=BQ_PROJECT, credentials=credentials)
+    elif BQ_KEY_PATH:
+        credentials = service_account.Credentials.from_service_account_file(
+            BQ_KEY_PATH, scopes=["https://www.googleapis.com/auth/bigquery"]
+        )
+        return bigquery.Client(project=BQ_PROJECT, credentials=credentials)
+    else:
+        return bigquery.Client(project=BQ_PROJECT)
 
-    with open(SEED_PATH) as f:
-        responses = json.load(f)
 
-    # TODO: also fetch real responses from BigQuery and merge them in
-    # with is_synthetic=False
-
-    print(f"Loaded {len(responses)} responses ({sum(1 for r in responses if r['is_synthetic'])} synthetic)")
-    return responses
+def fetch_responses() -> list[dict]:
+    """Fetch questionnaire responses from BigQuery."""
+    client = get_bq_client()
+    table = f"{BQ_PROJECT}.{BQ_DATASET}.questionnaire_responses"
+    query = f"SELECT response_text FROM `{table}` WHERE response_text IS NOT NULL"
+    rows = list(client.query(query).result())
+    return [{"text": row.response_text} for row in rows]
 
 
 def embed_texts(client: OpenAI, texts: list[str]) -> np.ndarray:
@@ -71,7 +93,14 @@ def fit_umap(embeddings: np.ndarray) -> tuple[np.ndarray, umap.UMAP]:
 
 
 def main():
-    responses = load_responses()
+    print("Fetching responses from BigQuery...")
+    responses = fetch_responses()
+    print(f"Found {len(responses)} responses")
+
+    if len(responses) < MIN_RESPONSES:
+        print(f"Need {MIN_RESPONSES} responses to fit UMAP, only have {len(responses)}. Exiting.")
+        return
+
     texts = [r["text"] for r in responses]
 
     print("Embedding responses...")
@@ -89,7 +118,6 @@ def main():
                 "x": float(coords[i, 0]),
                 "y": float(coords[i, 1]),
                 "text": r["text"],
-                "is_synthetic": r["is_synthetic"],
             }
         )
 

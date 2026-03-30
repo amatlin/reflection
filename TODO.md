@@ -6,12 +6,9 @@ Open work items for Reflection. The [lab notebook](LAB_NOTEBOOK.md) tracks what'
 
 - Rewrite exhibit copy (step headings + body text to match new step names)
 - Pick better / more interesting insight questions for the analytics strip
-- Visitor ID color coordination (homepage greeting vs stream "you" label)
 - Consider replacing hex visitor IDs with generated names
 - Architecture diagram in exhibit step 1 (static SVG/HTML showing both data paths)
 - `reflection.sh` DNS/SSL fix
-- Style the final "Exit" exhibit button differently from Back/Next
-- Pipeline countdown says "metrics refresh in Xm" assuming hourly dbt runs, but dbt/cache is daily — fix countdown to match actual schedule
 
 
 ## Mobile
@@ -27,9 +24,8 @@ Mobile exhibit redesigned as inline walkthrough (2026-03-29). Remaining:
 
 ## Modeling step (UMAP visualization)
 
-2D scatter plot of embedded questionnaire responses. Each dot is a thought; clusters form where people said similar things. Placeholder shows a counter until 50+ responses exist. Design documented in [lab notebook entry 2026-03-28](LAB_NOTEBOOK.md).
+Pipeline ready: embed_and_fit.py fetches from BigQuery, embeds, fits UMAP, outputs coordinates.json. API endpoint serves coordinates. Script exits early if < 50 responses. Blocked on collecting responses.
 
-- Daily batch job: fetch responses from BigQuery, embed (OpenAI text-embedding-3-small), fit UMAP, save coordinates
-- FastAPI: serve precomputed coordinates JSON
-- Frontend: D3 or Plotly scatter plot in the modeling strip (only renders when 50+ responses)
-- Content moderation strategy before showing any user-submitted text
+- Wire embed_and_fit.py to daily cron alongside dbt
+- Frontend: D3 or Plotly scatter plot in the modeling strip (after 50 responses)
+- Content moderation strategy before showing user-submitted text
