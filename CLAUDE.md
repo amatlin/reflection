@@ -26,6 +26,8 @@ Reflection is a self-referential website that analyzes its own usage. See `plan.
 
 - **Always use conda** for virtual environments, not venv or pip virtualenvs. The conda environment for this project is `reflection`. Activate with `conda activate reflection`.
 
+If you notice a tool permission being repeatedly approved for a safe, read-only, or routine operation, suggest adding it to `~/.claude/settings.json` under `permissions.allow`.
+
 ## Development
 
 The project is built incrementally through milestones — each one should be demo-able. Speed over polish. Commit and push frequently — don't let work pile up locally.

@@ -8,7 +8,7 @@
   var totalSteps = steps.length;
   var currentStep = 0; // 0 = not in exhibit
 
-  var stepNames = ["", "welcome", "stream", "warehouse", "analytics", "shop"];
+  var stepNames = ["", "welcome", "stream", "warehouse", "analytics", "modeling"];
 
   var isMobile = window.innerWidth <= 768;
 
@@ -32,11 +32,9 @@
       var streamStrip = document.getElementById("strip-stream");
       var warehouseStrip = document.getElementById("strip-warehouse");
       var analyticsStrip = document.getElementById("strip-analytics");
-      var shopStrip = document.getElementById("strip-shop");
       if (streamStrip) streamStrip.classList.toggle("exhibit-visible", n >= 2);
       if (warehouseStrip) warehouseStrip.classList.toggle("exhibit-visible", n >= 3);
       if (analyticsStrip) analyticsStrip.classList.toggle("exhibit-visible", n >= 4);
-      if (shopStrip) shopStrip.classList.toggle("exhibit-visible", n >= 5);
 
       if (n === 2 && streamStrip && !streamStrip.classList.contains("expanded")) {
         if (window.__toggleStrip) window.__toggleStrip("stream");
@@ -46,9 +44,6 @@
       }
       if (n === 4 && analyticsStrip && !analyticsStrip.classList.contains("expanded")) {
         if (window.__toggleStrip) window.__toggleStrip("analytics");
-      }
-      if (n === 5 && shopStrip && !shopStrip.classList.contains("expanded")) {
-        if (window.__toggleStrip) window.__toggleStrip("shop");
       }
     }
 

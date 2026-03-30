@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from app.config import settings
-from app.services.bigquery_client import get_last_export_time, get_latest_metrics
+from app.services.bigquery_client import get_last_export_time, get_latest_metrics, get_response_count
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -13,6 +13,7 @@ templates = Jinja2Templates(directory="app/templates")
 async def landing(request: Request):
     last_export_iso = get_last_export_time()
     metrics = get_latest_metrics()
+    response_count = get_response_count()
     return templates.TemplateResponse(
         "index.html",
         {
@@ -22,5 +23,6 @@ async def landing(request: Request):
             "last_export_iso": last_export_iso or "",
             "dbt_cron_hour_utc": settings.dbt_cron_hour_utc,
             "metrics": metrics,
+            "response_count": response_count,
         },
     )

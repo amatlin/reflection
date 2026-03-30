@@ -110,6 +110,31 @@ def get_last_export_time() -> str | None:
         return None
 
 
+_response_count_cache: dict = {"data": None, "fetched_at": 0.0}
+
+
+def get_response_count() -> int:
+    """Return count of questionnaire responses. Cached for 1 hour."""
+    global _response_count_cache
+    now = time.time()
+
+    if _response_count_cache["data"] is not None and (now - _response_count_cache["fetched_at"]) < _CACHE_TTL:
+        return _response_count_cache["data"]
+
+    try:
+        table = f"{settings.bigquery_project}.{settings.bigquery_dataset}.questionnaire_responses"
+        query = f"SELECT COUNT(*) AS total FROM `{table}`"
+        result = get_client().query(query).result()
+        rows = list(result)
+        count = rows[0].total if rows else 0
+        _response_count_cache["data"] = count
+        _response_count_cache["fetched_at"] = time.time()
+        return count
+    except Exception as e:
+        print(f"[bigquery] Error fetching response count: {e}")
+        return 0
+
+
 def get_cache_age_minutes() -> int | None:
     """Minutes since the cache was last populated. None if never fetched."""
     if _cache["fetched_at"] == 0.0:

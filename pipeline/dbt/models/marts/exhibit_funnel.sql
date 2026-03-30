@@ -22,6 +22,7 @@ step_mapped as (
             when 'warehouse' then 3
             when 'the-pipeline' then 4
             when 'analytics' then 4
+            when 'modeling' then 5
             when 'the-apparatus' then 5
             when 'the-shop' then 5
             when 'shop' then 5
@@ -34,7 +35,7 @@ step_names as (
     select 2, 'stream' union all
     select 3, 'warehouse' union all
     select 4, 'analytics' union all
-    select 5, 'shop'
+    select 5, 'modeling'
 ),
 
 step_visitors as (
