@@ -258,7 +258,7 @@ h1 {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.68rem;
   color: var(--text-muted);
-  padding: 0.5rem 0.25rem;
+  padding: 0.5rem 0;
   letter-spacing: 0.02em;
 }
 
