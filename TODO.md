@@ -24,9 +24,8 @@ Mobile exhibit redesigned as inline walkthrough (2026-03-29). Remaining:
 
 ## Modeling step (UMAP visualization)
 
-2D scatter plot of embedded questionnaire responses. Each dot is a thought; clusters form where people said similar things. Placeholder shows a counter until 50+ responses exist. Design documented in [lab notebook entry 2026-03-28](LAB_NOTEBOOK.md).
+Pipeline scaffolding is in place (embed_and_fit.py, /api/umap/coordinates endpoint). Placeholder shows response counter until 50+ exist. Blocked on collecting responses.
 
-- Daily batch job: fetch responses from BigQuery, embed (OpenAI text-embedding-3-small), fit UMAP, save coordinates
-- FastAPI: serve precomputed coordinates JSON
-- Frontend: D3 or Plotly scatter plot in the modeling strip (only renders when 50+ responses)
-- Content moderation strategy before showing any user-submitted text
+- Frontend: D3 or Plotly scatter plot in the modeling strip (after 50 responses)
+- Wire embed_and_fit.py to daily cron alongside dbt
+- Content moderation strategy before showing user-submitted text
