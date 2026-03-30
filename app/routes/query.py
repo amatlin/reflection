@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from google.cloud.bigquery import QueryJobConfig
 
 from app.services.bigquery_client import get_client
@@ -121,7 +121,7 @@ def _serialize(val):
 @router.get("/warehouse/{key}")
 async def warehouse_query(key: str):
     if key not in WAREHOUSE_QUERIES:
-        return {"error": f"Unknown warehouse query: {key}"}
+        raise HTTPException(status_code=404, detail=f"Unknown warehouse query: {key}")
 
     # Check cache
     now = time.time()
@@ -137,13 +137,13 @@ async def warehouse_query(key: str):
         _warehouse_cache[key] = {"data": data, "expires_at": now + _CACHE_TTL}
         return data
     except Exception as e:
-        return {"error": str(e), "sql": sql}
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/insights/{key}")
 async def insight_query(key: str):
     if key not in INSIGHT_QUERIES:
-        return {"error": f"Unknown insight: {key}"}
+        raise HTTPException(status_code=404, detail=f"Unknown insight: {key}")
 
     # Check cache
     now = time.time()
@@ -168,4 +168,4 @@ async def insight_query(key: str):
         _insight_cache[key] = {"data": data, "expires_at": now + _CACHE_TTL}
         return data
     except Exception as e:
-        return {"error": str(e), "sql": sql}
+        raise HTTPException(status_code=500, detail=str(e))

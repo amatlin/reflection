@@ -458,14 +458,17 @@
     showMessage(resultsEl, "running...", "query-loading");
     if (sqlEl) sqlEl.value = "";
     fetch("/api/warehouse/" + encodeURIComponent(key))
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r.ok) return r.json().then(function (err) { throw new Error(err.detail || "Query failed"); });
+        return r.json();
+      })
       .then(function (data) {
         if (sqlEl && data.sql) sqlEl.value = data.sql;
         clearEl(resultsEl);
         renderResultsTable(resultsEl, data);
       })
-      .catch(function () {
-        showMessage(resultsEl, "Network error", "query-error");
+      .catch(function (e) {
+        showMessage(resultsEl, e.message || "Network error", "query-error");
       });
   }
 
@@ -484,7 +487,10 @@
 
     showMessage(resultsEl, "thinking...", "query-loading");
     fetch("/api/insights/" + encodeURIComponent(key))
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r.ok) return r.json().then(function (err) { throw new Error(err.detail || "Query failed"); });
+        return r.json();
+      })
       .then(function (data) {
         clearEl(resultsEl);
         if (data.summary) {
@@ -509,8 +515,8 @@
         }
         renderResultsTable(resultsEl, data);
       })
-      .catch(function () {
-        showMessage(resultsEl, "Network error", "query-error");
+      .catch(function (e) {
+        showMessage(resultsEl, e.message || "Network error", "query-error");
       });
   }
 

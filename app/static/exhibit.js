@@ -10,7 +10,7 @@
 
   var stepNames = ["", "welcome", "stream", "warehouse", "analytics", "modeling"];
 
-  var isMobile = window.innerWidth <= 768;
+  function isMobile() { return window.innerWidth <= 768; }
 
   function showStep(n) {
     currentStep = n;
@@ -28,7 +28,7 @@
 
     // On mobile, strips are hidden — content is inlined in exhibit steps.
     // On desktop, toggle strip visibility and auto-expand.
-    if (!isMobile) {
+    if (!isMobile()) {
       var streamStrip = document.getElementById("strip-stream");
       var warehouseStrip = document.getElementById("strip-warehouse");
       var analyticsStrip = document.getElementById("strip-analytics");
@@ -53,7 +53,7 @@
     }
 
     // On mobile step 2, populate mini-stream with recent events
-    if (isMobile && n === 2) {
+    if (isMobile() && n === 2) {
       populateMobileStream();
     }
 
