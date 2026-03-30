@@ -32,9 +32,11 @@
       var streamStrip = document.getElementById("strip-stream");
       var warehouseStrip = document.getElementById("strip-warehouse");
       var analyticsStrip = document.getElementById("strip-analytics");
+      var modelingStrip = document.getElementById("strip-modeling");
       if (streamStrip) streamStrip.classList.toggle("exhibit-visible", n >= 2);
       if (warehouseStrip) warehouseStrip.classList.toggle("exhibit-visible", n >= 3);
       if (analyticsStrip) analyticsStrip.classList.toggle("exhibit-visible", n >= 4);
+      if (modelingStrip) modelingStrip.classList.toggle("exhibit-visible", n >= 5);
 
       if (n === 2 && streamStrip && !streamStrip.classList.contains("expanded")) {
         if (window.__toggleStrip) window.__toggleStrip("stream");
@@ -44,6 +46,9 @@
       }
       if (n === 4 && analyticsStrip && !analyticsStrip.classList.contains("expanded")) {
         if (window.__toggleStrip) window.__toggleStrip("analytics");
+      }
+      if (n === 5 && modelingStrip && !modelingStrip.classList.contains("expanded")) {
+        if (window.__toggleStrip) window.__toggleStrip("modeling");
       }
     }
 

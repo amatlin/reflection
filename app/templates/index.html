@@ -149,6 +149,20 @@
         </div>
       </div>
 
+      <!-- Modeling strip -->
+      <div class="strip" id="strip-modeling" data-strip="modeling">
+        <div class="strip-header" data-strip-toggle="modeling">
+          <span class="strip-label">modeling</span>
+          <span class="strip-chevron">▸</span>
+        </div>
+        <div class="strip-content">
+          <div class="modeling-content">
+            <p class="pipeline-status">Count of thoughts submitted: {{ response_count }}. When more than 50 are submitted, a visualization will be shown below.</p>
+            <div id="umap-container"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Shop strip -->
       <div class="strip" id="strip-shop" data-strip="shop">
         <div class="strip-header" data-strip-toggle="shop">
@@ -308,12 +322,6 @@
           Every response left here gets embedded into a vector and projected onto a 2D map.
           Each dot is a thought. Clusters form where people said similar things.
         </p>
-        <div id="umap-container">
-          <p class="exhibit-text exhibit-text-muted">
-            Count of thoughts submitted: {{ response_count }}.
-            When more than 50 are submitted, a visualization will be shown below.
-          </p>
-        </div>
         <div class="exhibit-questionnaire" id="questionnaire">
           <label class="exhibit-label" for="questionnaire-text">leave a thought</label>
           <textarea id="questionnaire-text" class="exhibit-textarea" maxlength="500"
