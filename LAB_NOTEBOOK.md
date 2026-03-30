@@ -1090,3 +1090,34 @@ Desktop is unchanged — strips still appear alongside the overlay as before.
 - Cleaned up `plan.md` — removed strikethrough noise, condensed done milestones, linked TODO
 - Fixed stale exhibit copy: step 4 now says "last 7 days" instead of "today's metrics"
 - Added `CLAUDE.md` instruction to propose `TODO.md` additions when new work surfaces
+
+---
+
+## 2026-03-29 — Exhibit restructure + website cleanup
+
+### Exhibit restructure
+Replaced the shop as exhibit step 5 with "modeling." The exhibit is now: welcome → stream → warehouse → analytics → modeling. The shop strip stays on the homepage sidebar but is no longer part of the guided walkthrough.
+
+The modeling step shows a questionnaire ("leave a thought") and a counter of total responses. Once 50+ responses exist, a UMAP visualization will render — each dot is a thought, clusters form where people said similar things. Decided against seeding with synthetic data because it contradicts the site's spirit of authenticity, and fake thoughts could prime real ones.
+
+UMAP pipeline scaffolding is in place (`pipeline/umap/`, `/api/umap/coordinates` endpoint) but won't produce output until the response threshold is met.
+
+### Website cleanup
+- **Exhibit funnel fix:** Old step names (`the-loop`, `the-warehouse`, etc.) and new names (`stream`, `warehouse`, etc.) were showing as separate rows in the funnel query. Consolidated in the dbt model by grouping on step number and mapping to canonical names.
+- **Exit button:** Styled with amber border/text to distinguish from Back/Next.
+- **Pipeline countdown:** Was showing "metrics refresh in Xm" assuming hourly dbt runs. Fixed to show daily countdown (6am UTC). Split the single status line across three strips — streaming shows export timing, warehouse shows raw data freshness + pipeline refresh, analytics shows next dbt refresh.
+
+### Files changed
+| File | Change |
+|---|---|
+| `app/templates/index.html` | Step 5 → modeling with response counter, pipeline status in warehouse/analytics strips |
+| `app/static/exhibit.js` | stepNames updated, shop strip toggling removed, exit button class toggle |
+| `app/static/stream.js` | Pipeline countdown split across three strips, daily dbt schedule |
+| `app/static/style.css` | `.exhibit-btn-exit` amber styling |
+| `app/config.py` | `dbt_cron_hour_utc` replaces `dbt_cron_minute`, added `openai_api_key` |
+| `app/routes/pages.py` | Passes `response_count` and `dbt_cron_hour_utc` to template |
+| `app/services/bigquery_client.py` | Added `get_response_count()` |
+| `app/routes/umap.py` | New — serves precomputed UMAP coordinates |
+| `app/main.py` | Registered umap router |
+| `pipeline/dbt/models/marts/exhibit_funnel.sql` | Consolidated old/new step names, added "modeling" |
+| `pipeline/umap/` | New — seed_responses.py, embed_and_fit.py (scaffolding for future use) |

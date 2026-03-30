@@ -31,17 +31,18 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 - Collapsible stream panel with fire-an-event button
 
 5. Museum exhibit funnel (done — polish items in [TODO.md](TODO.md))
-- Dark overlay exhibit with 5 steps: Welcome → Stream → Warehouse → Analytics → Shop
-- Collapsible strips (stream + warehouse + analytics + shop) with horizontal accordion
+- Dark overlay exhibit with 5 steps: welcome → stream → warehouse → analytics → modeling
+- Collapsible strips (stream + warehouse + analytics) with horizontal accordion; shop is a homepage strip
 - Hash routing (`#exhibit-1` through `#exhibit-5`), direct URL load supported
 - "Fire an event" button + journey card in step 2
-- Strips fade in at correct steps (stream at 2, warehouse at 3, analytics at 4, shop at 5)
+- Strips fade in at correct steps (stream at 2, warehouse at 3, analytics at 4)
 - `funnel_step` events on navigation, `questionnaire_response` on submit, `checkout_started` on buy
 - Interactive warehouse strip: SQL textarea + 3 query chips + results table
 - Interactive analytics strip: 7-day server-rendered metrics + 3 insight chips with hardcoded SQL + Claude result summaries
+- Modeling step: questionnaire + response counter, UMAP visualization after 50 responses
 - `exhibit_funnel` dbt model with step completion rates
 - Daily dbt cron via GitHub Actions (6am UTC)
-- Gift shop with Stripe Checkout (pay-what-you-wish donation)
+- Gift shop with Stripe Checkout (pay-what-you-wish donation) — homepage strip only
 - Deployed to Railway
 - See `museum_idea.md` for original design
 
@@ -59,4 +60,4 @@ Real, live behavioral data is hard to find outside of a job. Public datasets are
 
 - Sandbox: community submissions — open contributions from visitors
 - Self-optimization: define business goals, run experiments, show visitors which variant they're in
-- UMAP visualization of embedded questionnaire responses (design in lab notebook)
+- UMAP visualization of embedded questionnaire responses (pipeline scaffolded, awaiting 50+ responses)

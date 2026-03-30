@@ -116,7 +116,7 @@ PostHog handles session IDs, visitor IDs, device metadata, and timestamps automa
 | `$pageview` | (auto-tracked by PostHog) | PostHog SDK |
 | `$autocapture` | (auto-tracked by PostHog — clicks, inputs) | PostHog SDK |
 | `fire_event` | (none — synthetic test event) | Exhibit step 2 |
-| `funnel_step` | `step` ("welcome", "the-loop", "the-warehouse", "the-pipeline", "the-apparatus") | Exhibit navigation |
-| `questionnaire_response` | `response_text` (string, max 500 chars, validated server-side) | Exhibit step 6 |
+| `funnel_step` | `step` ("welcome", "stream", "warehouse", "analytics", "modeling") | Exhibit navigation |
+| `questionnaire_response` | `response_text` (string, max 500 chars, validated server-side) | Exhibit step 5 |
 | `checkout_started` | `item_id` (string), `item_name` (string), `price` (number, > 0) | Shop strip buy button |
 | `purchase_complete` | `item_id` (string), `item_name` (string), `price` (number), `stripe_session_id` (string) | Stripe webhook |
