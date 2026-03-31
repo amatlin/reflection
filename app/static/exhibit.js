@@ -26,6 +26,10 @@
     nextBtn.classList.toggle("exhibit-btn-exit", isLast);
     counter.textContent = n + " / " + totalSteps;
 
+    // Hero panel: show only on step 1
+    var heroPanel = document.querySelector(".exhibit-hero-panel");
+    if (heroPanel) heroPanel.style.display = n === 1 ? "" : "none";
+
     // On mobile, strips are hidden — content is inlined in exhibit steps.
     // On desktop, toggle strip visibility and auto-expand.
     if (!isMobile()) {

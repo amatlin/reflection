@@ -784,6 +784,32 @@ body.exhibit-mode .exhibit-close {
   display: block;
 }
 
+.exhibit-hero-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 58%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.exhibit-hero-panel .exhibit-hero-image {
+  max-width: 400px;
+  width: 70%;
+  opacity: 0.85;
+}
+
+.exhibit-mobile-content .exhibit-hero-image {
+  max-width: 240px;
+  width: 100%;
+  margin-bottom: 1.25rem;
+  opacity: 0.9;
+}
+
 .exhibit-heading {
   font-family: 'Lora', Georgia, serif;
   font-size: 1.8rem;
@@ -1433,6 +1459,11 @@ body.exhibit-mode .ask-sql-details summary {
   /* Hide strips entirely during exhibit on mobile */
   body.exhibit-mode .strips-container {
     display: none;
+  }
+
+  /* Hide desktop hero panel on mobile — image shown inline instead */
+  .exhibit-hero-panel {
+    display: none !important;
   }
 
   /* Show inline content in exhibit steps */
