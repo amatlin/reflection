@@ -4,10 +4,9 @@ Open work items for Reflection. The [lab notebook](LAB_NOTEBOOK.md) tracks what'
 
 ## Website cleanup
 
-- Rewrite exhibit copy (step headings + body text to match new step names)
+- Revisit spirit.md to reflect new exhibit voice (first person, water metaphor, Narcissus)
 - Pick better / more interesting insight questions for the analytics strip
 - Consider replacing hex visitor IDs with generated names
-- Architecture diagram in exhibit step 1 (static SVG/HTML showing both data paths)
 - `reflection.sh` DNS/SSL fix
 
 

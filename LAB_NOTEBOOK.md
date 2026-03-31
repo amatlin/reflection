@@ -1093,6 +1093,30 @@ Desktop is unchanged — strips still appear alongside the overlay as before.
 
 ---
 
+## 2026-03-30 — Exhibit copy rewrite + Narcissus illustration
+
+### Copy rewrite
+Rewrote all 5 exhibit steps. The new copy has a distinct voice — the site speaks in first person ("my system," "shall we begin?") and uses a water metaphor that runs through the arc: gentle current (stream) → lake (warehouse) → reflection comes into view (analytics) → shared reflection (modeling). Technical terms like "event listener," "impressions," and "enriched" are used literally but carry double meaning for non-technical visitors. The aim: educational and artistic at the same time, without editorializing.
+
+Key decisions:
+- **"event listener"** is the conceptual anchor of step 2 — it's a real technical term that sounds like surveillance to a lay audience. The copy doesn't comment on this; it just uses the phrase and lets it land.
+- **"impressions become memories"** (step 3) — impressions are a real analytics term; memories as stored data. Works on both registers.
+- **"who's listening? well, this time, you are"** (step 5) — pays off the event listener thread from step 2.
+- Removed "There is no product. There is no content." from step 1 — too editorializing, violates the spirit of not explaining why it's interesting.
+- Removed "fresh like spring water" from step 2 after back-and-forth — it over-explained the metaphor.
+
+Working copy files in `copy/` directory for drafting outside the HTML.
+
+### Narcissus illustration
+Added a generated illustration (Narcissus at a reflection pool) to the exhibit welcome step. On desktop it appears in the right panel behind the strips; on mobile it shows inline above the heading. Only visible on step 1 — disappears when the stream strip takes over at step 2. Background color matched to the exhibit overlay (#0f172a / RGB 15, 23, 42). Image compressed to ~440K via sips for git push.
+
+### What's next
+- Revisit spirit.md — the current tone guidance ("no wink, no irony, straightforward") doesn't capture the new voice. The site now has first-person address, water metaphor, and Narcissus as a reference point alongside Seinfeld/Duchamp/Warhol.
+- Consider whether spirit.md stays internal or becomes site-facing content.
+- TODO.md: removed "Architecture diagram in exhibit step 1" — the Narcissus illustration replaces it.
+
+---
+
 ## 2026-03-29 — Exhibit restructure + website cleanup
 
 ### Exhibit restructure
