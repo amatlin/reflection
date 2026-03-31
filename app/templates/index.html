@@ -217,31 +217,25 @@
         <div class="exhibit-mobile-content">
           <img src="/static/narcissus.png" alt="" class="exhibit-hero-image">
         </div>
-        <h2 class="exhibit-heading">this site analyzes itself.</h2>
+        <h2 class="exhibit-heading">hello</h2>
         <p class="exhibit-text">
-          Every click, every page view, every second you spend here is captured,
-          stored, transformed, and displayed back to you in real time.
+          welcome to your reflection. every page view and every click of a button
+          will flow through my system and be shared back to you.
         </p>
         <p class="exhibit-text">
-          There is no product. There is no content. There is only the infrastructure
-          — pointed at itself.
-        </p>
-        <p class="exhibit-text exhibit-text-muted">
-          This exhibit walks through how the data pipeline works. You'll fire a real
-          event and watch it travel through the system.
+          shall we begin?
         </p>
       </div>
 
       <!-- Step 2: The Loop -->
       <div class="exhibit-step" data-step="2">
-        <h2 class="exhibit-heading">the loop</h2>
+        <h2 class="exhibit-heading">event stream</h2>
         <p class="exhibit-text">
-          When you click the button below, a <code>fire_event</code> is captured by
-          the analytics tracker, sent to the backend, stored in the database, and
-          broadcast to every connected visitor.
+          when you click the button below, a <code>fire_event</code> is recorded
+          by an event listener and added to the stream, associated with your unique ID.
         </p>
         <p class="exhibit-text">
-          Watch the stream.
+          your data flows in a gentle current, fresh like spring water.
         </p>
         <div class="exhibit-actions">
           <button id="btn-fire" class="btn btn-fire">Fire an event</button>
@@ -254,14 +248,13 @@
 
       <!-- Step 3: The Warehouse -->
       <div class="exhibit-step" data-step="3">
-        <h2 class="exhibit-heading">the warehouse</h2>
+        <h2 class="exhibit-heading">warehouse</h2>
         <p class="exhibit-text">
-          Every hour, events are exported from the live database to
-          <a href="https://console.cloud.google.com/bigquery?project=reflection-data" class="exhibit-link" target="_blank" rel="noopener">BigQuery</a>.
-          The warehouse lets you run real SQL against the public dataset.
+          once an hour, events are exported from the live database to the offline
+          warehouse. your data flows into a lake; impressions become memories.
         </p>
         <p class="exhibit-text">
-          Try a query — click one of the chips<span class="desktop-only"> in the warehouse panel</span>.
+          click any of the chips<span class="desktop-only"> in the panel</span> to explore.
         </p>
         <div class="exhibit-mobile-content">
           <div class="warehouse-label">BigQuery · fct_events</div>
@@ -277,15 +270,13 @@
 
       <!-- Step 4: The Pipeline -->
       <div class="exhibit-step" data-step="4">
-        <h2 class="exhibit-heading">the pipeline</h2>
+        <h2 class="exhibit-heading">analytics</h2>
         <p class="exhibit-text">
-          A <a href="https://github.com/amatlin/reflection/tree/main/pipeline/dbt" class="exhibit-link" target="_blank" rel="noopener">dbt pipeline</a>
-          transforms the raw warehouse data into staging tables and daily metric
-          aggregations — pageviews, unique visitors, events per session.
+          overnight, your data is filtered and enriched so that it's ready
+          for analysis. your reflection comes into view.
         </p>
         <p class="exhibit-text">
-          The analytics panel shows the last 7 days of metrics.
-          Click an insight chip to query the warehouse.
+          what can you learn about yourself and others? click one of the chips to get started.
         </p>
         <div class="exhibit-mobile-content">
           {% if metrics %}
@@ -325,8 +316,11 @@
       <div class="exhibit-step" data-step="5">
         <h2 class="exhibit-heading">modeling</h2>
         <p class="exhibit-text">
-          Every response left here gets embedded into a vector and projected onto a 2D map.
-          Each dot is a thought. Clusters form where people said similar things.
+          leave a thought, big or small. it'll become part of the shared reflection
+          after the next data export.
+        </p>
+        <p class="exhibit-text">
+          who's listening? well, this time, you are.
         </p>
         <div class="exhibit-questionnaire" id="questionnaire">
           <label class="exhibit-label" for="questionnaire-text">leave a thought</label>

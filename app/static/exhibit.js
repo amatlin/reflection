@@ -8,7 +8,7 @@
   var totalSteps = steps.length;
   var currentStep = 0; // 0 = not in exhibit
 
-  var stepNames = ["", "welcome", "stream", "warehouse", "analytics", "modeling"];
+  var stepNames = ["", "hello", "event-stream", "warehouse", "analytics", "modeling"];
 
   function isMobile() { return window.innerWidth <= 768; }
 
