@@ -1,0 +1,20 @@
+# Files excluded from `gcloud run deploy --source .` uploads.
+# The Dockerfile only copies app/ and requirements.txt, so everything else is dead weight
+# (and .env / key files must never leave the laptop).
+.gcloudignore
+.git/
+.github/
+.env
+*-bq-key.json
+__pycache__/
+*.pyc
+.venv/
+venv/
+pipeline/
+copy/
+prompts/
+scripts/
+*.md
+mockup.html
+.playwright-mcp/
+.superpowers/

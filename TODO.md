@@ -2,6 +2,19 @@
 
 Open work items for Reflection. The [lab notebook](LAB_NOTEBOOK.md) tracks what's been done; this tracks what's left.
 
+## Outage recovery (2026-10-05)
+
+Site down since Railway trial expired 2026-04-15. See [`cloud_run_migration.md`](cloud_run_migration.md).
+
+- Check GCP billing is active on `reflection-data`; set $5/month budget alert
+- Migrate hosting Railway → Cloud Run (runbook steps 3–9)
+- Restore Supabase project (or recreate + update keys)
+- Check PostHog → BigQuery batch export; re-enable if paused
+- Re-enable the `dbt build` GitHub Actions workflow (disabled for inactivity 2026-05-30)
+- Update README.md / architecture.md hosting sections once migrated; delete Railway project
+- Add a `/health` endpoint that reports each service's status (Supabase, BigQuery freshness, PostHog export lag)
+- Keep-alive plan so the stack survives long idle periods (dbt workflow and Supabase both stop when untouched)
+
 ## Website cleanup
 
 - Revisit spirit.md to reflect new exhibit voice (first person, water metaphor, Narcissus)

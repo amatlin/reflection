@@ -1145,3 +1145,31 @@ UMAP pipeline scaffolding is in place (`pipeline/umap/`, `/api/umap/coordinates`
 | `app/main.py` | Registered umap router |
 | `pipeline/dbt/models/marts/exhibit_funnel.sql` | Consolidated old/new step names, added "modeling" |
 | `pipeline/umap/` | New — seed_responses.py, embed_and_fit.py (scaffolding for future use) |
+
+---
+
+## 2026-10-05 — Six months idle: everything stopped
+
+Came back after ~6 months (last commit 2026-03-30) to find the site down. Diagnosis:
+
+- **Railway:** the trial expired 2026-04-15, which stopped the service. This is why the site was down. DNS was fine: `www.reflection.sh` still pointed at Railway (`hi6tzv2n.up.railway.app`).
+- **GitHub Actions dbt cron:** GitHub disabled it on 2026-05-30 (`disabled_inactivity`) because scheduled workflows are turned off after 60 days with no repo activity. All 66 runs before that succeeded, so the BigQuery key still worked as of late May.
+- **Supabase / PostHog export / GCP billing:** not yet checked. Supabase pauses idle free projects; the PostHog → BigQuery export may have been paused after repeated failures; GCP billing may have lapsed if it was on the free trial.
+
+### Key learning
+
+Every piece of the stack quietly stops when left alone: the trial ends, the cron gets disabled, the database pauses. "Pick what's fastest" was right for hosting as a two-way door, but the question we skipped was *what happens when nobody touches this for six months?* For an art project meant to keep running unattended, that's the question that matters.
+
+### Why Railway in the first place
+
+The lab notebook never compared Railway against alternatives. Hosting was "TBD, two-way door," and Railway was the fastest path: upload code, get a URL, with an always-on process that suited the in-memory WebSocket broadcast and caches. Cloud Run was viable (GCP billing was already on for BigQuery) but would have meant learning service accounts and container registries, and dealing with scale-to-zero, all in the first week.
+
+### Decision: move hosting to Cloud Run
+
+- Same GCP project and bill as BigQuery, and no trial to expire.
+- Estimated cost ~$0–2/month (scale-to-zero; BigQuery usage fits in the free allowance) vs. ~$5/month flat on Railway Hobby.
+- No code changes needed: the Dockerfile already listens on `$PORT`, `bigquery_client.py` already falls back to the default login (the service account replaces the `BIGQUERY_KEY_JSON` key), and `stream.js` already reconnects WebSockets.
+- Constraints: `--max-instances 1` (the in-process broadcast needs one shared process), `--concurrency 250` (each WebSocket counts as a request), `--timeout 3600`. Cold starts after idle periods wipe the in-memory caches; that's acceptable.
+- $5/month budget alert. It only emails; it doesn't stop spending.
+
+Full step-by-step guide: [`cloud_run_migration.md`](cloud_run_migration.md). Added `.gcloudignore` so `.env` and keys never get uploaded.
