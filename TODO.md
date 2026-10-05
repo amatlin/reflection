@@ -6,7 +6,6 @@ Open work items for Reflection. The [lab notebook](LAB_NOTEBOOK.md) tracks what'
 
 Site down since Railway trial expired 2026-04-15. See [`cloud_run_migration.md`](cloud_run_migration.md).
 
-- Set $5/month budget alert on billing account (runbook step 2)
 - Migrate hosting Railway → Cloud Run (runbook steps 3–9)
 - Restore Supabase project (or recreate + update keys)
 - Check PostHog → BigQuery batch export; re-enable if paused
