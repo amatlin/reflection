@@ -1155,7 +1155,8 @@ Came back after ~6 months (last commit 2026-03-30) to find the site down. Diagno
 - **Railway:** the trial expired 2026-04-15, which stopped the service. This is why the site was down. DNS was fine: `www.reflection.sh` still pointed at Railway (`hi6tzv2n.up.railway.app`).
 - **GitHub Actions dbt cron:** GitHub disabled it on 2026-05-30 (`disabled_inactivity`) because scheduled workflows are turned off after 60 days with no repo activity. All 66 runs before that succeeded, so the BigQuery key still worked as of late May.
 - **GCP billing:** checked: active. `reflection-data` is linked to a paid (Direct) billing account with a valid card; $0.00 spent so far in October. So BigQuery itself was never cut off. Set a $5/month budget alert (50/90/100% email thresholds).
-- **Supabase / PostHog export:** not yet checked. Supabase pauses idle free projects; the PostHog → BigQuery export may have been paused after repeated failures.
+- **Supabase:** was paused for inactivity (free plan). Resumed from the dashboard on 2026-10-05; same project, so URL and keys are unchanged.
+- **PostHog export:** not yet checked. It may have been paused after repeated failures.
 
 ### Key learning
 

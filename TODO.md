@@ -7,7 +7,7 @@ Open work items for Reflection. The [lab notebook](LAB_NOTEBOOK.md) tracks what'
 Site down since Railway trial expired 2026-04-15. See [`cloud_run_migration.md`](cloud_run_migration.md).
 
 - Migrate hosting Railway → Cloud Run (runbook steps 3–9)
-- Restore Supabase project (or recreate + update keys)
+- Confirm Supabase finished restoring (resumed 2026-10-05) and the `events` table still has data
 - Check PostHog → BigQuery batch export; re-enable if paused
 - Re-enable the `dbt build` GitHub Actions workflow (disabled for inactivity 2026-05-30)
 - Update README.md / architecture.md hosting sections once migrated; delete Railway project
