@@ -1206,3 +1206,47 @@ Walked through `cloud_run_migration.md` steps 3–10. The app is now running on 
 - Update `README.md` and `architecture.md` hosting sections
 - Delete Railway project once Cloud Run is stable
 - Redeploying is now: `gcloud run deploy reflection --source . --region us-central1`
+
+## 2026-10-06 — Reframing: art → education
+
+### The decision
+
+Concluded that "data science as art" felt forced. The site's real strength is educational — it's a production-grade data stack that anyone can see end-to-end. Dropped the Duchamp/Warhol/Seinfeld lineage, the water metaphor, the first-person voice, and the Narcissus illustration. The new framing: warm but matter-of-fact, explaining what happens to your data as it flows through the pipeline.
+
+### What changed
+
+**`spirit.md` — complete rewrite.** New sections: The Concept (every website tracks you, this one shows you how), Who It's For (curious visitors, students, people who know part of the stack), The Tone (warm but matter-of-fact), What a Visitor Should Walk Away With (high-level pipeline understanding with the option to dig deeper).
+
+**Walkthrough copy (index.html) — all 5 steps rewritten:**
+- Step 1: "how it works" (was "hello") — explains the walkthrough will follow your data through the pipeline
+- Step 2: "event stream" — names PostHog, explains event → database → WebSocket technically
+- Step 3: "warehouse" — names BigQuery and dbt, explains batch export and transformation
+- Step 4: "analytics" — explains metrics computation and LLM summaries
+- Step 5: "modeling" — explains embeddings and UMAP plainly
+
+**User-facing renames:** "Enter the exhibit" → "Start the walkthrough", "exhibit completion" → "walkthrough completion", "entered exhibit step" → "entered walkthrough step" (in stream humanization and insight chip labels).
+
+**Homepage description:** "this website tracks and analyzes its own usage" replacing "every action you take here is recorded and visible to everyone."
+
+**Deleted:** `grant/` directory (5 files), `museum_idea.md`.
+
+**Docs updated:** README.md (educational framing, Cloud Run hosting), plan.md (new milestone 6 for simulated agent traffic, removed art references), architecture.md (Railway → Cloud Run, exhibit → walkthrough throughout), CLAUDE.md (updated project description), TODO.md (outage recovery items marked done, new reframing and agent sections).
+
+### What didn't change (yet)
+
+- Code identifiers: CSS classes (`exhibit-*`), JS variables, hash routes (`#exhibit-1`), event name `funnel_step` — all kept as-is. User-facing copy is updated; internal names are a future cleanup.
+- Narcissus image slot: kept in HTML but needs a replacement image.
+- `copy/` working files: still have old text.
+
+### Also in this session
+
+- **Cloud Run migration completed** — site deployed and serving from `https://reflection-1033782295536.us-central1.run.app` and `https://www.reflection.sh`. SSL cert issued successfully (the cert issue that plagued Railway is resolved).
+- **dbt build re-enabled and succeeded** — GitHub Actions workflow re-enabled, manual run completed. Warehouse and analytics chips working.
+- **Agent research completed** — investigated 4 approaches for simulating user traffic (pure Playwright, Claude computer use, browser agent frameworks, hybrid). Recommended hybrid: Playwright for browser mechanics, Claude for decision-making at each step and questionnaire text generation. Cost: ~$0.50-$2/day for 20 agents. Added as milestone 6 in plan.md.
+
+### Next session
+
+- Design agent personas and build the hybrid agent system
+- Replace Narcissus image with something educational
+- Check PostHog → BigQuery batch export status
+- Delete Railway project
