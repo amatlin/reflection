@@ -13,11 +13,11 @@
       <div class="left-content">
         <h1>reflection</h1>
         <p class="description">
-          <span id="greeting">welcome.</span> stay for a second or for a while.
-          every action you take here is recorded and visible to everyone.
+          <span id="greeting">welcome.</span> this website tracks and analyzes its own usage.
+          every action you take here flows through a real data pipeline — and you can see every step.
         </p>
         <div class="actions">
-          <button id="btn-exhibit" class="btn btn-fire">Enter the exhibit</button>
+          <button id="btn-exhibit" class="btn btn-fire">Start the walkthrough</button>
         </div>
       </div>
       <div class="footer">
@@ -56,7 +56,7 @@
             <div class="chip-row">
               <button class="chip warehouse-chip" data-warehouse="events-by-type">events by type</button>
               <button class="chip warehouse-chip" data-warehouse="visitors-this-week">visitors this week</button>
-              <button class="chip warehouse-chip" data-warehouse="exhibit-completion">exhibit completion</button>
+              <button class="chip warehouse-chip" data-warehouse="exhibit-completion">walkthrough completion</button>
             </div>
             <textarea id="warehouse-sql" class="warehouse-textarea" readonly spellcheck="false" placeholder="← click a query above"></textarea>
             <div id="warehouse-results" class="query-results"></div>
@@ -141,7 +141,7 @@
           {% endif %}
           <div class="ask-divider">insights</div>
           <div class="chip-row">
-            <button class="chip insight-chip" data-insight="exhibit-completion">how many visitors complete the exhibit?</button>
+            <button class="chip insight-chip" data-insight="exhibit-completion">how many visitors complete the walkthrough?</button>
             <button class="chip insight-chip" data-insight="most-common-event">what's the most common event?</button>
             <button class="chip insight-chip" data-insight="mobile-percentage">what percentage are on mobile?</button>
           </div>
@@ -217,13 +217,14 @@
         <div class="exhibit-mobile-content">
           <img src="/static/narcissus.png" alt="" class="exhibit-hero-image">
         </div>
-        <h2 class="exhibit-heading">hello</h2>
+        <h2 class="exhibit-heading">how it works</h2>
         <p class="exhibit-text">
-          welcome to your reflection. every page view and every click of a button
-          will flow through my system and be shared back to you.
+          every website you visit tracks your behavior. most never show you
+          what they collect or how they use it. this one does.
         </p>
         <p class="exhibit-text">
-          shall we begin?
+          this walkthrough follows your data through a real pipeline — from the
+          moment you click something to the dashboard that counts it.
         </p>
       </div>
 
@@ -231,11 +232,14 @@
       <div class="exhibit-step" data-step="2">
         <h2 class="exhibit-heading">event stream</h2>
         <p class="exhibit-text">
-          when you click the button below, a <code>fire_event</code> is recorded
-          by an event listener and added to the stream, associated with your unique ID.
+          when you click the button below, a tracking system called
+          <a href="https://posthog.com" class="exhibit-link" target="_blank">PostHog</a>
+          records a <code>fire_event</code> with your visitor ID and a timestamp.
+          the event is sent to the server, stored in a database, and broadcast to
+          every open browser through a WebSocket.
         </p>
         <p class="exhibit-text">
-          your data flows in a gentle current.
+          that's the stream on the right — every event, from every visitor, in real time.
         </p>
         <div class="exhibit-actions">
           <button id="btn-fire" class="btn btn-fire">Fire an event</button>
@@ -250,18 +254,22 @@
       <div class="exhibit-step" data-step="3">
         <h2 class="exhibit-heading">warehouse</h2>
         <p class="exhibit-text">
-          once an hour, events are exported from the live database to the offline
-          warehouse. your data flows into a lake; impressions become memories.
+          once an hour, PostHog batch-exports events into
+          <a href="https://cloud.google.com/bigquery" class="exhibit-link" target="_blank">BigQuery</a>,
+          a data warehouse. a tool called
+          <a href="https://www.getdbt.com" class="exhibit-link" target="_blank">dbt</a>
+          then transforms the raw events into clean tables — deduplicating,
+          extracting fields, and building daily aggregates.
         </p>
         <p class="exhibit-text">
-          click any of the chips<span class="desktop-only"> in the panel</span> to explore.
+          click any of the chips<span class="desktop-only"> in the panel</span> to run a real query against the warehouse.
         </p>
         <div class="exhibit-mobile-content">
           <div class="warehouse-label">BigQuery · fct_events</div>
           <div class="chip-row">
             <button class="chip warehouse-chip" data-warehouse="events-by-type">events by type</button>
             <button class="chip warehouse-chip" data-warehouse="visitors-this-week">visitors this week</button>
-            <button class="chip warehouse-chip" data-warehouse="exhibit-completion">exhibit completion</button>
+            <button class="chip warehouse-chip" data-warehouse="exhibit-completion">walkthrough completion</button>
           </div>
           <textarea id="mobile-warehouse-sql" class="warehouse-textarea" readonly spellcheck="false" placeholder="← click a query above"></textarea>
           <div id="mobile-warehouse-results" class="query-results"></div>
@@ -272,11 +280,13 @@
       <div class="exhibit-step" data-step="4">
         <h2 class="exhibit-heading">analytics</h2>
         <p class="exhibit-text">
-          overnight, your data is filtered and enriched so that it's ready
-          for analysis. your reflection comes into view.
+          the transformed data feeds into metrics and insights. daily counts,
+          device breakdowns, conversion rates — the same numbers a product team
+          would look at, computed from the same pipeline.
         </p>
         <p class="exhibit-text">
-          what can you learn about yourself and others? click one of the chips to get started.
+          click one of the insight chips to ask a question. the SQL runs against
+          BigQuery, and an LLM summarizes the result.
         </p>
         <div class="exhibit-mobile-content">
           {% if metrics %}
@@ -304,7 +314,7 @@
           {% endif %}
           <div class="ask-divider">insights</div>
           <div class="chip-row">
-            <button class="chip insight-chip" data-insight="exhibit-completion">how many visitors complete the exhibit?</button>
+            <button class="chip insight-chip" data-insight="exhibit-completion">how many visitors complete the walkthrough?</button>
             <button class="chip insight-chip" data-insight="most-common-event">what's the most common event?</button>
             <button class="chip insight-chip" data-insight="mobile-percentage">what percentage are on mobile?</button>
           </div>
@@ -316,11 +326,12 @@
       <div class="exhibit-step" data-step="5">
         <h2 class="exhibit-heading">modeling</h2>
         <p class="exhibit-text">
-          leave a thought, big or small. it'll become part of the shared reflection
-          after the next data export.
+          this is where the pipeline goes further. text responses get embedded
+          and projected onto a 2D map — once enough people have contributed,
+          you'll see clusters form where people said similar things.
         </p>
         <p class="exhibit-text">
-          who's listening? well, this time, you are.
+          leave a thought and it becomes part of the dataset.
         </p>
         <div class="exhibit-questionnaire" id="questionnaire">
           <label class="exhibit-label" for="questionnaire-text">leave a thought</label>

@@ -1,22 +1,27 @@
 # Spirit
-Reflection is a website about nothing that takes itself completely seriously.
+
+Reflection is a website that tracks and analyzes its own usage, then shows you how it did it.
 
 ## The Concept
 
-A website whose sole purpose is to analyze itself. It doesn't do anything — and then it builds production-grade data infrastructure to measure the nothing that it does.
+Every website you visit tracks your behavior. Most of them never show you what they collect, how they store it, or what they do with it. Reflection does all three.
 
-## The Lineage
+You visit the site. Your clicks, page views, and interactions are captured by a real event tracking system. Those events flow through a real data pipeline — ingestion, storage, transformation, aggregation — and come out the other side as metrics and insights that you can see on the same site that generated them.
 
-- **Seinfeld** — a show about nothing that became one of the most successful sitcoms ever. It wasn't actually about nothing; it was about the act of obsessively observing nothing. Reflection is the same move applied to data infrastructure.
-- **Duchamp** — took the machinery of art (the gallery, the pedestal) and put a urinal on it. Reflection takes the machinery of data-driven product development and removes the product.
-- **Warhol** — took the machinery of commerce (advertising, mass production) and made it the subject. Reflection takes the apparatus of user analytics — event tracking, funnels, A/B tests — and points it at itself.
+The self-referential loop is the core idea. The site's only content is its own data.
+
+## Who It's For
+
+- **Anyone curious about tracking.** If you've ever wondered what happens when you click something on a website, this shows you the full path — from the click to the database row to the chart.
+- **Students and junior data scientists.** The pipeline is production-grade: PostHog for event capture, BigQuery for warehousing, dbt for transformation, daily cron jobs for orchestration. It's a working example of the modern data stack, not a diagram of one.
+- **People who know part of the stack.** A data engineer might skip the event capture section and go straight to the dbt models. A frontend developer might be more interested in how PostHog hooks into the page. The walkthrough lets you focus on what's new to you.
 
 ## The Tone
 
-Straightforward. The site presents what it is without editorializing. The dashboards are real. The data infrastructure is real. The SQL playground works. There's no wink, no irony, no explanation of why this is interesting. It just is what it is, and the visitor makes of it what they will.
+Warm but matter-of-fact. The site explains what's happening clearly and without jargon where possible. Technical terms are used when they're the right words, and explained when they're not obvious. No hype, no cleverness for its own sake. The goal is for someone to leave understanding something they didn't before.
 
-## Why It Works
+## What a Visitor Should Walk Away With
 
-Every tech company builds increasingly sophisticated infrastructure to track, measure, and optimize human behavior. Reflection strips that down to its bare core: the apparatus, pointed at nothing but itself. And in doing so, it accidentally creates something genuinely useful — live behavioral data that doesn't exist anywhere else.
+A high-level picture of how data flows through a modern analytics pipeline: capture → store → transform → analyze. And the option to dig deeper into any piece — click a query chip to see the actual SQL, read the dbt model that built the table, watch your own events arrive in real time.
 
-The art generates the utility. The concept is the product.
+The depth is up to the visitor. The surface should be accessible to anyone.

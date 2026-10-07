@@ -1145,3 +1145,64 @@ UMAP pipeline scaffolding is in place (`pipeline/umap/`, `/api/umap/coordinates`
 | `app/main.py` | Registered umap router |
 | `pipeline/dbt/models/marts/exhibit_funnel.sql` | Consolidated old/new step names, added "modeling" |
 | `pipeline/umap/` | New — seed_responses.py, embed_and_fit.py (scaffolding for future use) |
+
+---
+
+## 2026-10-05 — Six months idle: everything stopped
+
+Came back after ~6 months (last commit 2026-03-30) to find the site down. Diagnosis:
+
+- **Railway:** the trial expired 2026-04-15, which stopped the service. This is why the site was down. DNS was fine: `www.reflection.sh` still pointed at Railway (`hi6tzv2n.up.railway.app`).
+- **GitHub Actions dbt cron:** GitHub disabled it on 2026-05-30 (`disabled_inactivity`) because scheduled workflows are turned off after 60 days with no repo activity. All 66 runs before that succeeded, so the BigQuery key still worked as of late May.
+- **GCP billing:** checked: active. `reflection-data` is linked to a paid (Direct) billing account with a valid card; $0.00 spent so far in October. So BigQuery itself was never cut off. Set a $5/month budget alert (50/90/100% email thresholds).
+- **Supabase:** was paused for inactivity (free plan). Resumed from the dashboard on 2026-10-05; same project, so URL and keys are unchanged.
+- **PostHog export:** not yet checked. It may have been paused after repeated failures.
+
+### Key learning
+
+Every piece of the stack quietly stops when left alone: the trial ends, the cron gets disabled, the database pauses. "Pick what's fastest" was right for hosting as a two-way door, but the question we skipped was *what happens when nobody touches this for six months?* For an art project meant to keep running unattended, that's the question that matters.
+
+### Why Railway in the first place
+
+The lab notebook never compared Railway against alternatives. Hosting was "TBD, two-way door," and Railway was the fastest path: upload code, get a URL, with an always-on process that suited the in-memory WebSocket broadcast and caches. Cloud Run was viable (GCP billing was already on for BigQuery) but would have meant learning service accounts and container registries, and dealing with scale-to-zero, all in the first week.
+
+### Decision: move hosting to Cloud Run
+
+- Same GCP project and bill as BigQuery, and no trial to expire.
+- Estimated cost ~$0–2/month (scale-to-zero; BigQuery usage fits in the free allowance) vs. ~$5/month flat on Railway Hobby.
+- No code changes needed: the Dockerfile already listens on `$PORT`, `bigquery_client.py` already falls back to the default login (the service account replaces the `BIGQUERY_KEY_JSON` key), and `stream.js` already reconnects WebSockets.
+- Constraints: `--max-instances 1` (the in-process broadcast needs one shared process), `--concurrency 250` (each WebSocket counts as a request), `--timeout 3600`. Cold starts after idle periods wipe the in-memory caches; that's acceptable.
+- $5/month budget alert. It only emails; it doesn't stop spending.
+
+Full step-by-step guide: [`cloud_run_migration.md`](cloud_run_migration.md). Added `.gcloudignore` so `.env` and keys never get uploaded.
+
+## 2026-10-05 — Cloud Run migration complete
+
+Walked through `cloud_run_migration.md` steps 3–10. The app is now running on Cloud Run.
+
+### What was done
+
+1. **Enabled GCP APIs:** Cloud Run, Cloud Build, Artifact Registry, Secret Manager.
+2. **Created service account** `reflection-web@reflection-data.iam.gserviceaccount.com` with BigQuery dataViewer, jobUser, and Secret Manager secretAccessor roles. The app runs *as* this account — no more pasted `BIGQUERY_KEY_JSON` key.
+3. **Stored 6 secrets** in Secret Manager (Supabase, Anthropic, Stripe, OpenAI keys).
+4. **Deployed** with `gcloud run deploy --source .` — Cloud Build built the Docker image, Cloud Run started serving at `https://reflection-1033782295536.us-central1.run.app`.
+5. **Set artifact cleanup policy** — keeps latest 3 container images, deletes older ones after 7 days.
+6. **Domain verification** — verified `reflection.sh` via Google Search Console TXT record.
+7. **Domain mapping** — created Cloud Run mapping for `www.reflection.sh`, updated Namecheap CNAME from `hi6tzv2n.up.railway.app` → `ghs.googlehosted.com`, deleted the `_railway-verify.www` TXT record. SSL cert provisioning in progress.
+8. **Re-enabled dbt cron** — GitHub Actions workflow was disabled for inactivity; re-enabled and triggered a manual run.
+
+### Smoke test results
+
+- Homepage loads on Cloud Run URL with visitor greeting
+- Supabase streaming works — live events populating
+- Warehouse/analytics chips fail (expected — dbt tables don't exist yet until the cron run completes)
+- Only console error: missing favicon (harmless)
+
+### Still TODO
+
+- Confirm dbt build succeeds and warehouse/analytics chips work
+- Confirm DNS propagation and SSL cert for `www.reflection.sh`
+- Check PostHog → BigQuery batch export status
+- Update `README.md` and `architecture.md` hosting sections
+- Delete Railway project once Cloud Run is stable
+- Redeploying is now: `gcloud run deploy reflection --source . --region us-central1`

@@ -88,7 +88,7 @@
     if (t === "fire_event") return "fired an event";
     if (t === "funnel_step") {
       var step = (ev.raw_properties && ev.raw_properties.step) || "";
-      return step ? "entered exhibit step: " + step : "entered exhibit step";
+      return step ? "entered walkthrough step: " + step : "entered walkthrough step";
     }
     if (t === "questionnaire_response") return "left a thought";
     if (t === "checkout_started") {

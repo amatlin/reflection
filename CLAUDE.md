@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Reflection is a self-referential website that analyzes its own usage. See `plan.md` for milestones, `spirit.md` for creative identity and tone, `architecture.md` for system design, and `LAB_NOTEBOOK.md` for decision history.
+Reflection is a website that tracks and analyzes its own usage, then shows you how it did it. See `plan.md` for milestones, `spirit.md` for project identity and tone, `architecture.md` for system design, and `LAB_NOTEBOOK.md` for decision history.
 
 ## Key Principles
 
@@ -32,7 +32,7 @@ If you notice a tool permission being repeatedly approved for a safe, read-only,
 
 The project is built incrementally through milestones — each one should be demo-able. Speed over polish. Commit and push frequently — don't let work pile up locally.
 
-**Ideas before code.** New features start as working documents (`museum_idea.md`, `LAB_NOTEBOOK.md`) and milestone entries in `plan.md`. Don't write code until the design is documented and the user asks for implementation.
+**Ideas before code.** New features start as working documents and milestone entries in `plan.md`. Don't write code until the design is documented and the user asks for implementation.
 
 On every commit and push, check whether `README.md` or `plan.md` need to be updated to reflect the changes.
 

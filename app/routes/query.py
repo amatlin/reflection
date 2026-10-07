@@ -42,7 +42,7 @@ ORDER BY step_number""",
 
 INSIGHT_QUERIES: dict[str, dict] = {
     "exhibit-completion": {
-        "question": "how many visitors complete the exhibit?",
+        "question": "how many visitors complete the walkthrough?",
         "sql": """SELECT
   step_name,
   unique_visitors,

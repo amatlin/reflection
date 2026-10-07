@@ -14,7 +14,7 @@ PostHog batch export (hourly) → BigQuery (raw)
 
 Page load → FastAPI queries BigQuery metrics_daily (1-hour in-memory cache) → analytics strip
 Visitor clicks warehouse chip → FastAPI GET /api/warehouse/{key} → BigQuery (daily cache) → results table in warehouse strip
-Visitor clicks insight chip → FastAPI GET /api/insights/{key} → Claude NL→SQL (daily cache) → BigQuery → analytics strip
+Visitor clicks insight chip → FastAPI GET /api/insights/{key} → Claude summary (daily cache) → BigQuery → analytics strip
 ```
 
 ### Two data paths
@@ -26,7 +26,7 @@ Visitor clicks insight chip → FastAPI GET /api/insights/{key} → Claude NL→
 
 ### Two-way doors (pick what's fastest, switch later)
 - **Frontend framework** — Vanilla HTML/CSS/JS with Jinja2 templates. No build step. Can be rewritten cheaply.
-- **Hosting** — Railway. Docker container, single uvicorn process. Changing is a config change and redeploy.
+- **Hosting** — Cloud Run. Docker container, single uvicorn process. Same GCP project as BigQuery.
 - **Database product** — Supabase (Postgres). The data is portable as long as it's Postgres-compatible.
 
 ### One-way doors (spend design energy here)
@@ -36,7 +36,7 @@ Visitor clicks insight chip → FastAPI GET /api/insights/{key} → Claude NL→
 ## Components
 
 ### Event Tracking — PostHog
-PostHog handles event capture, session management, visitor/user identification, device metadata, and behavioral analytics. PostHog's JS SDK auto-tracks page views and clicks; custom events are sent for exhibit interactions, SQL queries, and questionnaire submissions.
+PostHog handles event capture, session management, visitor/user identification, device metadata, and behavioral analytics. PostHog's JS SDK auto-tracks page views and clicks; custom events are sent for walkthrough interactions, SQL queries, and questionnaire submissions.
 
 ### Database — Supabase (Postgres)
 Supabase serves as the live event store. Events are written to a Supabase table in addition to PostHog. The FastAPI backend reads recent events from Supabase on WebSocket connect (backfill of last 50 events) and inserts new events on arrival. This dual-write ensures the live stream has low latency without depending on PostHog's API speed.
@@ -52,7 +52,7 @@ FastAPI (Python). Routes:
 - `POST /api/stripe/webhook` — receives Stripe webhook events. On `checkout.session.completed`, inserts a `purchase_complete` event into Supabase and broadcasts via WebSocket.
 
 ### Services
-- `bigquery_client.py` — lazy-init BigQuery client, `get_latest_metrics()` with 1-hour cache, `get_last_export_time()` with 5-minute cache for pipeline countdowns, `get_cache_age_minutes()` for data freshness display
+- `bigquery_client.py` — lazy-init BigQuery client, `get_latest_metrics()` with 1-hour cache, `get_last_export_time()` with 5-minute cache for pipeline countdowns, `get_cache_age_minutes()` for data freshness display. On Cloud Run, authenticates via the service account identity (no key file needed).
 - `claude_client.py` — Claude API client (Sonnet). Summarizes insight query results in 1-2 sentences. Gracefully returns None if no API key or on error.
 - `supabase_client.py` — Supabase client for event inserts and recent event reads
 
@@ -60,14 +60,14 @@ FastAPI (Python). Routes:
 Vanilla HTML + CSS + JS. Server-rendered Jinja2 templates. No build step, no framework.
 
 The homepage has a split layout:
-- **Left panel:** concept explanation, "Enter the exhibit" button, event journey card, pipeline countdowns (next warehouse export + dbt refresh)
+- **Left panel:** concept explanation, "Start the walkthrough" button, event journey card, pipeline countdowns (next warehouse export + dbt refresh)
 - **Right panel:** four collapsible strips arranged as a vertical accordion:
   - **Stream strip** — live event feed via WebSocket, presence count, "you" labels on your own events
   - **Warehouse strip** — 3 clickable query chips, readonly SQL textarea (shows the query being run), results table. Queries are fixed server-side and cached for 24 hours.
   - **Analytics strip** — server-rendered daily metrics from `metrics_daily`, plus 3 clickable insight chips with hardcoded SQL queries and Claude-generated summaries (cached daily)
   - **Shop strip** — 2 gift shop items (a visualization, keep the lights on). "Keep the lights on" has a live Stripe Checkout flow; the visualization has a "coming soon" overlay. Buy buttons fire `checkout_started` events; Stripe webhook fires `purchase_complete` events back through the pipeline.
 
-The **museum exhibit** is a dark overlay with 5 hash-routed steps (`#exhibit-1` through `#exhibit-5`): Welcome → Stream → Warehouse → Analytics → Shop. Strips are hidden initially and fade in at relevant steps (stream at step 2, warehouse at step 3, analytics at step 4, shop at step 5). Exhibit steps reference the chips in the strips rather than duplicating them. Mobile responsive with stacked layout.
+The **walkthrough** is a dark overlay with 5 hash-routed steps (`#exhibit-1` through `#exhibit-5`): How It Works → Stream → Warehouse → Analytics → Modeling. Strips are hidden initially and fade in at relevant steps (stream at step 2, warehouse at step 3, analytics at step 4). Walkthrough steps reference the chips in the strips rather than duplicating them. Mobile responsive with stacked layout.
 
 ### Payments — Stripe
 The "keep the lights on" donation uses Stripe Checkout (hosted payment page). Flow:
@@ -78,8 +78,12 @@ The "keep the lights on" donation uses Stripe Checkout (hosted payment page). Fl
 
 Purchase events flow through the same pipeline as all other events (Supabase → BigQuery → dbt), so they appear in warehouse queries and analytics alongside behavioral data. Stripe is the source of truth for payment state; the Supabase event is an analytical record.
 
-### Hosting — Railway
-Docker container (Python 3.12, single uvicorn process). Custom domain `reflection.sh` via Namecheap DNS (CNAME → Railway). Environment variables set in Railway's dashboard. The BigQuery service account key is passed as `BIGQUERY_KEY_JSON` (the full JSON string) since Railway can't mount key files.
+### Hosting — Cloud Run
+Docker container (Python 3.12, single uvicorn process) on Google Cloud Run. Same GCP project (`reflection-data`) as BigQuery. The app runs as a dedicated service account (`reflection-web`) with BigQuery read and Secret Manager access. No key files — the app authenticates via its service account identity.
+
+Key constraints: `--max-instances 1` (in-process WebSocket broadcast requires a single shared process), `--concurrency 250` (each WebSocket counts as an in-flight request), `--timeout 3600` (WebSockets get cut after 60 minutes; client reconnects automatically). Scale-to-zero when idle.
+
+Custom domain `reflection.sh` via Namecheap DNS (CNAME → `ghs.googlehosted.com`, Cloud Run domain mapping). Secrets stored in Secret Manager (Supabase, Anthropic, Stripe, OpenAI keys).
 
 ### Analytical Layer — BigQuery + dbt
 PostHog batch exports events to BigQuery hourly. dbt Core transforms them on a daily GitHub Actions cron (`dbt build --target prod` at 6am UTC, with manual trigger). The workflow writes the BigQuery service account key from a GitHub secret to a temp file.
@@ -100,7 +104,7 @@ The FastAPI backend queries `metrics_daily` via `bigquery_client.py` with a 1-ho
 - `_warehouse_cache` — results of fixed warehouse queries, 86400-second (24-hour) TTL. Keyed by query name. On error, does NOT cache (next request retries).
 - `_insight_cache` — results of fixed insight questions, 86400-second (24-hour) TTL. Keyed by question name. On error, does NOT cache.
 
-All caches are per-process (not shared across workers), which is fine for single-process Railway deployment.
+All caches are per-process (not shared across workers), which is fine for single-process Cloud Run deployment.
 
 ### WebSocket Broadcasting
 The live event stream uses in-process WebSocket broadcasting (not Supabase Realtime). `events.py` maintains a set of active WebSocket connections. On new event ingestion, the event is broadcast to all connected clients. On connect, the last 50 events are backfilled from Supabase so the stream isn't blank. Presence count is tracked and broadcast when connections open or close. This is simple and sufficient for single-process deployment.
@@ -115,8 +119,8 @@ PostHog handles session IDs, visitor IDs, device metadata, and timestamps automa
 |---|---|---|
 | `$pageview` | (auto-tracked by PostHog) | PostHog SDK |
 | `$autocapture` | (auto-tracked by PostHog — clicks, inputs) | PostHog SDK |
-| `fire_event` | (none — synthetic test event) | Exhibit step 2 |
-| `funnel_step` | `step` ("welcome", "stream", "warehouse", "analytics", "modeling") | Exhibit navigation |
-| `questionnaire_response` | `response_text` (string, max 500 chars, validated server-side) | Exhibit step 5 |
+| `fire_event` | (none — synthetic test event) | Walkthrough step 2 |
+| `funnel_step` | `step` ("welcome", "stream", "warehouse", "analytics", "modeling") | Walkthrough navigation |
+| `questionnaire_response` | `response_text` (string, max 500 chars, validated server-side) | Walkthrough step 5 |
 | `checkout_started` | `item_id` (string), `item_name` (string), `price` (number, > 0) | Shop strip buy button |
 | `purchase_complete` | `item_id` (string), `item_name` (string), `price` (number), `stripe_session_id` (string) | Stripe webhook |
